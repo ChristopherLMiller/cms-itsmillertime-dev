@@ -6,6 +6,7 @@ import {
   lexicalEditor,
 } from '@payloadcms/richtext-lexical'
 import { type CollectionConfig } from 'payload'
+const exifParser = require('exif-parser')
 
 export const Media: CollectionConfig = {
   slug: 'media',
@@ -29,6 +30,13 @@ export const Media: CollectionConfig = {
           return [...rootFeatures, FixedToolbarFeature(), InlineToolbarFeature()]
         },
       }),
+    },
+    {
+      name: 'exif',
+      type: 'json',
+      admin: {
+        readOnly: true,
+      },
     },
   ],
   upload: {
@@ -67,6 +75,39 @@ export const Media: CollectionConfig = {
         width: 1200,
         height: 630,
         crop: 'center',
+      },
+    ],
+  },
+  hooks: {
+    beforeChange: [
+      async ({ data, req }) => {
+        // Check if we have an uploaded file
+        if (req?.file) {
+          try {
+            const uploadedFile = req.file
+
+            // Verify that this is an image that might have EXIF data
+            if (!uploadedFile.mimetype || !uploadedFile.mimetype.startsWith('image/')) {
+              return data
+            }
+
+            // Access the file buffer directly
+            const buffer = uploadedFile.data
+
+            const parser = exifParser.create(buffer)
+            const result = parser.parse()
+
+            return {
+              ...data,
+              exif: result,
+            }
+          } catch (error) {
+            console.error('Error extracting EXIF data:', error)
+            return data
+          }
+        }
+
+        return data
       },
     ],
   },
