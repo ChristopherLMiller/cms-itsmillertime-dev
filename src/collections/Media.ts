@@ -94,7 +94,7 @@ export const Media: CollectionConfig = {
             // Access the file buffer directly
             const buffer = uploadedFile.data
 
-            const parser = exifParser.create(buffer).enableGPS(true)
+            const parser = exifParser.create(buffer)
             const result = parser.parse()
 
             return {
