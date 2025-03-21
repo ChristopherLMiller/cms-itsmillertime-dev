@@ -5,8 +5,8 @@ import {
   InlineToolbarFeature,
   lexicalEditor,
 } from '@payloadcms/richtext-lexical'
+import exifParser from 'exif-parser'
 import { type CollectionConfig } from 'payload'
-const exifParser = require('exif-parser')
 
 export const Media: CollectionConfig = {
   slug: 'media',
@@ -94,7 +94,7 @@ export const Media: CollectionConfig = {
             // Access the file buffer directly
             const buffer = uploadedFile.data
 
-            const parser = exifParser.create(buffer)
+            const parser = exifParser.create(buffer).enableGPS(true)
             const result = parser.parse()
 
             return {
