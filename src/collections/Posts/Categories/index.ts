@@ -1,16 +1,10 @@
-import { anyone } from '@/access/anyone'
-import { authenticated } from '@/access/authenticated'
-import { slugField } from '@/fields/slug'
-import { CollectionConfig } from 'payload'
+import { RBAC } from '@/access/RBAC';
+import { slugField } from '@/fields/slug';
+import { CollectionConfig } from 'payload';
 
 export const PostsCategories: CollectionConfig<'posts-categories'> = {
   slug: 'posts-categories',
-  access: {
-    create: authenticated,
-    read: anyone,
-    update: authenticated,
-    delete: authenticated,
-  },
+  access: RBAC('posts-categories'),
   admin: {
     useAsTitle: 'title',
   },
@@ -22,4 +16,4 @@ export const PostsCategories: CollectionConfig<'posts-categories'> = {
     },
     ...slugField(),
   ],
-}
+};

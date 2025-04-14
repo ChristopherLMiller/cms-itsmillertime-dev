@@ -1,17 +1,21 @@
 // storage-adapter-import-placeholder
 import { postgresAdapter } from '@payloadcms/db-postgres'
-import { lexicalEditor } from '@payloadcms/richtext-lexical'
 import path from 'path'
 import { buildConfig } from 'payload'
 import sharp from 'sharp'
 import { fileURLToPath } from 'url'
 
 import { resendAdapter } from '@payloadcms/email-resend'
+import { Nav } from './app/(payload)/globals/Nav/config'
 import { Media } from './collections/Media'
+import { NavItems } from './collections/NavItems'
+import { Pages } from './collections/Pages'
 import { PostsCategories } from './collections/Posts/Categories'
 import { Posts } from './collections/Posts/Posts'
 import { PostsTags } from './collections/Posts/Tags'
+import { Roles } from './collections/RBAC/Roles'
 import { Users } from './collections/Users'
+import { defaultLexical } from './fields/defaultLexical'
 import { plugins } from './plugins'
 
 const filename = fileURLToPath(import.meta.url)
@@ -19,16 +23,14 @@ const dirname = path.dirname(filename)
 
 export default buildConfig({
   admin: {
-    components: {
-      beforeLogin: ['/components/Auth#AuthComponent'],
-    },
     user: Users.slug,
     importMap: {
       baseDir: path.resolve(dirname),
     },
   },
-  collections: [Users, Media, Posts, PostsCategories, PostsTags],
-  editor: lexicalEditor(),
+  globals: [Nav],
+  collections: [Users, Media, Posts, PostsCategories, PostsTags, Pages, NavItems, Roles],
+  editor: defaultLexical,
   secret: process.env.PAYLOAD_SECRET || '',
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),

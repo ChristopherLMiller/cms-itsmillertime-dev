@@ -1,12 +1,13 @@
-import { slugField } from '@/fields/slug'
-import { wordCountField } from '@/fields/wordCount'
+import { RBAC } from '@/access/RBAC';
+import { slugField } from '@/fields/slug';
+import { wordCountField } from '@/fields/wordCount';
 import {
   MetaDescriptionField,
   MetaImageField,
   MetaTitleField,
   OverviewField,
   PreviewField,
-} from '@payloadcms/plugin-seo/fields'
+} from '@payloadcms/plugin-seo/fields';
 import {
   FixedToolbarFeature,
   HeadingFeature,
@@ -15,17 +16,12 @@ import {
   InlineToolbarFeature,
   lexicalEditor,
   lexicalHTML,
-} from '@payloadcms/richtext-lexical'
-import { CollectionConfig } from 'payload'
+} from '@payloadcms/richtext-lexical';
+import { CollectionConfig } from 'payload';
 
 export const Posts: CollectionConfig<'posts'> = {
   slug: 'posts',
-  access: {
-    create: () => true,
-    read: () => true,
-    update: () => true,
-    delete: () => true,
-  },
+  access: RBAC('posts'),
   defaultPopulate: {
     title: true,
     slug: true,
@@ -52,9 +48,9 @@ export const Posts: CollectionConfig<'posts'> = {
         beforeChange: [
           ({ siblingData, value }) => {
             if (siblingData._status === 'published' && !value) {
-              return new Date()
+              return new Date();
             }
-            return value
+            return value;
           },
         ],
       },
@@ -79,6 +75,22 @@ export const Posts: CollectionConfig<'posts'> = {
       },
     },
     {
+      name: 'relatedPosts',
+      type: 'relationship',
+      admin: {
+        position: 'sidebar',
+      },
+      filterOptions: ({ id }) => {
+        return {
+          id: {
+            not_in: [id],
+          },
+        };
+      },
+      hasMany: true,
+      relationTo: 'posts',
+    },
+    {
       type: 'tabs',
       tabs: [
         {
@@ -101,12 +113,12 @@ export const Posts: CollectionConfig<'posts'> = {
                 features: ({ rootFeatures }) => {
                   return [
                     ...rootFeatures,
-                    HeadingFeature({ enabledHeadingSizes: ['h2', 'h3', 'h4', 'h5', 'h6'] }),
+                    HeadingFeature({ enabledHeadingSizes: ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'] }),
                     FixedToolbarFeature(),
                     InlineToolbarFeature(),
                     HorizontalRuleFeature(),
-                    HTMLConverterFeature({}),
-                  ]
+                    HTMLConverterFeature(),
+                  ];
                 },
               }),
             },
@@ -150,4 +162,4 @@ export const Posts: CollectionConfig<'posts'> = {
     },
     maxPerDoc: 5,
   },
-}
+};

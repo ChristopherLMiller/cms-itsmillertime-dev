@@ -1,21 +1,15 @@
-import { anyone } from '@/access/anyone'
-import { authenticated } from '@/access/authenticated'
+import { RBAC } from '@/access/RBAC';
 import {
   FixedToolbarFeature,
   InlineToolbarFeature,
   lexicalEditor,
-} from '@payloadcms/richtext-lexical'
-import exifParser from 'exif-parser'
-import { type CollectionConfig } from 'payload'
+} from '@payloadcms/richtext-lexical';
+import exifParser from 'exif-parser';
+import { type CollectionConfig } from 'payload';
 
 export const Media: CollectionConfig = {
   slug: 'media',
-  access: {
-    create: authenticated,
-    delete: authenticated,
-    read: anyone,
-    update: authenticated,
-  },
+  access: RBAC('media'),
   fields: [
     {
       name: 'alt',
@@ -27,7 +21,7 @@ export const Media: CollectionConfig = {
       type: 'richText',
       editor: lexicalEditor({
         features: ({ rootFeatures }) => {
-          return [...rootFeatures, FixedToolbarFeature(), InlineToolbarFeature()]
+          return [...rootFeatures, FixedToolbarFeature(), InlineToolbarFeature()];
         },
       }),
     },
@@ -84,31 +78,31 @@ export const Media: CollectionConfig = {
         // Check if we have an uploaded file
         if (req?.file) {
           try {
-            const uploadedFile = req.file
+            const uploadedFile = req.file;
 
             // Verify that this is an image that might have EXIF data
             if (!uploadedFile.mimetype || !uploadedFile.mimetype.startsWith('image/')) {
-              return data
+              return data;
             }
 
             // Access the file buffer directly
-            const buffer = uploadedFile.data
+            const buffer = uploadedFile.data;
 
-            const parser = exifParser.create(buffer)
-            const result = parser.parse()
+            const parser = exifParser.create(buffer);
+            const result = parser.parse();
 
             return {
               ...data,
               exif: result,
-            }
+            };
           } catch (error) {
-            console.error('Error extracting EXIF data:', error)
-            return data
+            console.error('Error extracting EXIF data:', error);
+            return data;
           }
         }
 
-        return data
+        return data;
       },
     ],
   },
-}
+};
