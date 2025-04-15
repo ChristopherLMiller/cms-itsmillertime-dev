@@ -1,5 +1,5 @@
-import { Payload } from 'payload'
-import { ClientPermissionsTable } from './PermissionsTableClient'
+import { Payload } from 'payload';
+import { ClientPermissionsTable } from './PermissionsTableClient';
 
 export const PermissionsTableServer = async ({ payload }: { payload: Payload }) => {
   const collections = Object.entries(await payload.collections)
@@ -7,7 +7,9 @@ export const PermissionsTableServer = async ({ payload }: { payload: Payload }) 
     .map((collection) => ({
       slug: collection[1].config.slug,
       label: collection[1].config.labels.plural as string,
-    }))
+    }));
 
-  return <ClientPermissionsTable collections={collections} />
-}
+  console.log(collections);
+
+  return <ClientPermissionsTable collections={collections} />;
+};

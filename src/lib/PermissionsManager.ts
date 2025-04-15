@@ -80,7 +80,7 @@ export class PermissionsManager {
   }
 
   public verifyPermissionNodes() {
-    // This is what a default permission node looks like
+    // Iterate the existing permission nodes and fix them
 
     Object.keys(this.permissions).forEach((node) => {
       // Get the current nodes from the object
@@ -95,6 +95,18 @@ export class PermissionsManager {
       // Now write that back to the permission
       this.permissions[node] = adjustedNodes;
     });
+
+    // Now see if there are any new collections not present
+    const newCollections = this.collections.filter(
+      (collection) => !(collection.slug in this.permissions),
+    );
+
+    if (newCollections.length) {
+      //console.log(newCollections);
+      newCollections.forEach((collection) => {
+        this.permissions[collection.slug] = this.defaultPermissionNodes;
+      });
+    }
   }
 
   public getCollections(): Collection[] {

@@ -66,19 +66,20 @@ export const ClientPermissionsTable = ({ collections }: { collections: Collectio
               return (
                 <tr key={collection.slug}>
                   <td>{collection.label}</td>
-                  {Object.entries(collectionPermissions)
-                    .sort()
-                    .map((action) => {
-                      return (
-                        <td key={`${collection.slug}-${action[0]}`}>
-                          <CheckboxInput
-                            onToggle={handleChange}
-                            checked={action[1]}
-                            id={`${collection.slug}.${action[0]}`}
-                          />
-                        </td>
-                      );
-                    })}
+                  {collectionPermissions &&
+                    Object.entries(collectionPermissions)
+                      .sort()
+                      .map((action) => {
+                        return (
+                          <td key={`${collection.slug}-${action[0]}`}>
+                            <CheckboxInput
+                              onToggle={handleChange}
+                              checked={action[1]}
+                              id={`${collection.slug}.${action[0]}`}
+                            />
+                          </td>
+                        );
+                      })}
                   <th>
                     <Button
                       className="button-many__toggle"
