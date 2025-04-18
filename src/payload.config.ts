@@ -1,25 +1,29 @@
 // storage-adapter-import-placeholder
-import { postgresAdapter } from '@payloadcms/db-postgres'
-import path from 'path'
-import { buildConfig } from 'payload'
-import sharp from 'sharp'
-import { fileURLToPath } from 'url'
+import { postgresAdapter } from '@payloadcms/db-postgres';
+import path from 'path';
+import { buildConfig } from 'payload';
+import sharp from 'sharp';
+import { fileURLToPath } from 'url';
 
-import { resendAdapter } from '@payloadcms/email-resend'
-import { Nav } from './app/(payload)/globals/Nav/config'
-import { Media } from './collections/Media'
-import { NavItems } from './collections/NavItems'
-import { Pages } from './collections/Pages'
-import { PostsCategories } from './collections/Posts/Categories'
-import { Posts } from './collections/Posts/Posts'
-import { PostsTags } from './collections/Posts/Tags'
-import { Roles } from './collections/RBAC/Roles'
-import { Users } from './collections/Users'
-import { defaultLexical } from './fields/defaultLexical'
-import { plugins } from './plugins'
+import { resendAdapter } from '@payloadcms/email-resend';
+import { Nav } from './app/(payload)/globals/Nav/config';
+import { GalleryAlbums } from './collections/Gallery/Album';
+import { GalleryImages } from './collections/Gallery/Image';
+import { GalleryTags } from './collections/Gallery/Tags';
+import { Media } from './collections/Media/Media';
+import { MediaTags } from './collections/Media/Tags';
+import { NavItems } from './collections/NavItems';
+import { Pages } from './collections/Pages';
+import { PostsCategories } from './collections/Posts/Categories';
+import { Posts } from './collections/Posts/Posts';
+import { PostsTags } from './collections/Posts/Tags';
+import { Roles } from './collections/RBAC/Roles';
+import { Users } from './collections/Users';
+import { defaultLexical } from './fields/defaultLexical';
+import { plugins } from './plugins';
 
-const filename = fileURLToPath(import.meta.url)
-const dirname = path.dirname(filename)
+const filename = fileURLToPath(import.meta.url);
+const dirname = path.dirname(filename);
 
 export default buildConfig({
   admin: {
@@ -29,7 +33,20 @@ export default buildConfig({
     },
   },
   globals: [Nav],
-  collections: [Users, Media, Posts, PostsCategories, PostsTags, Pages, NavItems, Roles],
+  collections: [
+    Users,
+    Media,
+    MediaTags,
+    Posts,
+    PostsCategories,
+    PostsTags,
+    Pages,
+    NavItems,
+    Roles,
+    GalleryAlbums,
+    GalleryImages,
+    GalleryTags,
+  ],
   editor: defaultLexical,
   secret: process.env.PAYLOAD_SECRET || '',
   typescript: {
@@ -48,4 +65,4 @@ export default buildConfig({
     defaultFromName: 'Support',
     apiKey: process.env.RESEND_API_KEY || '',
   }),
-})
+});

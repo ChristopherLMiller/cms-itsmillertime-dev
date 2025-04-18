@@ -7,6 +7,8 @@ export const Roles: CollectionConfig<'roles'> = {
   access: RBAC('roles'),
   admin: {
     useAsTitle: 'name',
+    group: 'Authentication & Authorization',
+    description: 'User roles and permissions',
   },
   fields: [
     {

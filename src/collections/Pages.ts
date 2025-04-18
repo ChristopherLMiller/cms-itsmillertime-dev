@@ -22,14 +22,59 @@ export const Pages: CollectionConfig<'pages'> = {
   admin: {
     defaultColumns: ['title', 'slug', 'updatedAt'],
     useAsTitle: 'title',
+    group: 'Pages',
+    description: 'Singular dynamic page of the front end',
   },
   fields: [
     {
-      name: 'title',
-      type: 'text',
-      required: true,
+      type: 'row',
+      fields: [
+        {
+          name: 'title',
+          type: 'text',
+          required: true,
+        },
+      ],
     },
     ...slugField('title'),
+    {
+      type: 'select',
+      name: 'visibility',
+      defaultValue: 'ALL',
+      admin: {
+        position: 'sidebar',
+      },
+      options: [
+        {
+          value: 'ALL',
+          label: 'Anybody',
+        },
+        {
+          value: 'AUTHENTICATED',
+          label: 'Logged In',
+        },
+        {
+          value: 'ANONYMOUS',
+          label: 'Logged Out',
+        },
+        {
+          value: 'PRIVILEGED',
+          label: 'By User Role',
+        },
+      ],
+    },
+    {
+      type: 'relationship',
+      relationTo: 'roles',
+      hasMany: true,
+      name: 'allowedRoles',
+      admin: {
+        position: 'sidebar',
+        condition: (data, siblingData) => {
+          return siblingData?.visibility === 'PRIVILEGED';
+        },
+      },
+    },
     {
       type: 'tabs',
       tabs: [

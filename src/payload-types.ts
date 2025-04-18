@@ -69,28 +69,44 @@ export interface Config {
   collections: {
     users: User;
     media: Media;
+    'media-tags': MediaTag;
     posts: Post;
     'posts-categories': PostsCategory;
     'posts-tags': PostsTag;
     pages: Page;
     'nav-items': NavItem;
     roles: Role;
+    'gallery-albums': GalleryAlbum;
+    'gallery-images': GalleryImage;
+    'gallery-tags': GalleryTag;
     search: Search;
     'payload-jobs': PayloadJob;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
   };
-  collectionsJoins: {};
+  collectionsJoins: {
+    media: {
+      'gallery-images': 'gallery-images';
+      relatedPosts: 'posts';
+    };
+    'gallery-albums': {
+      images: 'gallery-images';
+    };
+  };
   collectionsSelect: {
     users: UsersSelect<false> | UsersSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
+    'media-tags': MediaTagsSelect<false> | MediaTagsSelect<true>;
     posts: PostsSelect<false> | PostsSelect<true>;
     'posts-categories': PostsCategoriesSelect<false> | PostsCategoriesSelect<true>;
     'posts-tags': PostsTagsSelect<false> | PostsTagsSelect<true>;
     pages: PagesSelect<false> | PagesSelect<true>;
     'nav-items': NavItemsSelect<false> | NavItemsSelect<true>;
     roles: RolesSelect<false> | RolesSelect<true>;
+    'gallery-albums': GalleryAlbumsSelect<false> | GalleryAlbumsSelect<true>;
+    'gallery-images': GalleryImagesSelect<false> | GalleryImagesSelect<true>;
+    'gallery-tags': GalleryTagsSelect<false> | GalleryTagsSelect<true>;
     search: SearchSelect<false> | SearchSelect<true>;
     'payload-jobs': PayloadJobsSelect<false> | PayloadJobsSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
@@ -158,6 +174,8 @@ export interface User {
   password?: string | null;
 }
 /**
+ * User roles and permissions
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "roles".
  */
@@ -179,11 +197,14 @@ export interface Role {
   createdAt: string;
 }
 /**
+ * Media Items, images and otherwise
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "media".
  */
 export interface Media {
   id: number;
+  'media-tags'?: (number | MediaTag)[] | null;
   alt: string;
   caption?: {
     root: {
@@ -200,6 +221,22 @@ export interface Media {
     };
     [k: string]: unknown;
   } | null;
+  'gallery-images'?: {
+    docs?: {
+      relationTo?: 'gallery-images';
+      value: number | GalleryImage;
+    }[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
+  relatedPosts?: {
+    docs?: {
+      relationTo?: 'posts';
+      value: number | Post;
+    }[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
   exif?:
     | {
         [k: string]: unknown;
@@ -280,6 +317,112 @@ export interface Media {
   };
 }
 /**
+ * Tagging of images for filtering
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media-tags".
+ */
+export interface MediaTag {
+  id: number;
+  title: string;
+  slug?: string | null;
+  slugLock?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Image
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "gallery-images".
+ */
+export interface GalleryImage {
+  id: number;
+  settings?: {
+    slug?: string | null;
+    slugLock?: boolean | null;
+    isNsfw?: boolean | null;
+    'gallery-tags'?: (number | GalleryTag)[] | null;
+    visibility?: ('ALL' | 'AUTHENTICATED' | 'ANONYMOUS' | 'PRIVILEGED') | null;
+    allowedRoles?: (number | Role)[] | null;
+  };
+  selling?: {
+    isSellable?: boolean | null;
+  };
+  title?: string | null;
+  image?: (number | null) | Media;
+  albums?: (number | GalleryAlbum)[] | null;
+  meta?: {
+    title?: string | null;
+    /**
+     * Maximum upload file size: 12MB. Recommended file size for images is <500KB.
+     */
+    image?: (number | null) | Media;
+    description?: string | null;
+  };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Gallery tags.  Used for more focused classification of gallery images.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "gallery-tags".
+ */
+export interface GalleryTag {
+  id: number;
+  title: string;
+  slug?: string | null;
+  slugLock?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Listing of all photo albums
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "gallery-albums".
+ */
+export interface GalleryAlbum {
+  id: number;
+  slug?: string | null;
+  slugLock?: boolean | null;
+  tags?: (number | GalleryTag)[] | null;
+  title: string;
+  content?: {
+    root: {
+      type: string;
+      children: {
+        type: string;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  images?: {
+    docs?: (number | GalleryImage)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
+  meta?: {
+    title?: string | null;
+    /**
+     * Maximum upload file size: 12MB. Recommended file size for images is <500KB.
+     */
+    image?: (number | null) | Media;
+    description?: string | null;
+  };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Blog Posts
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "posts".
  */
@@ -309,7 +452,7 @@ export interface Post {
     };
     [k: string]: unknown;
   } | null;
-  content_html?: string | null;
+  markdown?: string | null;
   meta?: {
     title?: string | null;
     /**
@@ -323,6 +466,8 @@ export interface Post {
   _status?: ('draft' | 'published') | null;
 }
 /**
+ * Blog categories.  Used for general classification of blog posts.
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "posts-categories".
  */
@@ -335,6 +480,8 @@ export interface PostsCategory {
   createdAt: string;
 }
 /**
+ * Blog tags.  Used for more focused classification of blog posts.
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "posts-tags".
  */
@@ -347,6 +494,8 @@ export interface PostsTag {
   createdAt: string;
 }
 /**
+ * Singular dynamic page of the front end
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "pages".
  */
@@ -355,6 +504,8 @@ export interface Page {
   title: string;
   slug?: string | null;
   slugLock?: boolean | null;
+  visibility?: ('ALL' | 'AUTHENTICATED' | 'ANONYMOUS' | 'PRIVILEGED') | null;
+  allowedRoles?: (number | Role)[] | null;
   blocks?:
     | {
         block?: {
@@ -541,6 +692,10 @@ export interface PayloadLockedDocument {
         value: number | Media;
       } | null)
     | ({
+        relationTo: 'media-tags';
+        value: number | MediaTag;
+      } | null)
+    | ({
         relationTo: 'posts';
         value: number | Post;
       } | null)
@@ -563,6 +718,18 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'roles';
         value: number | Role;
+      } | null)
+    | ({
+        relationTo: 'gallery-albums';
+        value: number | GalleryAlbum;
+      } | null)
+    | ({
+        relationTo: 'gallery-images';
+        value: number | GalleryImage;
+      } | null)
+    | ({
+        relationTo: 'gallery-tags';
+        value: number | GalleryTag;
       } | null)
     | ({
         relationTo: 'search';
@@ -635,8 +802,11 @@ export interface UsersSelect<T extends boolean = true> {
  * via the `definition` "media_select".
  */
 export interface MediaSelect<T extends boolean = true> {
+  'media-tags'?: T;
   alt?: T;
   caption?: T;
+  'gallery-images'?: T;
+  relatedPosts?: T;
   exif?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -726,6 +896,17 @@ export interface MediaSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media-tags_select".
+ */
+export interface MediaTagsSelect<T extends boolean = true> {
+  title?: T;
+  slug?: T;
+  slugLock?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "posts_select".
  */
 export interface PostsSelect<T extends boolean = true> {
@@ -739,7 +920,7 @@ export interface PostsSelect<T extends boolean = true> {
   title?: T;
   featuredImage?: T;
   content?: T;
-  content_html?: T;
+  markdown?: T;
   meta?:
     | T
     | {
@@ -781,6 +962,8 @@ export interface PagesSelect<T extends boolean = true> {
   title?: T;
   slug?: T;
   slugLock?: T;
+  visibility?: T;
+  allowedRoles?: T;
   blocks?:
     | T
     | {
@@ -829,6 +1012,71 @@ export interface RolesSelect<T extends boolean = true> {
   description?: T;
   isDefault?: T;
   permissions?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "gallery-albums_select".
+ */
+export interface GalleryAlbumsSelect<T extends boolean = true> {
+  slug?: T;
+  slugLock?: T;
+  tags?: T;
+  title?: T;
+  content?: T;
+  images?: T;
+  meta?:
+    | T
+    | {
+        title?: T;
+        image?: T;
+        description?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "gallery-images_select".
+ */
+export interface GalleryImagesSelect<T extends boolean = true> {
+  settings?:
+    | T
+    | {
+        slug?: T;
+        slugLock?: T;
+        isNsfw?: T;
+        'gallery-tags'?: T;
+        visibility?: T;
+        allowedRoles?: T;
+      };
+  selling?:
+    | T
+    | {
+        isSellable?: T;
+      };
+  title?: T;
+  image?: T;
+  albums?: T;
+  meta?:
+    | T
+    | {
+        title?: T;
+        image?: T;
+        description?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "gallery-tags_select".
+ */
+export interface GalleryTagsSelect<T extends boolean = true> {
+  title?: T;
+  slug?: T;
+  slugLock?: T;
   updatedAt?: T;
   createdAt?: T;
 }

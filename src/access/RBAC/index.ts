@@ -40,16 +40,21 @@ export function RBAC(collection: Collection['slug']) {
     const userRoles = await getApplicableRoles(req);
     const rolePermissions = userRoles.map((role) => role.permissions);
 
-    let isAuthorized = false;
-    rolePermissions.forEach((permissionNode) => {
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
-      if (permissionNode[collection][operation] === true) {
-        isAuthorized = true;
-      }
-    });
+    try {
+      let isAuthorized = false;
+      rolePermissions.forEach((permissionNode) => {
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        if (permissionNode[collection] && permissionNode[collection][operation] === true) {
+          isAuthorized = true;
+        }
+      });
 
-    return isAuthorized;
+      return isAuthorized;
+    } catch (error) {
+      console.error(error);
+      return false;
+    }
   };
 
   const read = async ({ req }: { req: PayloadRequest }) => {

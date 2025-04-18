@@ -9,15 +9,16 @@ import {
   PreviewField,
 } from '@payloadcms/plugin-seo/fields';
 import {
+  convertLexicalToMarkdown,
+  editorConfigFactory,
   FixedToolbarFeature,
   HeadingFeature,
   HorizontalRuleFeature,
-  HTMLConverterFeature,
   InlineToolbarFeature,
   lexicalEditor,
-  lexicalHTML,
 } from '@payloadcms/richtext-lexical';
-import { CollectionConfig } from 'payload';
+import { SerializedEditorState } from '@payloadcms/richtext-lexical/lexical';
+import { CollectionConfig, RichTextField } from 'payload';
 
 export const Posts: CollectionConfig<'posts'> = {
   slug: 'posts',
@@ -33,6 +34,8 @@ export const Posts: CollectionConfig<'posts'> = {
   admin: {
     defaultColumns: ['title', 'slug', 'updatedAt'],
     useAsTitle: 'title',
+    description: 'Blog Posts',
+    group: 'Blog',
   },
   fields: [
     {
@@ -117,12 +120,39 @@ export const Posts: CollectionConfig<'posts'> = {
                     FixedToolbarFeature(),
                     InlineToolbarFeature(),
                     HorizontalRuleFeature(),
-                    HTMLConverterFeature(),
                   ];
                 },
               }),
             },
-            lexicalHTML('content', { name: 'content_html' }),
+            {
+              name: 'markdown',
+              type: 'textarea',
+              admin: {
+                hidden: true,
+              },
+              hooks: {
+                afterRead: [
+                  ({ siblingData, siblingFields }) => {
+                    const data: SerializedEditorState = siblingData['content'];
+
+                    if (!data) {
+                      return '';
+                    }
+
+                    const markdown = convertLexicalToMarkdown({
+                      data,
+                      editorConfig: editorConfigFactory.fromField({
+                        field: siblingFields.find(
+                          (field) => 'name' in field && field.name === 'content',
+                        ) as RichTextField,
+                      }),
+                    });
+
+                    return markdown;
+                  },
+                ],
+              },
+            },
           ],
         },
         {

@@ -2,13 +2,13 @@ import { RBAC } from '@/access/RBAC';
 import { slugField } from '@/fields/slug';
 import { CollectionConfig } from 'payload';
 
-export const PostsCategories: CollectionConfig<'posts-categories'> = {
-  slug: 'posts-categories',
-  access: RBAC('posts-categories'),
+export const MediaTags: CollectionConfig<'media-tags'> = {
+  slug: 'media-tags',
+  access: RBAC('media-tags'),
   admin: {
     useAsTitle: 'title',
-    group: 'Blog',
-    description: 'Blog categories.  Used for general classification of blog posts.',
+    group: 'Media Library',
+    description: 'Tagging of images for filtering',
   },
   fields: [
     {

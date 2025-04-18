@@ -7,6 +7,8 @@ export const PostsTags: CollectionConfig<'posts-tags'> = {
   access: RBAC('posts-tags'),
   admin: {
     useAsTitle: 'title',
+    group: 'Blog',
+    description: 'Blog tags.  Used for more focused classification of blog posts.',
   },
   fields: [
     {

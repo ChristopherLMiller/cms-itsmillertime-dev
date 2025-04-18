@@ -1,20 +1,20 @@
-import { Post } from '@/payload-types'
-import { getServerSideURL } from '@/utilities/getURL'
-import { searchPlugin } from '@payloadcms/plugin-search'
-import { seoPlugin } from '@payloadcms/plugin-seo'
-import { GenerateTitle, GenerateURL } from '@payloadcms/plugin-seo/types'
-import { s3Storage } from '@payloadcms/storage-s3'
-import { Plugin } from 'payload'
+import { Post } from '@/payload-types';
+import { getServerSideURL } from '@/utilities/getURL';
+import { searchPlugin } from '@payloadcms/plugin-search';
+import { seoPlugin } from '@payloadcms/plugin-seo';
+import { GenerateTitle, GenerateURL } from '@payloadcms/plugin-seo/types';
+import { s3Storage } from '@payloadcms/storage-s3';
+import { Plugin } from 'payload';
 
 const generateTitle: GenerateTitle<Post> = ({ doc }) => {
-  return doc?.title ? `${doc.title} | ItsMillerTime` : 'ItsMillerTime'
-}
+  return doc?.title ? `${doc.title} | ItsMillerTime` : 'ItsMillerTime';
+};
 
 const generateURL: GenerateURL<Post> = ({ doc }) => {
-  const url = getServerSideURL()
+  const url = getServerSideURL();
 
-  return doc?.slug ? `${url}/${doc.slug}` : url
-}
+  return doc?.slug ? `${url}/${doc.slug}` : url;
+};
 
 export const plugins: Plugin[] = [
   seoPlugin({
@@ -41,4 +41,4 @@ export const plugins: Plugin[] = [
       region: process.env.CLOUDFLARE_REGION as string,
     },
   }),
-]
+];

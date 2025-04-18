@@ -9,7 +9,5 @@ export const PermissionsTableServer = async ({ payload }: { payload: Payload }) 
       label: collection[1].config.labels.plural as string,
     }));
 
-  console.log(collections);
-
   return <ClientPermissionsTable collections={collections} />;
 };

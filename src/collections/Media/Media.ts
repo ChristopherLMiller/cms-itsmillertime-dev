@@ -9,28 +9,85 @@ import { type CollectionConfig } from 'payload';
 
 export const Media: CollectionConfig = {
   slug: 'media',
+  admin: {
+    group: 'Media Library',
+    description: 'Media Items, images and otherwise',
+    defaultColumns: ['alt', 'caption', 'media-tags'],
+  },
   access: RBAC('media'),
   fields: [
     {
-      name: 'alt',
-      type: 'text',
-      required: true,
-    },
-    {
-      name: 'caption',
-      type: 'richText',
-      editor: lexicalEditor({
-        features: ({ rootFeatures }) => {
-          return [...rootFeatures, FixedToolbarFeature(), InlineToolbarFeature()];
-        },
-      }),
-    },
-    {
-      name: 'exif',
-      type: 'json',
+      name: 'media-tags',
+      type: 'relationship',
+      relationTo: 'media-tags',
+      hasMany: true,
       admin: {
-        readOnly: true,
+        position: 'sidebar',
       },
+    },
+    {
+      type: 'tabs',
+      tabs: [
+        {
+          label: 'Content',
+          fields: [
+            {
+              name: 'alt',
+              type: 'text',
+              required: true,
+            },
+            {
+              name: 'caption',
+              type: 'richText',
+              editor: lexicalEditor({
+                features: ({ rootFeatures }) => {
+                  return [...rootFeatures, FixedToolbarFeature(), InlineToolbarFeature()];
+                },
+              }),
+            },
+          ],
+        },
+        {
+          label: 'Related Resources',
+          fields: [
+            {
+              type: 'join',
+              collection: ['gallery-images'],
+              on: 'image',
+              name: 'gallery-images',
+              label: 'Gallery Images',
+              admin: {
+                allowCreate: false,
+              },
+            },
+            {
+              type: 'join',
+              collection: ['posts'],
+              on: 'featuredImage',
+              name: 'relatedPosts',
+              label: 'Posts',
+              admin: {
+                allowCreate: false,
+              },
+            },
+          ],
+        },
+        {
+          label: 'EXIF',
+          fields: [
+            {
+              name: 'exif',
+              type: 'json',
+              admin: {
+                readOnly: true,
+              },
+            },
+          ],
+          admin: {
+            condition: ({ siblingData }) => Boolean(!siblingData?.exif),
+          },
+        },
+      ],
     },
   ],
   upload: {

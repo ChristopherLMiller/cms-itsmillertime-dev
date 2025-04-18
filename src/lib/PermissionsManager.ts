@@ -69,12 +69,6 @@ export class PermissionsManager {
       }
     });
 
-    if (Object.entries(invalidPermissions).length) {
-      console.debug(
-        `Removing the following no longer found collection(s): ${Object.keys(invalidPermissions).join(', ')}`,
-      );
-    }
-
     // Update our permission nodes with those that are valid
     this.permissions = validPermissions;
   }
@@ -102,7 +96,6 @@ export class PermissionsManager {
     );
 
     if (newCollections.length) {
-      //console.log(newCollections);
       newCollections.forEach((collection) => {
         this.permissions[collection.slug] = this.defaultPermissionNodes;
       });
