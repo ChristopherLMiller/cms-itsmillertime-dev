@@ -156,12 +156,16 @@ export interface UserAuthOperations {
   };
 }
 /**
+ * User accounts
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
  */
 export interface User {
   id: number;
   roles: (number | Role)[];
+  displayName?: string | null;
+  showNSFW?: boolean | null;
   updatedAt: string;
   createdAt: string;
   email: string;
@@ -246,6 +250,7 @@ export interface Media {
     | number
     | boolean
     | null;
+  blurhash?: string | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -338,19 +343,20 @@ export interface MediaTag {
  */
 export interface GalleryImage {
   id: number;
-  settings?: {
+  settings: {
     slug?: string | null;
     slugLock?: boolean | null;
     isNsfw?: boolean | null;
     'gallery-tags'?: (number | GalleryTag)[] | null;
-    visibility?: ('ALL' | 'AUTHENTICATED' | 'ANONYMOUS' | 'PRIVILEGED') | null;
+    visibility: 'ALL' | 'AUTHENTICATED' | 'PRIVILEGED';
     allowedRoles?: (number | Role)[] | null;
+    allowedUsers?: (number | User)[] | null;
   };
   selling?: {
     isSellable?: boolean | null;
   };
-  title?: string | null;
-  image?: (number | null) | Media;
+  title: string;
+  image: number | Media;
   albums?: (number | GalleryAlbum)[] | null;
   meta?: {
     title?: string | null;
@@ -385,9 +391,15 @@ export interface GalleryTag {
  */
 export interface GalleryAlbum {
   id: number;
-  slug?: string | null;
-  slugLock?: boolean | null;
-  tags?: (number | GalleryTag)[] | null;
+  settings: {
+    slug?: string | null;
+    slugLock?: boolean | null;
+    isNsfw?: boolean | null;
+    tags?: (number | GalleryTag)[] | null;
+    visibility: 'ALL' | 'AUTHENTICATED' | 'PRIVILEGED';
+    allowedRoles?: (number | Role)[] | null;
+    allowedUsers?: (number | User)[] | null;
+  };
   title: string;
   content?: {
     root: {
@@ -787,6 +799,8 @@ export interface PayloadMigration {
  */
 export interface UsersSelect<T extends boolean = true> {
   roles?: T;
+  displayName?: T;
+  showNSFW?: T;
   updatedAt?: T;
   createdAt?: T;
   email?: T;
@@ -808,6 +822,7 @@ export interface MediaSelect<T extends boolean = true> {
   'gallery-images'?: T;
   relatedPosts?: T;
   exif?: T;
+  blurhash?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -1020,9 +1035,17 @@ export interface RolesSelect<T extends boolean = true> {
  * via the `definition` "gallery-albums_select".
  */
 export interface GalleryAlbumsSelect<T extends boolean = true> {
-  slug?: T;
-  slugLock?: T;
-  tags?: T;
+  settings?:
+    | T
+    | {
+        slug?: T;
+        slugLock?: T;
+        isNsfw?: T;
+        tags?: T;
+        visibility?: T;
+        allowedRoles?: T;
+        allowedUsers?: T;
+      };
   title?: T;
   content?: T;
   images?: T;
@@ -1050,6 +1073,7 @@ export interface GalleryImagesSelect<T extends boolean = true> {
         'gallery-tags'?: T;
         visibility?: T;
         allowedRoles?: T;
+        allowedUsers?: T;
       };
   selling?:
     | T

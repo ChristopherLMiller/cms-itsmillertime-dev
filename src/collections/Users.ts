@@ -5,6 +5,8 @@ export const Users: CollectionConfig = {
   admin: {
     useAsTitle: 'email',
     group: 'Authentication & Authorization',
+    description: 'User accounts',
+    defaultColumns: ['displayName', 'email', 'roles', 'showNSFW'],
   },
   auth: true,
   fields: [
@@ -14,6 +16,20 @@ export const Users: CollectionConfig = {
       name: 'roles',
       required: true,
       hasMany: true,
+    },
+    {
+      type: 'text',
+      name: 'displayName',
+      label: 'Display Name',
+    },
+    {
+      type: 'checkbox',
+      name: 'showNSFW',
+      label: 'Show NSFW',
+      defaultValue: false,
+      admin: {
+        position: 'sidebar',
+      },
     },
   ],
 };

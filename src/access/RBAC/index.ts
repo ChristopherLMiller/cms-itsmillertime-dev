@@ -1,8 +1,8 @@
 import { Collection, OperationKey } from '@/lib/PermissionsManager';
 import { Role } from '@/payload-types';
-import { PayloadRequest } from 'payload';
+import { PayloadRequest, Where } from 'payload';
 
-export function RBAC(collection: Collection['slug']) {
+export const RBAC = (collection: Collection['slug']) => {
   const getDefaultRole = async (req: PayloadRequest): Promise<Role> => {
     const defaultRole = await req?.payload.find({
       collection: 'roles',
@@ -85,5 +85,35 @@ export function RBAC(collection: Collection['slug']) {
     return isAuthorized('admin', req);
   };
 
-  return { read, create, update, remove, unlock, readVersions, admin };
-}
+  const operations = { read, create, update, remove, unlock, readVersions, admin };
+
+  const applyFilters = (
+    operation: keyof typeof operations,
+    filters: Array<({ req }: { req: PayloadRequest }) => Promise<Where>>,
+  ) => {
+    return async ({ req }: { req: PayloadRequest }) => {
+      // Frist run the operation to check if permitted or not at a role level
+      const operationFunction = operations[operation];
+      const operationResult = await operationFunction({ req });
+
+      // If the operation result was true, we can run the filters on the data
+      if (operationResult) {
+        // Now run the filters
+        const functionPromises = filters.map((func) => func({ req }));
+        const filterResults = await Promise.allSettled(functionPromises);
+
+        const queryFilter: Where = {
+          and: filterResults.map((result) => result.status === 'fulfilled' && result.value),
+        };
+        return queryFilter;
+      } else {
+        return operationResult;
+      }
+    };
+  };
+
+  return {
+    ...operations,
+    applyFilters,
+  };
+};

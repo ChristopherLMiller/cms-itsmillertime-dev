@@ -1,4 +1,6 @@
 import { RBAC } from '@/access/RBAC';
+import { nsfwFilter } from '@/access/RBAC/filters/nsfw';
+import { visibilityFilter } from '@/access/RBAC/filters/visibility';
 import { slugField } from '@/fields/slug';
 import {
   MetaDescriptionField,
@@ -18,27 +20,91 @@ import { CollectionConfig } from 'payload';
 
 export const GalleryAlbums: CollectionConfig<'gallery-albums'> = {
   slug: 'gallery-albums',
-  access: RBAC('gallery-albums'),
+  access: {
+    create: RBAC('gallery-albums').create,
+    read: RBAC('gallery-albums').applyFilters('read', [nsfwFilter, visibilityFilter]),
+    update: RBAC('gallery-albums').update,
+    delete: RBAC('gallery-albums').remove,
+    readVersions: RBAC('gallery-albums').readVersions,
+    unlock: RBAC('gallery-albums').unlock,
+    admin: RBAC('gallery-albums').admin,
+  },
   admin: {
     group: 'Gallery',
     description: 'Listing of all photo albums',
     useAsTitle: 'title',
   },
   fields: [
-    ...slugField('title'),
     {
-      name: 'tags',
-      type: 'relationship',
-      relationTo: 'gallery-tags',
-      hasMany: true,
+      type: 'group',
+      name: 'settings',
+      label: 'Settings',
       admin: {
         position: 'sidebar',
       },
-    },
-    {
-      name: 'title',
-      type: 'text',
-      required: true,
+      fields: [
+        ...slugField('title'),
+
+        {
+          name: 'isNsfw',
+          type: 'checkbox',
+          defaultValue: false,
+          label: 'Is NSFW?',
+        },
+        {
+          name: 'tags',
+          type: 'relationship',
+          relationTo: 'gallery-tags',
+          hasMany: true,
+          admin: {
+            position: 'sidebar',
+          },
+        },
+        {
+          name: 'visibility',
+          type: 'select',
+          defaultValue: 'ALL',
+          required: true,
+          options: [
+            {
+              value: 'ALL',
+              label: 'Anybody',
+            },
+            {
+              value: 'AUTHENTICATED',
+              label: 'Logged In',
+            },
+            {
+              value: 'PRIVILEGED',
+              label: 'By User or Role',
+            },
+          ],
+        },
+        {
+          type: 'relationship',
+          relationTo: 'roles',
+          hasMany: true,
+          name: 'allowedRoles',
+          admin: {
+            position: 'sidebar',
+            condition: (siblingData) => {
+              return siblingData?.settings?.visibility === 'PRIVILEGED';
+            },
+          },
+        },
+        {
+          type: 'relationship',
+          relationTo: 'users',
+          hasMany: true,
+          name: 'allowedUsers',
+          admin: {
+            position: 'sidebar',
+            condition: (siblingData) => {
+              return siblingData?.settings?.visibility === 'PRIVILEGED';
+            },
+          },
+        },
+      ],
     },
     {
       type: 'tabs',
@@ -46,6 +112,12 @@ export const GalleryAlbums: CollectionConfig<'gallery-albums'> = {
         {
           label: 'Content',
           fields: [
+            {
+              type: 'text',
+              name: 'title',
+              label: 'Title',
+              required: true,
+            },
             {
               name: 'content',
               type: 'richText',
@@ -85,7 +157,7 @@ export const GalleryAlbums: CollectionConfig<'gallery-albums'> = {
               relationTo: 'media',
             }),
             MetaDescriptionField({
-              hasGenerateFn: true,
+              hasGenerateFn: false,
             }),
             PreviewField({
               hasGenerateFn: true,

@@ -1,4 +1,6 @@
 import { RBAC } from '@/access/RBAC';
+import { nsfwFilter } from '@/access/RBAC/filters/nsfw';
+import { visibilityFilter } from '@/access/RBAC/filters/visibility';
 import { slugField } from '@/fields/slug';
 import {
   MetaDescriptionField,
@@ -15,9 +17,17 @@ export const GalleryImages: CollectionConfig<'gallery-images'> = {
     group: 'Gallery',
     description: 'Image',
     useAsTitle: 'title',
-    defaultColumns: ['title', 'slug', 'gallery-tags', 'selling_is_nsfw', 'visibility'],
+    defaultColumns: ['title', 'slug', 'gallery-tags'],
   },
-  access: RBAC('gallery-images'),
+  access: {
+    create: RBAC('gallery-images').create,
+    read: RBAC('gallery-images').applyFilters('read', [nsfwFilter, visibilityFilter]),
+    update: RBAC('gallery-images').update,
+    delete: RBAC('gallery-images').remove,
+    readVersions: RBAC('gallery-images').readVersions,
+    unlock: RBAC('gallery-images').unlock,
+    admin: RBAC('gallery-images').admin,
+  },
   fields: [
     {
       type: 'group',
@@ -48,6 +58,7 @@ export const GalleryImages: CollectionConfig<'gallery-images'> = {
           name: 'visibility',
           type: 'select',
           defaultValue: 'ALL',
+          required: true,
           options: [
             {
               value: 'ALL',
@@ -58,12 +69,8 @@ export const GalleryImages: CollectionConfig<'gallery-images'> = {
               label: 'Logged In',
             },
             {
-              value: 'ANONYMOUS',
-              label: 'Logged Out',
-            },
-            {
               value: 'PRIVILEGED',
-              label: 'By User Role',
+              label: 'By User or Role',
             },
           ],
         },
@@ -74,8 +81,20 @@ export const GalleryImages: CollectionConfig<'gallery-images'> = {
           name: 'allowedRoles',
           admin: {
             position: 'sidebar',
-            condition: ({ siblingData }) => {
-              return siblingData?.visibility === 'PRIVILEGED';
+            condition: (siblingData) => {
+              return siblingData?.settings?.visibility === 'PRIVILEGED';
+            },
+          },
+        },
+        {
+          type: 'relationship',
+          relationTo: 'users',
+          hasMany: true,
+          name: 'allowedUsers',
+          admin: {
+            position: 'sidebar',
+            condition: (siblingData) => {
+              return siblingData?.settings?.visibility === 'PRIVILEGED';
             },
           },
         },
@@ -108,11 +127,13 @@ export const GalleryImages: CollectionConfig<'gallery-images'> = {
               type: 'text',
               name: 'title',
               label: 'Title',
+              required: true,
             },
             {
               type: 'upload',
               relationTo: 'media',
               name: 'image',
+              required: true,
             },
             {
               name: 'albums',
@@ -138,7 +159,7 @@ export const GalleryImages: CollectionConfig<'gallery-images'> = {
               relationTo: 'media',
             }),
             MetaDescriptionField({
-              hasGenerateFn: true,
+              hasGenerateFn: false,
             }),
             PreviewField({
               hasGenerateFn: true,
