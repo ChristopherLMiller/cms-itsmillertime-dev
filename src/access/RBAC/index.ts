@@ -103,7 +103,7 @@ export const RBAC = (collection: Collection['slug']) => {
         const filterResults = await Promise.allSettled(functionPromises);
 
         const queryFilter: Where = {
-          and: filterResults.map((result) => result.status === 'fulfilled' && result.value),
+          and: filterResults.map((result) => (result.status === 'fulfilled' ? result.value : {})),
         };
         return queryFilter;
       } else {
