@@ -1,9 +1,12 @@
 import { Post } from '@/payload-types';
 import { getServerSideURL } from '@/utilities/getURL';
+import { formBuilderPlugin } from '@payloadcms/plugin-form-builder';
 import { searchPlugin } from '@payloadcms/plugin-search';
+import { sentryPlugin } from '@payloadcms/plugin-sentry';
 import { seoPlugin } from '@payloadcms/plugin-seo';
 import { GenerateTitle, GenerateURL } from '@payloadcms/plugin-seo/types';
 import { s3Storage } from '@payloadcms/storage-s3';
+import * as Sentry from '@sentry/nextjs';
 import { Plugin } from 'payload';
 
 const generateTitle: GenerateTitle<Post> = ({ doc }) => {
@@ -17,6 +20,20 @@ const generateURL: GenerateURL<Post> = ({ doc }) => {
 };
 
 export const plugins: Plugin[] = [
+  formBuilderPlugin({
+    fields: {
+      text: true,
+      textarea: true,
+      select: true,
+      email: true,
+      state: true,
+      country: true,
+      checkbox: true,
+      number: true,
+      message: true,
+      payment: false,
+    },
+  }),
   seoPlugin({
     generateTitle,
     generateURL,
@@ -26,6 +43,9 @@ export const plugins: Plugin[] = [
     defaultPriorities: {
       posts: 20,
     },
+  }),
+  sentryPlugin({
+    Sentry,
   }),
   s3Storage({
     collections: {
