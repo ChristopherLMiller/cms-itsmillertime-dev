@@ -11,10 +11,6 @@ import {
 import {
   convertLexicalToMarkdown,
   editorConfigFactory,
-  FixedToolbarFeature,
-  HeadingFeature,
-  HorizontalRuleFeature,
-  InlineToolbarFeature,
   lexicalEditor,
 } from '@payloadcms/richtext-lexical';
 import { SerializedEditorState } from '@payloadcms/richtext-lexical/lexical';
@@ -114,13 +110,7 @@ export const Posts: CollectionConfig<'posts'> = {
               type: 'richText',
               editor: lexicalEditor({
                 features: ({ rootFeatures }) => {
-                  return [
-                    ...rootFeatures,
-                    HeadingFeature({ enabledHeadingSizes: ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'] }),
-                    FixedToolbarFeature(),
-                    InlineToolbarFeature(),
-                    HorizontalRuleFeature(),
-                  ];
+                  return [...rootFeatures];
                 },
               }),
             },
@@ -151,6 +141,12 @@ export const Posts: CollectionConfig<'posts'> = {
                     return markdown;
                   },
                 ],
+                beforeChange: [
+                  ({ siblingData }) => {
+                    delete siblingData['markdown'];
+                    return null;
+                  },
+                ],
               },
             },
           ],
@@ -167,14 +163,14 @@ export const Posts: CollectionConfig<'posts'> = {
             MetaTitleField({
               hasGenerateFn: true,
             }),
-            MetaImageField({
-              relationTo: 'media',
-            }),
             MetaDescriptionField({
               hasGenerateFn: true,
             }),
+            MetaImageField({
+              relationTo: 'media',
+            }),
             PreviewField({
-              hasGenerateFn: true,
+              hasGenerateFn: false,
               titlePath: 'meta.title',
               descriptionPath: 'meta.description',
             }),
