@@ -106,6 +106,9 @@ export const Media: CollectionConfig = {
     adminThumbnail: 'thumbnail',
     focalPoint: true,
     withMetadata: true,
+    formatOptions: {
+      format: 'avif',
+    },
     imageSizes: [
       {
         name: 'thumbnail',
