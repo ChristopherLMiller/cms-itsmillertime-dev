@@ -8,13 +8,8 @@ import {
   OverviewField,
   PreviewField,
 } from '@payloadcms/plugin-seo/fields';
-import {
-  convertLexicalToMarkdown,
-  editorConfigFactory,
-  lexicalEditor,
-} from '@payloadcms/richtext-lexical';
-import { SerializedEditorState } from '@payloadcms/richtext-lexical/lexical';
-import { CollectionConfig, RichTextField } from 'payload';
+import { lexicalEditor } from '@payloadcms/richtext-lexical';
+import { CollectionConfig } from 'payload';
 
 export const Posts: CollectionConfig<'posts'> = {
   slug: 'posts',
@@ -113,41 +108,6 @@ export const Posts: CollectionConfig<'posts'> = {
                   return [...rootFeatures];
                 },
               }),
-            },
-            {
-              name: 'markdown',
-              type: 'textarea',
-              admin: {
-                hidden: true,
-              },
-              hooks: {
-                afterRead: [
-                  ({ siblingData, siblingFields }) => {
-                    const data: SerializedEditorState = siblingData['content'];
-
-                    if (!data) {
-                      return '';
-                    }
-
-                    const markdown = convertLexicalToMarkdown({
-                      data,
-                      editorConfig: editorConfigFactory.fromField({
-                        field: siblingFields.find(
-                          (field) => 'name' in field && field.name === 'content',
-                        ) as RichTextField,
-                      }),
-                    });
-
-                    return markdown;
-                  },
-                ],
-                beforeChange: [
-                  ({ siblingData }) => {
-                    delete siblingData['markdown'];
-                    return null;
-                  },
-                ],
-              },
             },
           ],
         },
