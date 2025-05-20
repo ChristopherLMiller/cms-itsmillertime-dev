@@ -128,6 +128,11 @@ export const Posts: CollectionConfig<'posts'> = {
             }),
             MetaImageField({
               relationTo: 'media',
+              overrides: {
+                admin: {
+                  allowCreate: true,
+                },
+              },
             }),
             PreviewField({
               hasGenerateFn: false,

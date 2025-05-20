@@ -468,13 +468,9 @@ export interface Post {
     };
     [k: string]: unknown;
   } | null;
-  markdown?: string | null;
   meta?: {
     title?: string | null;
     description?: string | null;
-    /**
-     * Maximum upload file size: 12MB. Recommended file size for images is <500KB.
-     */
     image?: (number | null) | Media;
   };
   updatedAt: string;
@@ -1138,7 +1134,6 @@ export interface PostsSelect<T extends boolean = true> {
   title?: T;
   featuredImage?: T;
   content?: T;
-  markdown?: T;
   meta?:
     | T
     | {

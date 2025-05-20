@@ -1,23 +1,13 @@
-import { Post } from '@/payload-types';
 import { getServerSideURL } from '@/utilities/getURL';
+import { lexicalToText } from '@/utilities/lexicalToText';
+import { truncateText } from '@/utilities/truncateText';
 import { formBuilderPlugin } from '@payloadcms/plugin-form-builder';
 import { searchPlugin } from '@payloadcms/plugin-search';
 import { sentryPlugin } from '@payloadcms/plugin-sentry';
 import { seoPlugin } from '@payloadcms/plugin-seo';
-import { GenerateTitle, GenerateURL } from '@payloadcms/plugin-seo/types';
 import { s3Storage } from '@payloadcms/storage-s3';
 import * as Sentry from '@sentry/nextjs';
 import { Plugin } from 'payload';
-
-const generateTitle: GenerateTitle<Post> = ({ doc }) => {
-  return doc?.title ? `${doc.title} | ItsMillerTime` : 'ItsMillerTime';
-};
-
-const generateURL: GenerateURL<Post> = ({ doc }) => {
-  const url = getServerSideURL();
-
-  return doc?.slug ? `${url}/${doc.slug}` : url;
-};
 
 export const plugins: Plugin[] = [
   formBuilderPlugin({
@@ -35,8 +25,25 @@ export const plugins: Plugin[] = [
     },
   }),
   seoPlugin({
-    generateTitle,
-    generateURL,
+    generateTitle: ({ doc }) => {
+      return doc?.title ? `${doc.title} | ItsMillerTime` : 'ItsMillerTime';
+    },
+    generateURL: ({ doc }) => {
+      const url = getServerSideURL();
+      return doc?.slug ? `${url}/${doc.slug}` : url;
+    },
+    generateDescription: ({ doc }) => {
+      if (doc?.content) {
+        return truncateText(lexicalToText(doc?.content));
+      } else {
+        return 'Default description, i need implemented';
+      }
+    },
+    generateImage: async ({ doc }) => {
+      if (doc?.featuredImage) {
+        return doc?.featuredImage?.url;
+      }
+    },
   }),
   searchPlugin({
     collections: ['posts'],
