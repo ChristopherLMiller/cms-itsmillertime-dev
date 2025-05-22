@@ -41,7 +41,7 @@ export const plugins: Plugin[] = [
     },
     generateImage: async ({ doc }) => {
       if (doc?.featuredImage) {
-        return doc?.featuredImage?.url;
+        return doc?.featuredImage;
       }
     },
   }),

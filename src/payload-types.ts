@@ -69,7 +69,6 @@ export interface Config {
   collections: {
     users: User;
     media: Media;
-    'media-tags': MediaTag;
     posts: Post;
     'posts-categories': PostsCategory;
     'posts-tags': PostsTag;
@@ -82,6 +81,7 @@ export interface Config {
     forms: Form;
     'form-submissions': FormSubmission;
     search: Search;
+    'payload-folders': FolderInterface;
     'payload-jobs': PayloadJob;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -95,11 +95,13 @@ export interface Config {
     'gallery-albums': {
       images: 'gallery-images';
     };
+    'payload-folders': {
+      documentsAndFolders: 'payload-folders' | 'media' | 'posts' | 'gallery-albums' | 'gallery-images';
+    };
   };
   collectionsSelect: {
     users: UsersSelect<false> | UsersSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
-    'media-tags': MediaTagsSelect<false> | MediaTagsSelect<true>;
     posts: PostsSelect<false> | PostsSelect<true>;
     'posts-categories': PostsCategoriesSelect<false> | PostsCategoriesSelect<true>;
     'posts-tags': PostsTagsSelect<false> | PostsTagsSelect<true>;
@@ -112,6 +114,7 @@ export interface Config {
     forms: FormsSelect<false> | FormsSelect<true>;
     'form-submissions': FormSubmissionsSelect<false> | FormSubmissionsSelect<true>;
     search: SearchSelect<false> | SearchSelect<true>;
+    'payload-folders': PayloadFoldersSelect<false> | PayloadFoldersSelect<true>;
     'payload-jobs': PayloadJobsSelect<false> | PayloadJobsSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -212,7 +215,6 @@ export interface Role {
  */
 export interface Media {
   id: number;
-  'media-tags'?: (number | MediaTag)[] | null;
   alt: string;
   caption?: {
     root: {
@@ -255,6 +257,7 @@ export interface Media {
     | boolean
     | null;
   blurhash?: string | null;
+  folder?: (number | null) | FolderInterface;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -326,20 +329,6 @@ export interface Media {
   };
 }
 /**
- * Tagging of images for filtering
- *
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "media-tags".
- */
-export interface MediaTag {
-  id: number;
-  title: string;
-  slug?: string | null;
-  slugLock?: boolean | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
  * Image
  *
  * This interface was referenced by `Config`'s JSON-Schema
@@ -370,6 +359,7 @@ export interface GalleryImage {
     image?: (number | null) | Media;
     description?: string | null;
   };
+  folder?: (number | null) | FolderInterface;
   updatedAt: string;
   createdAt: string;
 }
@@ -433,6 +423,44 @@ export interface GalleryAlbum {
     image?: (number | null) | Media;
     description?: string | null;
   };
+  folder?: (number | null) | FolderInterface;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-folders".
+ */
+export interface FolderInterface {
+  id: number;
+  name: string;
+  folder?: (number | null) | FolderInterface;
+  documentsAndFolders?: {
+    docs?: (
+      | {
+          relationTo?: 'payload-folders';
+          value: number | FolderInterface;
+        }
+      | {
+          relationTo?: 'media';
+          value: number | Media;
+        }
+      | {
+          relationTo?: 'posts';
+          value: number | Post;
+        }
+      | {
+          relationTo?: 'gallery-albums';
+          value: number | GalleryAlbum;
+        }
+      | {
+          relationTo?: 'gallery-images';
+          value: number | GalleryImage;
+        }
+    )[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
   updatedAt: string;
   createdAt: string;
 }
@@ -444,7 +472,7 @@ export interface GalleryAlbum {
  */
 export interface Post {
   id: number;
-  publishedAt?: string | null;
+  originalPublicationDate?: string | null;
   slug?: string | null;
   slugLock?: boolean | null;
   word_count?: number | null;
@@ -473,6 +501,7 @@ export interface Post {
     description?: string | null;
     image?: (number | null) | Media;
   };
+  folder?: (number | null) | FolderInterface;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -895,10 +924,6 @@ export interface PayloadLockedDocument {
         value: number | Media;
       } | null)
     | ({
-        relationTo: 'media-tags';
-        value: number | MediaTag;
-      } | null)
-    | ({
         relationTo: 'posts';
         value: number | Post;
       } | null)
@@ -945,6 +970,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'search';
         value: number | Search;
+      } | null)
+    | ({
+        relationTo: 'payload-folders';
+        value: number | FolderInterface;
       } | null)
     | ({
         relationTo: 'payload-jobs';
@@ -1015,13 +1044,13 @@ export interface UsersSelect<T extends boolean = true> {
  * via the `definition` "media_select".
  */
 export interface MediaSelect<T extends boolean = true> {
-  'media-tags'?: T;
   alt?: T;
   caption?: T;
   'gallery-images'?: T;
   relatedPosts?: T;
   exif?: T;
   blurhash?: T;
+  folder?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -1110,21 +1139,10 @@ export interface MediaSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "media-tags_select".
- */
-export interface MediaTagsSelect<T extends boolean = true> {
-  title?: T;
-  slug?: T;
-  slugLock?: T;
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "posts_select".
  */
 export interface PostsSelect<T extends boolean = true> {
-  publishedAt?: T;
+  originalPublicationDate?: T;
   slug?: T;
   slugLock?: T;
   word_count?: T;
@@ -1141,6 +1159,7 @@ export interface PostsSelect<T extends boolean = true> {
         description?: T;
         image?: T;
       };
+  folder?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
@@ -1254,6 +1273,7 @@ export interface GalleryAlbumsSelect<T extends boolean = true> {
         image?: T;
         description?: T;
       };
+  folder?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1288,6 +1308,7 @@ export interface GalleryImagesSelect<T extends boolean = true> {
         image?: T;
         description?: T;
       };
+  folder?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1459,6 +1480,17 @@ export interface SearchSelect<T extends boolean = true> {
   title?: T;
   priority?: T;
   doc?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-folders_select".
+ */
+export interface PayloadFoldersSelect<T extends boolean = true> {
+  name?: T;
+  folder?: T;
+  documentsAndFolders?: T;
   updatedAt?: T;
   createdAt?: T;
 }

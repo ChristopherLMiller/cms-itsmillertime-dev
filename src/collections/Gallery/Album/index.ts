@@ -33,6 +33,7 @@ export const GalleryAlbums: CollectionConfig<'gallery-albums'> = {
     group: 'Gallery',
     description: 'Listing of all photo albums',
     useAsTitle: 'title',
+    folders: true,
   },
   fields: [
     {

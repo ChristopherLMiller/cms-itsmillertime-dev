@@ -15,18 +15,10 @@ export const Media: CollectionConfig = {
     group: 'Media Library',
     description: 'Media Items, images and otherwise',
     defaultColumns: ['alt', 'caption', 'media-tags'],
+    folders: true,
   },
   access: RBAC('media'),
   fields: [
-    {
-      name: 'media-tags',
-      type: 'relationship',
-      relationTo: 'media-tags',
-      hasMany: true,
-      admin: {
-        position: 'sidebar',
-      },
-    },
     {
       type: 'tabs',
       tabs: [

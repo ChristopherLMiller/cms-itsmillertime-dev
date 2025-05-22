@@ -11,7 +11,6 @@ import { GalleryAlbums } from './collections/Gallery/Album';
 import { GalleryImages } from './collections/Gallery/Image';
 import { GalleryTags } from './collections/Gallery/Tags';
 import { Media } from './collections/Media/Media';
-import { MediaTags } from './collections/Media/Tags';
 import { NavItems } from './collections/NavItems';
 import { Pages } from './collections/Pages';
 import { PostsCategories } from './collections/Posts/Categories';
@@ -37,7 +36,6 @@ export default buildConfig({
   collections: [
     Users,
     Media,
-    MediaTags,
     Posts,
     PostsCategories,
     PostsTags,

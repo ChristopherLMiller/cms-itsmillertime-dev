@@ -27,10 +27,11 @@ export const Posts: CollectionConfig<'posts'> = {
     useAsTitle: 'title',
     description: 'Blog Posts',
     group: 'Blog',
+    folders: true,
   },
   fields: [
     {
-      name: 'publishedAt',
+      name: 'originalPublicationDate',
       type: 'date',
       admin: {
         date: {
@@ -127,6 +128,7 @@ export const Posts: CollectionConfig<'posts'> = {
               hasGenerateFn: true,
             }),
             MetaImageField({
+              hasGenerateFn: true,
               relationTo: 'media',
               overrides: {
                 admin: {
