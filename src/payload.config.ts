@@ -6,12 +6,10 @@ import sharp from 'sharp';
 import { fileURLToPath } from 'url';
 
 import { resendAdapter } from '@payloadcms/email-resend';
-import { Nav } from './app/(payload)/globals/Nav/config';
 import { GalleryAlbums } from './collections/Gallery/Album';
 import { GalleryImages } from './collections/Gallery/Image';
 import { GalleryTags } from './collections/Gallery/Tags';
 import { Media } from './collections/Media/Media';
-import { NavItems } from './collections/NavItems';
 import { Pages } from './collections/Pages';
 import { PostsCategories } from './collections/Posts/Categories';
 import { Posts } from './collections/Posts/Posts';
@@ -19,12 +17,19 @@ import { PostsTags } from './collections/Posts/Tags';
 import { Roles } from './collections/RBAC/Roles';
 import { Users } from './collections/Users';
 import { defaultLexical } from './fields/defaultLexical';
+import { SiteMeta } from './globals/site-meta';
+import { SiteNavigation } from './globals/site-navigation';
 import { plugins } from './plugins';
 
 const filename = fileURLToPath(import.meta.url);
 const dirname = path.dirname(filename);
 
 export default buildConfig({
+  graphQL: {
+    disable: true,
+  },
+  folders: {},
+  telemetry: false,
   cors: '*',
   admin: {
     user: Users.slug,
@@ -32,7 +37,7 @@ export default buildConfig({
       baseDir: path.resolve(dirname),
     },
   },
-  globals: [Nav],
+  globals: [SiteMeta, SiteNavigation],
   collections: [
     Users,
     Media,
@@ -40,7 +45,6 @@ export default buildConfig({
     PostsCategories,
     PostsTags,
     Pages,
-    NavItems,
     Roles,
     GalleryAlbums,
     GalleryImages,

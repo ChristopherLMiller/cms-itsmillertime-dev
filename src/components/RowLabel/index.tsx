@@ -7,5 +7,5 @@ export const RowLabel = () => {
 
   const customLabel = `${data.title || 'Slide'} ${String(rowNumber).padStart(2, '0')} `;
 
-  return <div>{customLabel}</div>;
+  return <div>{data.title}</div>;
 };

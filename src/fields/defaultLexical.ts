@@ -42,14 +42,7 @@ export const defaultLexical = lexicalEditor({
     OrderedListFeature(),
     ChecklistFeature(),
     LinkFeature({
-      enabledCollections: [
-        'pages',
-        'posts',
-        'media',
-        'nav-items',
-        'gallery-albums',
-        'gallery-images',
-      ],
+      enabledCollections: ['pages', 'posts', 'media', 'gallery-albums', 'gallery-images'],
       fields: ({ defaultFields }) => {
         const defaultFieldsWithoutUrl = defaultFields.filter((field) => {
           if ('name' in field && field.name === 'url') return false;

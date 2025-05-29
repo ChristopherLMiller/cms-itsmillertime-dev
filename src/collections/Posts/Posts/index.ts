@@ -27,7 +27,6 @@ export const Posts: CollectionConfig<'posts'> = {
     useAsTitle: 'title',
     description: 'Blog Posts',
     group: 'Blog',
-    folders: true,
   },
   fields: [
     {

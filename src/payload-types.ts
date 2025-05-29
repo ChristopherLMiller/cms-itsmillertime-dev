@@ -73,7 +73,6 @@ export interface Config {
     'posts-categories': PostsCategory;
     'posts-tags': PostsTag;
     pages: Page;
-    'nav-items': NavItem;
     roles: Role;
     'gallery-albums': GalleryAlbum;
     'gallery-images': GalleryImage;
@@ -96,7 +95,7 @@ export interface Config {
       images: 'gallery-images';
     };
     'payload-folders': {
-      documentsAndFolders: 'payload-folders' | 'media' | 'posts' | 'gallery-albums' | 'gallery-images';
+      documentsAndFolders: 'payload-folders' | 'gallery-albums' | 'gallery-images';
     };
   };
   collectionsSelect: {
@@ -106,7 +105,6 @@ export interface Config {
     'posts-categories': PostsCategoriesSelect<false> | PostsCategoriesSelect<true>;
     'posts-tags': PostsTagsSelect<false> | PostsTagsSelect<true>;
     pages: PagesSelect<false> | PagesSelect<true>;
-    'nav-items': NavItemsSelect<false> | NavItemsSelect<true>;
     roles: RolesSelect<false> | RolesSelect<true>;
     'gallery-albums': GalleryAlbumsSelect<false> | GalleryAlbumsSelect<true>;
     'gallery-images': GalleryImagesSelect<false> | GalleryImagesSelect<true>;
@@ -124,10 +122,12 @@ export interface Config {
     defaultIDType: number;
   };
   globals: {
-    nav: Nav;
+    'site-meta': SiteMeta;
+    'site-navigation': SiteNavigation;
   };
   globalsSelect: {
-    nav: NavSelect<false> | NavSelect<true>;
+    'site-meta': SiteMetaSelect<false> | SiteMetaSelect<true>;
+    'site-navigation': SiteNavigationSelect<false> | SiteNavigationSelect<true>;
   };
   locale: null;
   user: User & {
@@ -257,7 +257,6 @@ export interface Media {
     | boolean
     | null;
   blurhash?: string | null;
-  folder?: (number | null) | FolderInterface;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -442,14 +441,6 @@ export interface FolderInterface {
           value: number | FolderInterface;
         }
       | {
-          relationTo?: 'media';
-          value: number | Media;
-        }
-      | {
-          relationTo?: 'posts';
-          value: number | Post;
-        }
-      | {
           relationTo?: 'gallery-albums';
           value: number | GalleryAlbum;
         }
@@ -501,7 +492,6 @@ export interface Post {
     description?: string | null;
     image?: (number | null) | Media;
   };
-  folder?: (number | null) | FolderInterface;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -578,35 +568,6 @@ export interface Page {
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "nav-items".
- */
-export interface NavItem {
-  id: number;
-  label: string;
-  link?: {
-    type?: ('reference' | 'custom') | null;
-    newTab?: boolean | null;
-    reference?:
-      | ({
-          relationTo: 'pages';
-          value: number | Page;
-        } | null)
-      | ({
-          relationTo: 'posts';
-          value: number | Post;
-        } | null);
-    url?: string | null;
-  };
-  order: number;
-  icon?: (number | null) | Media;
-  childrenNodes?: (number | NavItem)[] | null;
-  slug?: string | null;
-  slugLock?: boolean | null;
-  updatedAt: string;
-  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -940,10 +901,6 @@ export interface PayloadLockedDocument {
         value: number | Page;
       } | null)
     | ({
-        relationTo: 'nav-items';
-        value: number | NavItem;
-      } | null)
-    | ({
         relationTo: 'roles';
         value: number | Role;
       } | null)
@@ -1050,7 +1007,6 @@ export interface MediaSelect<T extends boolean = true> {
   relatedPosts?: T;
   exif?: T;
   blurhash?: T;
-  folder?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -1159,7 +1115,6 @@ export interface PostsSelect<T extends boolean = true> {
         description?: T;
         image?: T;
       };
-  folder?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
@@ -1212,28 +1167,6 @@ export interface PagesSelect<T extends boolean = true> {
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "nav-items_select".
- */
-export interface NavItemsSelect<T extends boolean = true> {
-  label?: T;
-  link?:
-    | T
-    | {
-        type?: T;
-        newTab?: T;
-        reference?: T;
-        url?: T;
-      };
-  order?: T;
-  icon?: T;
-  childrenNodes?: T;
-  slug?: T;
-  slugLock?: T;
-  updatedAt?: T;
-  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1559,53 +1492,98 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "nav".
+ * via the `definition` "site-meta".
  */
-export interface Nav {
+export interface SiteMeta {
   id: number;
-  navItems: {
-    link: {
-      type?: ('reference' | 'custom') | null;
-      newTab?: boolean | null;
-      reference?:
-        | ({
-            relationTo: 'pages';
-            value: number | Page;
-          } | null)
-        | ({
-            relationTo: 'posts';
-            value: number | Post;
-          } | null);
-      url?: string | null;
-      label: string;
-      /**
-       * Choose how the link should be rendered.
-       */
-      appearance?: ('default' | 'outline') | null;
-    };
-    id?: string | null;
-  }[];
+  siteMeta?:
+    | {
+        title: string;
+        description: string;
+        path: string;
+        id?: string | null;
+      }[]
+    | null;
   updatedAt?: string | null;
   createdAt?: string | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "nav_select".
+ * via the `definition` "site-navigation".
  */
-export interface NavSelect<T extends boolean = true> {
+export interface SiteNavigation {
+  id: number;
+  navItems?:
+    | {
+        title: string;
+        link: string;
+        childNodes?:
+          | {
+              label: string;
+              link: string;
+              order: number;
+              icon?: (number | null) | Media;
+              visibility: 'ALL' | 'AUTHENTICATED' | 'ANONYMOUS' | 'PRIVILEGED';
+              allowedRoles?: (number | Role)[] | null;
+              allowedUsers?: (number | User)[] | null;
+              id?: string | null;
+            }[]
+          | null;
+        order: number;
+        icon?: (number | null) | Media;
+        visibility: 'ALL' | 'AUTHENTICATED' | 'ANONYMOUS' | 'PRIVILEGED';
+        allowedRoles?: (number | Role)[] | null;
+        allowedUsers?: (number | User)[] | null;
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "site-meta_select".
+ */
+export interface SiteMetaSelect<T extends boolean = true> {
+  siteMeta?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+        path?: T;
+        id?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "site-navigation_select".
+ */
+export interface SiteNavigationSelect<T extends boolean = true> {
   navItems?:
     | T
     | {
-        link?:
+        title?: T;
+        link?: T;
+        childNodes?:
           | T
           | {
-              type?: T;
-              newTab?: T;
-              reference?: T;
-              url?: T;
               label?: T;
-              appearance?: T;
+              link?: T;
+              order?: T;
+              icon?: T;
+              visibility?: T;
+              allowedRoles?: T;
+              allowedUsers?: T;
+              id?: T;
             };
+        order?: T;
+        icon?: T;
+        visibility?: T;
+        allowedRoles?: T;
+        allowedUsers?: T;
         id?: T;
       };
   updatedAt?: T;

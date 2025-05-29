@@ -23,7 +23,6 @@ export const ClientPermissionsTable = ({ collections }: { collections: Collectio
     const { id, checked } = event.target;
     const [collectionSlug, action] = id.split('.');
 
-    //updateState(mergePermissionNodes(collectionSlug, { [operationKey]: checked }));
     permissionsManager.updatePermissionNode(collectionSlug, action as OperationKey, checked);
     setValue(permissionsManager.getPermissions());
   };

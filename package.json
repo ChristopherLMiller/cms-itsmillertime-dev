@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "build": "cross-env NODE_OPTIONS=--no-deprecation next build",
-    "dev": "cross-env NODE_OPTIONS=--no-deprecation next dev",
+    "dev": "cross-env NODE_OPTIONS=--no-deprecation next dev --turbopack",
     "devsafe": "rm -rf .next && cross-env NODE_OPTIONS=--no-deprecation next dev",
     "generate:importmap": "cross-env NODE_OPTIONS=--no-deprecation payload generate:importmap",
     "generate:types": "cross-env NODE_OPTIONS=--no-deprecation payload generate:types",
@@ -31,7 +31,7 @@
     "blurhash": "^2.0.5",
     "cross-env": "^7.0.3",
     "exif-parser": "^0.1.12",
-    "graphql": "^16.11.0",
+    "graphql": "^16.10.0",
     "next": "15.3.2",
     "payload": "3.39.1",
     "plaiceholder": "^3.0.0",
