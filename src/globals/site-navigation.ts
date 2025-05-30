@@ -44,7 +44,7 @@ export const SiteNavigation: GlobalConfig = {
           },
           fields: [
             {
-              name: 'label',
+              name: 'title',
               type: 'text',
               required: true,
             },

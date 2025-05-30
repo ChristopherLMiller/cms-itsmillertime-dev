@@ -46,7 +46,6 @@ export const enum__pages_v_version_status = pgEnum('enum__pages_v_version_status
   'draft',
   'published',
 ]);
-export const enum_nav_items_link_type = pgEnum('enum_nav_items_link_type', ['reference', 'custom']);
 export const enum_gallery_albums_settings_visibility = pgEnum(
   'enum_gallery_albums_settings_visibility',
   ['ALL', 'AUTHENTICATED', 'PRIVILEGED'],
@@ -71,14 +70,14 @@ export const enum_payload_jobs_task_slug = pgEnum('enum_payload_jobs_task_slug',
   'inline',
   'schedulePublish',
 ]);
-export const enum_nav_nav_items_link_type = pgEnum('enum_nav_nav_items_link_type', [
-  'reference',
-  'custom',
-]);
-export const enum_nav_nav_items_link_appearance = pgEnum('enum_nav_nav_items_link_appearance', [
-  'default',
-  'outline',
-]);
+export const enum_site_navigation_nav_items_child_nodes_visibility = pgEnum(
+  'enum_site_navigation_nav_items_child_nodes_visibility',
+  ['ALL', 'AUTHENTICATED', 'ANONYMOUS', 'PRIVILEGED'],
+);
+export const enum_site_navigation_nav_items_visibility = pgEnum(
+  'enum_site_navigation_nav_items_visibility',
+  ['ALL', 'AUTHENTICATED', 'ANONYMOUS', 'PRIVILEGED'],
+);
 
 export const users = pgTable(
   'users',
@@ -261,9 +260,6 @@ export const posts = pgTable(
     meta_image: integer('meta_image_id').references(() => media.id, {
       onDelete: 'set null',
     }),
-    folder: integer('folder_id').references(() => payload_folders.id, {
-      onDelete: 'set null',
-    }),
     updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
       .defaultNow()
       .notNull(),
@@ -277,7 +273,6 @@ export const posts = pgTable(
     posts_category_idx: index('posts_category_idx').on(columns.category),
     posts_featured_image_idx: index('posts_featured_image_idx').on(columns.featuredImage),
     posts_meta_meta_image_idx: index('posts_meta_meta_image_idx').on(columns.meta_image),
-    posts_folder_idx: index('posts_folder_idx').on(columns.folder),
     posts_updated_at_idx: index('posts_updated_at_idx').on(columns.updatedAt),
     posts_created_at_idx: index('posts_created_at_idx').on(columns.createdAt),
     posts__status_idx: index('posts__status_idx').on(columns._status),
@@ -346,9 +341,6 @@ export const _posts_v = pgTable(
     version_meta_image: integer('version_meta_image_id').references(() => media.id, {
       onDelete: 'set null',
     }),
-    version_folder: integer('version_folder_id').references(() => payload_folders.id, {
-      onDelete: 'set null',
-    }),
     version_updatedAt: timestamp('version_updated_at', {
       mode: 'string',
       withTimezone: true,
@@ -383,9 +375,6 @@ export const _posts_v = pgTable(
     _posts_v_version_meta_version_meta_image_idx: index(
       '_posts_v_version_meta_version_meta_image_idx',
     ).on(columns.version_meta_image),
-    _posts_v_version_version_folder_idx: index('_posts_v_version_version_folder_idx').on(
-      columns.version_folder,
-    ),
     _posts_v_version_version_updated_at_idx: index('_posts_v_version_version_updated_at_idx').on(
       columns.version_updatedAt,
     ),
@@ -659,78 +648,6 @@ export const _pages_v_rels = pgTable(
       columns: [columns['rolesID']],
       foreignColumns: [roles.id],
       name: '_pages_v_rels_roles_fk',
-    }).onDelete('cascade'),
-  }),
-);
-
-export const nav_items = pgTable(
-  'nav_items',
-  {
-    id: serial('id').primaryKey(),
-    label: varchar('label').notNull(),
-    link_type: enum_nav_items_link_type('link_type').default('reference'),
-    link_newTab: boolean('link_new_tab'),
-    link_url: varchar('link_url'),
-    order: numeric('order').notNull().default('1'),
-    icon: integer('icon_id').references(() => media.id, {
-      onDelete: 'set null',
-    }),
-    slug: varchar('slug'),
-    slugLock: boolean('slug_lock').default(true),
-    updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
-      .defaultNow()
-      .notNull(),
-    createdAt: timestamp('created_at', { mode: 'string', withTimezone: true, precision: 3 })
-      .defaultNow()
-      .notNull(),
-  },
-  (columns) => ({
-    nav_items_icon_idx: index('nav_items_icon_idx').on(columns.icon),
-    nav_items_slug_idx: index('nav_items_slug_idx').on(columns.slug),
-    nav_items_updated_at_idx: index('nav_items_updated_at_idx').on(columns.updatedAt),
-    nav_items_created_at_idx: index('nav_items_created_at_idx').on(columns.createdAt),
-  }),
-);
-
-export const nav_items_rels = pgTable(
-  'nav_items_rels',
-  {
-    id: serial('id').primaryKey(),
-    order: integer('order'),
-    parent: integer('parent_id').notNull(),
-    path: varchar('path').notNull(),
-    pagesID: integer('pages_id'),
-    postsID: integer('posts_id'),
-    'nav-itemsID': integer('nav_items_id'),
-  },
-  (columns) => ({
-    order: index('nav_items_rels_order_idx').on(columns.order),
-    parentIdx: index('nav_items_rels_parent_idx').on(columns.parent),
-    pathIdx: index('nav_items_rels_path_idx').on(columns.path),
-    nav_items_rels_pages_id_idx: index('nav_items_rels_pages_id_idx').on(columns.pagesID),
-    nav_items_rels_posts_id_idx: index('nav_items_rels_posts_id_idx').on(columns.postsID),
-    nav_items_rels_nav_items_id_idx: index('nav_items_rels_nav_items_id_idx').on(
-      columns['nav-itemsID'],
-    ),
-    parentFk: foreignKey({
-      columns: [columns['parent']],
-      foreignColumns: [nav_items.id],
-      name: 'nav_items_rels_parent_fk',
-    }).onDelete('cascade'),
-    pagesIdFk: foreignKey({
-      columns: [columns['pagesID']],
-      foreignColumns: [pages.id],
-      name: 'nav_items_rels_pages_fk',
-    }).onDelete('cascade'),
-    postsIdFk: foreignKey({
-      columns: [columns['postsID']],
-      foreignColumns: [posts.id],
-      name: 'nav_items_rels_posts_fk',
-    }).onDelete('cascade'),
-    'nav-itemsIdFk': foreignKey({
-      columns: [columns['nav-itemsID']],
-      foreignColumns: [nav_items.id],
-      name: 'nav_items_rels_nav_items_fk',
     }).onDelete('cascade'),
   }),
 );
@@ -1471,7 +1388,6 @@ export const payload_locked_documents_rels = pgTable(
     'posts-categoriesID': integer('posts_categories_id'),
     'posts-tagsID': integer('posts_tags_id'),
     pagesID: integer('pages_id'),
-    'nav-itemsID': integer('nav_items_id'),
     rolesID: integer('roles_id'),
     'gallery-albumsID': integer('gallery_albums_id'),
     'gallery-imagesID': integer('gallery_images_id'),
@@ -1504,9 +1420,6 @@ export const payload_locked_documents_rels = pgTable(
     payload_locked_documents_rels_pages_id_idx: index(
       'payload_locked_documents_rels_pages_id_idx',
     ).on(columns.pagesID),
-    payload_locked_documents_rels_nav_items_id_idx: index(
-      'payload_locked_documents_rels_nav_items_id_idx',
-    ).on(columns['nav-itemsID']),
     payload_locked_documents_rels_roles_id_idx: index(
       'payload_locked_documents_rels_roles_id_idx',
     ).on(columns.rolesID),
@@ -1568,11 +1481,6 @@ export const payload_locked_documents_rels = pgTable(
       columns: [columns['pagesID']],
       foreignColumns: [pages.id],
       name: 'payload_locked_documents_rels_pages_fk',
-    }).onDelete('cascade'),
-    'nav-itemsIdFk': foreignKey({
-      columns: [columns['nav-itemsID']],
-      foreignColumns: [nav_items.id],
-      name: 'payload_locked_documents_rels_nav_items_fk',
     }).onDelete('cascade'),
     rolesIdFk: foreignKey({
       columns: [columns['rolesID']],
@@ -1698,65 +1606,133 @@ export const payload_migrations = pgTable(
   }),
 );
 
-export const nav_nav_items = pgTable(
-  'nav_nav_items',
+export const site_meta_site_meta = pgTable(
+  'site_meta_site_meta',
   {
     _order: integer('_order').notNull(),
     _parentID: integer('_parent_id').notNull(),
     id: varchar('id').primaryKey(),
-    link_type: enum_nav_nav_items_link_type('link_type').default('reference'),
-    link_newTab: boolean('link_new_tab'),
-    link_url: varchar('link_url'),
-    link_label: varchar('link_label').notNull(),
-    link_appearance: enum_nav_nav_items_link_appearance('link_appearance').default('default'),
+    title: varchar('title').notNull(),
+    description: varchar('description').notNull(),
+    path: varchar('path').notNull(),
   },
   (columns) => ({
-    _orderIdx: index('nav_nav_items_order_idx').on(columns._order),
-    _parentIDIdx: index('nav_nav_items_parent_id_idx').on(columns._parentID),
+    _orderIdx: index('site_meta_site_meta_order_idx').on(columns._order),
+    _parentIDIdx: index('site_meta_site_meta_parent_id_idx').on(columns._parentID),
     _parentIDFk: foreignKey({
       columns: [columns['_parentID']],
-      foreignColumns: [nav.id],
-      name: 'nav_nav_items_parent_id_fk',
+      foreignColumns: [site_meta.id],
+      name: 'site_meta_site_meta_parent_id_fk',
     }).onDelete('cascade'),
   }),
 );
 
-export const nav = pgTable('nav', {
+export const site_meta = pgTable('site_meta', {
   id: serial('id').primaryKey(),
   updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 }),
   createdAt: timestamp('created_at', { mode: 'string', withTimezone: true, precision: 3 }),
 });
 
-export const nav_rels = pgTable(
-  'nav_rels',
+export const site_navigation_nav_items_child_nodes = pgTable(
+  'site_navigation_nav_items_child_nodes',
+  {
+    _order: integer('_order').notNull(),
+    _parentID: varchar('_parent_id').notNull(),
+    id: varchar('id').primaryKey(),
+    title: varchar('title').notNull(),
+    link: varchar('link').notNull(),
+    order: numeric('order').notNull().default('1'),
+    icon: integer('icon_id').references(() => media.id, {
+      onDelete: 'set null',
+    }),
+    visibility: enum_site_navigation_nav_items_child_nodes_visibility('visibility')
+      .notNull()
+      .default('ALL'),
+  },
+  (columns) => ({
+    _orderIdx: index('site_navigation_nav_items_child_nodes_order_idx').on(columns._order),
+    _parentIDIdx: index('site_navigation_nav_items_child_nodes_parent_id_idx').on(
+      columns._parentID,
+    ),
+    site_navigation_nav_items_child_nodes_icon_idx: index(
+      'site_navigation_nav_items_child_nodes_icon_idx',
+    ).on(columns.icon),
+    _parentIDFk: foreignKey({
+      columns: [columns['_parentID']],
+      foreignColumns: [site_navigation_nav_items.id],
+      name: 'site_navigation_nav_items_child_nodes_parent_id_fk',
+    }).onDelete('cascade'),
+  }),
+);
+
+export const site_navigation_nav_items = pgTable(
+  'site_navigation_nav_items',
+  {
+    _order: integer('_order').notNull(),
+    _parentID: integer('_parent_id').notNull(),
+    id: varchar('id').primaryKey(),
+    title: varchar('title').notNull(),
+    link: varchar('link').notNull(),
+    order: numeric('order').notNull().default('1'),
+    icon: integer('icon_id').references(() => media.id, {
+      onDelete: 'set null',
+    }),
+    visibility: enum_site_navigation_nav_items_visibility('visibility').notNull().default('ALL'),
+  },
+  (columns) => ({
+    _orderIdx: index('site_navigation_nav_items_order_idx').on(columns._order),
+    _parentIDIdx: index('site_navigation_nav_items_parent_id_idx').on(columns._parentID),
+    site_navigation_nav_items_icon_idx: index('site_navigation_nav_items_icon_idx').on(
+      columns.icon,
+    ),
+    _parentIDFk: foreignKey({
+      columns: [columns['_parentID']],
+      foreignColumns: [site_navigation.id],
+      name: 'site_navigation_nav_items_parent_id_fk',
+    }).onDelete('cascade'),
+  }),
+);
+
+export const site_navigation = pgTable('site_navigation', {
+  id: serial('id').primaryKey(),
+  updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 }),
+  createdAt: timestamp('created_at', { mode: 'string', withTimezone: true, precision: 3 }),
+});
+
+export const site_navigation_rels = pgTable(
+  'site_navigation_rels',
   {
     id: serial('id').primaryKey(),
     order: integer('order'),
     parent: integer('parent_id').notNull(),
     path: varchar('path').notNull(),
-    pagesID: integer('pages_id'),
-    postsID: integer('posts_id'),
+    rolesID: integer('roles_id'),
+    usersID: integer('users_id'),
   },
   (columns) => ({
-    order: index('nav_rels_order_idx').on(columns.order),
-    parentIdx: index('nav_rels_parent_idx').on(columns.parent),
-    pathIdx: index('nav_rels_path_idx').on(columns.path),
-    nav_rels_pages_id_idx: index('nav_rels_pages_id_idx').on(columns.pagesID),
-    nav_rels_posts_id_idx: index('nav_rels_posts_id_idx').on(columns.postsID),
+    order: index('site_navigation_rels_order_idx').on(columns.order),
+    parentIdx: index('site_navigation_rels_parent_idx').on(columns.parent),
+    pathIdx: index('site_navigation_rels_path_idx').on(columns.path),
+    site_navigation_rels_roles_id_idx: index('site_navigation_rels_roles_id_idx').on(
+      columns.rolesID,
+    ),
+    site_navigation_rels_users_id_idx: index('site_navigation_rels_users_id_idx').on(
+      columns.usersID,
+    ),
     parentFk: foreignKey({
       columns: [columns['parent']],
-      foreignColumns: [nav.id],
-      name: 'nav_rels_parent_fk',
+      foreignColumns: [site_navigation.id],
+      name: 'site_navigation_rels_parent_fk',
     }).onDelete('cascade'),
-    pagesIdFk: foreignKey({
-      columns: [columns['pagesID']],
-      foreignColumns: [pages.id],
-      name: 'nav_rels_pages_fk',
+    rolesIdFk: foreignKey({
+      columns: [columns['rolesID']],
+      foreignColumns: [roles.id],
+      name: 'site_navigation_rels_roles_fk',
     }).onDelete('cascade'),
-    postsIdFk: foreignKey({
-      columns: [columns['postsID']],
-      foreignColumns: [posts.id],
-      name: 'nav_rels_posts_fk',
+    usersIdFk: foreignKey({
+      columns: [columns['usersID']],
+      foreignColumns: [users.id],
+      name: 'site_navigation_rels_users_fk',
     }).onDelete('cascade'),
   }),
 );
@@ -1818,11 +1794,6 @@ export const relations_posts = relations(posts, ({ one, many }) => ({
     references: [media.id],
     relationName: 'meta_image',
   }),
-  folder: one(payload_folders, {
-    fields: [posts.folder],
-    references: [payload_folders.id],
-    relationName: 'folder',
-  }),
   _rels: many(posts_rels, {
     relationName: '_rels',
   }),
@@ -1864,11 +1835,6 @@ export const relations__posts_v = relations(_posts_v, ({ one, many }) => ({
     fields: [_posts_v.version_meta_image],
     references: [media.id],
     relationName: 'version_meta_image',
-  }),
-  version_folder: one(payload_folders, {
-    fields: [_posts_v.version_folder],
-    references: [payload_folders.id],
-    relationName: 'version_folder',
   }),
   _rels: many(_posts_v_rels, {
     relationName: '_rels',
@@ -1942,38 +1908,6 @@ export const relations__pages_v = relations(_pages_v, ({ one, many }) => ({
     relationName: 'version_meta_image',
   }),
   _rels: many(_pages_v_rels, {
-    relationName: '_rels',
-  }),
-}));
-export const relations_nav_items_rels = relations(nav_items_rels, ({ one }) => ({
-  parent: one(nav_items, {
-    fields: [nav_items_rels.parent],
-    references: [nav_items.id],
-    relationName: '_rels',
-  }),
-  pagesID: one(pages, {
-    fields: [nav_items_rels.pagesID],
-    references: [pages.id],
-    relationName: 'pages',
-  }),
-  postsID: one(posts, {
-    fields: [nav_items_rels.postsID],
-    references: [posts.id],
-    relationName: 'posts',
-  }),
-  'nav-itemsID': one(nav_items, {
-    fields: [nav_items_rels['nav-itemsID']],
-    references: [nav_items.id],
-    relationName: 'nav-items',
-  }),
-}));
-export const relations_nav_items = relations(nav_items, ({ one, many }) => ({
-  icon: one(media, {
-    fields: [nav_items.icon],
-    references: [media.id],
-    relationName: 'icon',
-  }),
-  _rels: many(nav_items_rels, {
     relationName: '_rels',
   }),
 }));
@@ -2272,11 +2206,6 @@ export const relations_payload_locked_documents_rels = relations(
       references: [pages.id],
       relationName: 'pages',
     }),
-    'nav-itemsID': one(nav_items, {
-      fields: [payload_locked_documents_rels['nav-itemsID']],
-      references: [nav_items.id],
-      relationName: 'nav-items',
-    }),
     rolesID: one(roles, {
       fields: [payload_locked_documents_rels.rolesID],
       references: [roles.id],
@@ -2353,35 +2282,73 @@ export const relations_payload_preferences = relations(payload_preferences, ({ m
   }),
 }));
 export const relations_payload_migrations = relations(payload_migrations, () => ({}));
-export const relations_nav_nav_items = relations(nav_nav_items, ({ one }) => ({
-  _parentID: one(nav, {
-    fields: [nav_nav_items._parentID],
-    references: [nav.id],
-    relationName: 'navItems',
+export const relations_site_meta_site_meta = relations(site_meta_site_meta, ({ one }) => ({
+  _parentID: one(site_meta, {
+    fields: [site_meta_site_meta._parentID],
+    references: [site_meta.id],
+    relationName: 'siteMeta',
   }),
 }));
-export const relations_nav_rels = relations(nav_rels, ({ one }) => ({
-  parent: one(nav, {
-    fields: [nav_rels.parent],
-    references: [nav.id],
+export const relations_site_meta = relations(site_meta, ({ many }) => ({
+  siteMeta: many(site_meta_site_meta, {
+    relationName: 'siteMeta',
+  }),
+}));
+export const relations_site_navigation_nav_items_child_nodes = relations(
+  site_navigation_nav_items_child_nodes,
+  ({ one }) => ({
+    _parentID: one(site_navigation_nav_items, {
+      fields: [site_navigation_nav_items_child_nodes._parentID],
+      references: [site_navigation_nav_items.id],
+      relationName: 'childNodes',
+    }),
+    icon: one(media, {
+      fields: [site_navigation_nav_items_child_nodes.icon],
+      references: [media.id],
+      relationName: 'icon',
+    }),
+  }),
+);
+export const relations_site_navigation_nav_items = relations(
+  site_navigation_nav_items,
+  ({ one, many }) => ({
+    _parentID: one(site_navigation, {
+      fields: [site_navigation_nav_items._parentID],
+      references: [site_navigation.id],
+      relationName: 'navItems',
+    }),
+    childNodes: many(site_navigation_nav_items_child_nodes, {
+      relationName: 'childNodes',
+    }),
+    icon: one(media, {
+      fields: [site_navigation_nav_items.icon],
+      references: [media.id],
+      relationName: 'icon',
+    }),
+  }),
+);
+export const relations_site_navigation_rels = relations(site_navigation_rels, ({ one }) => ({
+  parent: one(site_navigation, {
+    fields: [site_navigation_rels.parent],
+    references: [site_navigation.id],
     relationName: '_rels',
   }),
-  pagesID: one(pages, {
-    fields: [nav_rels.pagesID],
-    references: [pages.id],
-    relationName: 'pages',
+  rolesID: one(roles, {
+    fields: [site_navigation_rels.rolesID],
+    references: [roles.id],
+    relationName: 'roles',
   }),
-  postsID: one(posts, {
-    fields: [nav_rels.postsID],
-    references: [posts.id],
-    relationName: 'posts',
+  usersID: one(users, {
+    fields: [site_navigation_rels.usersID],
+    references: [users.id],
+    relationName: 'users',
   }),
 }));
-export const relations_nav = relations(nav, ({ many }) => ({
-  navItems: many(nav_nav_items, {
+export const relations_site_navigation = relations(site_navigation, ({ many }) => ({
+  navItems: many(site_navigation_nav_items, {
     relationName: 'navItems',
   }),
-  _rels: many(nav_rels, {
+  _rels: many(site_navigation_rels, {
     relationName: '_rels',
   }),
 }));
@@ -2393,15 +2360,14 @@ type DatabaseSchema = {
   enum_pages_status: typeof enum_pages_status;
   enum__pages_v_version_visibility: typeof enum__pages_v_version_visibility;
   enum__pages_v_version_status: typeof enum__pages_v_version_status;
-  enum_nav_items_link_type: typeof enum_nav_items_link_type;
   enum_gallery_albums_settings_visibility: typeof enum_gallery_albums_settings_visibility;
   enum_gallery_images_settings_visibility: typeof enum_gallery_images_settings_visibility;
   enum_forms_confirmation_type: typeof enum_forms_confirmation_type;
   enum_payload_jobs_log_task_slug: typeof enum_payload_jobs_log_task_slug;
   enum_payload_jobs_log_state: typeof enum_payload_jobs_log_state;
   enum_payload_jobs_task_slug: typeof enum_payload_jobs_task_slug;
-  enum_nav_nav_items_link_type: typeof enum_nav_nav_items_link_type;
-  enum_nav_nav_items_link_appearance: typeof enum_nav_nav_items_link_appearance;
+  enum_site_navigation_nav_items_child_nodes_visibility: typeof enum_site_navigation_nav_items_child_nodes_visibility;
+  enum_site_navigation_nav_items_visibility: typeof enum_site_navigation_nav_items_visibility;
   users: typeof users;
   users_rels: typeof users_rels;
   media: typeof media;
@@ -2417,8 +2383,6 @@ type DatabaseSchema = {
   _pages_v_version_blocks: typeof _pages_v_version_blocks;
   _pages_v: typeof _pages_v;
   _pages_v_rels: typeof _pages_v_rels;
-  nav_items: typeof nav_items;
-  nav_items_rels: typeof nav_items_rels;
   roles: typeof roles;
   gallery_albums: typeof gallery_albums;
   gallery_albums_rels: typeof gallery_albums_rels;
@@ -2449,9 +2413,12 @@ type DatabaseSchema = {
   payload_preferences: typeof payload_preferences;
   payload_preferences_rels: typeof payload_preferences_rels;
   payload_migrations: typeof payload_migrations;
-  nav_nav_items: typeof nav_nav_items;
-  nav: typeof nav;
-  nav_rels: typeof nav_rels;
+  site_meta_site_meta: typeof site_meta_site_meta;
+  site_meta: typeof site_meta;
+  site_navigation_nav_items_child_nodes: typeof site_navigation_nav_items_child_nodes;
+  site_navigation_nav_items: typeof site_navigation_nav_items;
+  site_navigation: typeof site_navigation;
+  site_navigation_rels: typeof site_navigation_rels;
   relations_users_rels: typeof relations_users_rels;
   relations_users: typeof relations_users;
   relations_media: typeof relations_media;
@@ -2467,8 +2434,6 @@ type DatabaseSchema = {
   relations__pages_v_version_blocks: typeof relations__pages_v_version_blocks;
   relations__pages_v_rels: typeof relations__pages_v_rels;
   relations__pages_v: typeof relations__pages_v;
-  relations_nav_items_rels: typeof relations_nav_items_rels;
-  relations_nav_items: typeof relations_nav_items;
   relations_roles: typeof relations_roles;
   relations_gallery_albums_rels: typeof relations_gallery_albums_rels;
   relations_gallery_albums: typeof relations_gallery_albums;
@@ -2499,9 +2464,12 @@ type DatabaseSchema = {
   relations_payload_preferences_rels: typeof relations_payload_preferences_rels;
   relations_payload_preferences: typeof relations_payload_preferences;
   relations_payload_migrations: typeof relations_payload_migrations;
-  relations_nav_nav_items: typeof relations_nav_nav_items;
-  relations_nav_rels: typeof relations_nav_rels;
-  relations_nav: typeof relations_nav;
+  relations_site_meta_site_meta: typeof relations_site_meta_site_meta;
+  relations_site_meta: typeof relations_site_meta;
+  relations_site_navigation_nav_items_child_nodes: typeof relations_site_navigation_nav_items_child_nodes;
+  relations_site_navigation_nav_items: typeof relations_site_navigation_nav_items;
+  relations_site_navigation_rels: typeof relations_site_navigation_rels;
+  relations_site_navigation: typeof relations_site_navigation;
 };
 
 declare module '@payloadcms/db-postgres' {

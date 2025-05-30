@@ -15,6 +15,7 @@ export const Media: CollectionConfig = {
     group: 'Media Library',
     description: 'Media Items, images and otherwise',
     defaultColumns: ['alt', 'caption'],
+    folders: true,
   },
   access: RBAC('media'),
   fields: [

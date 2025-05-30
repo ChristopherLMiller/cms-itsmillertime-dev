@@ -12,6 +12,13 @@ export const SiteMeta: GlobalConfig = {
     {
       name: 'siteMeta',
       type: 'array',
+      admin: {
+        components: {
+          RowLabel: {
+            path: '@/components/RowLabel#RowLabel',
+          },
+        },
+      },
       fields: [
         {
           name: 'title',

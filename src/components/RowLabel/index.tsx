@@ -2,10 +2,12 @@
 
 import { useRowLabel } from '@payloadcms/ui';
 
-export const RowLabel = () => {
+export const RowLabel = ({ showRowNumber }: { showRowNumber?: boolean }) => {
   const { data, rowNumber } = useRowLabel<{ title?: string }>();
-
-  const customLabel = `${data.title || 'Slide'} ${String(rowNumber).padStart(2, '0')} `;
-
-  return <div>{data.title}</div>;
+  return (
+    <div>
+      {data.title}
+      {showRowNumber && rowNumber}
+    </div>
+  );
 };

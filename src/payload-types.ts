@@ -95,7 +95,7 @@ export interface Config {
       images: 'gallery-images';
     };
     'payload-folders': {
-      documentsAndFolders: 'payload-folders' | 'gallery-albums' | 'gallery-images';
+      documentsAndFolders: 'payload-folders' | 'media' | 'gallery-albums' | 'gallery-images';
     };
   };
   collectionsSelect: {
@@ -257,6 +257,7 @@ export interface Media {
     | boolean
     | null;
   blurhash?: string | null;
+  folder?: (number | null) | FolderInterface;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -439,6 +440,10 @@ export interface FolderInterface {
       | {
           relationTo?: 'payload-folders';
           value: number | FolderInterface;
+        }
+      | {
+          relationTo?: 'media';
+          value: number | Media;
         }
       | {
           relationTo?: 'gallery-albums';
@@ -1007,6 +1012,7 @@ export interface MediaSelect<T extends boolean = true> {
   relatedPosts?: T;
   exif?: T;
   blurhash?: T;
+  folder?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -1519,7 +1525,7 @@ export interface SiteNavigation {
         link: string;
         childNodes?:
           | {
-              label: string;
+              title: string;
               link: string;
               order: number;
               icon?: (number | null) | Media;
@@ -1570,7 +1576,7 @@ export interface SiteNavigationSelect<T extends boolean = true> {
         childNodes?:
           | T
           | {
-              label?: T;
+              title?: T;
               link?: T;
               order?: T;
               icon?: T;
