@@ -1,6 +1,15 @@
 import exifParser from 'exif-parser';
 import { CollectionBeforeChangeHook } from 'payload';
 
+const exifSupportedMimeTypes = [
+  'image/jpeg',
+  'image/tiff',
+  'image/heic',
+  'image/heif',
+  'image/avif',
+  'image/webp',
+];
+
 export const generateEXIF: CollectionBeforeChangeHook = async ({ req, data }) => {
   // Check if we have an uploaded file
   if (req?.file) {
@@ -8,7 +17,11 @@ export const generateEXIF: CollectionBeforeChangeHook = async ({ req, data }) =>
       const uploadedFile = req.file;
 
       // Verify that this is an image that might have EXIF data
-      if (!uploadedFile.mimetype || !uploadedFile.mimetype.startsWith('image/')) {
+      if (
+        !uploadedFile.mimetype ||
+        !uploadedFile.mimetype.startsWith('image/') ||
+        !exifSupportedMimeTypes.includes(uploadedFile.mimetype)
+      ) {
         return data;
       }
 

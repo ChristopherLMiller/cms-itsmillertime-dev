@@ -28,7 +28,9 @@ export default buildConfig({
   graphQL: {
     disable: true,
   },
-  folders: {},
+  folders: {
+    debug: true,
+  },
   telemetry: false,
   cors: '*',
   admin: {
@@ -68,4 +70,10 @@ export default buildConfig({
     defaultFromName: 'Support',
     apiKey: process.env.RESEND_API_KEY || '',
   }),
+  upload: {
+    abortOnLimit: true,
+    limits: {
+      fileSize: 5 * 1024 * 1024 * 1024, // 5GB
+    },
+  },
 });

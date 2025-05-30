@@ -3,10 +3,8 @@ import { lexicalToText } from '@/utilities/lexicalToText';
 import { truncateText } from '@/utilities/truncateText';
 import { formBuilderPlugin } from '@payloadcms/plugin-form-builder';
 import { searchPlugin } from '@payloadcms/plugin-search';
-import { sentryPlugin } from '@payloadcms/plugin-sentry';
 import { seoPlugin } from '@payloadcms/plugin-seo';
 import { s3Storage } from '@payloadcms/storage-s3';
-import * as Sentry from '@sentry/nextjs';
 import { Plugin } from 'payload';
 
 export const plugins: Plugin[] = [
@@ -46,13 +44,10 @@ export const plugins: Plugin[] = [
     },
   }),
   searchPlugin({
-    collections: ['posts'],
+    collections: ['posts', 'pages'],
     defaultPriorities: {
       posts: 20,
     },
-  }),
-  sentryPlugin({
-    Sentry,
   }),
   s3Storage({
     collections: {

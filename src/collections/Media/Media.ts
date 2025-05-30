@@ -15,8 +15,8 @@ export const Media: CollectionConfig = {
     group: 'Media Library',
     description: 'Media Items, images and otherwise',
     defaultColumns: ['alt', 'caption'],
-    folders: true,
   },
+  folders: true,
   access: RBAC('media'),
   fields: [
     {
@@ -97,7 +97,15 @@ export const Media: CollectionConfig = {
     disableLocalStorage: true,
     adminThumbnail: 'thumbnail',
     focalPoint: true,
+    displayPreview: true,
     withMetadata: true,
+    pasteURL: {
+      allowList: [
+        {
+          hostname: 'images.itsmillertime.dev',
+        },
+      ],
+    },
     formatOptions: {
       format: 'avif',
     },

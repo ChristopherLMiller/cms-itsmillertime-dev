@@ -18,7 +18,6 @@ export const GalleryImages: CollectionConfig<'gallery-images'> = {
     description: 'Image',
     useAsTitle: 'title',
     defaultColumns: ['title', 'slug', 'gallery-tags'],
-    folders: true,
   },
   access: {
     create: RBAC('gallery-images').create,

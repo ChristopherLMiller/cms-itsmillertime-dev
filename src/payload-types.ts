@@ -95,7 +95,7 @@ export interface Config {
       images: 'gallery-images';
     };
     'payload-folders': {
-      documentsAndFolders: 'payload-folders' | 'media' | 'gallery-albums' | 'gallery-images';
+      documentsAndFolders: 'payload-folders' | 'media';
     };
   };
   collectionsSelect: {
@@ -359,7 +359,6 @@ export interface GalleryImage {
     image?: (number | null) | Media;
     description?: string | null;
   };
-  folder?: (number | null) | FolderInterface;
   updatedAt: string;
   createdAt: string;
 }
@@ -422,40 +421,6 @@ export interface GalleryAlbum {
      */
     image?: (number | null) | Media;
     description?: string | null;
-  };
-  folder?: (number | null) | FolderInterface;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "payload-folders".
- */
-export interface FolderInterface {
-  id: number;
-  name: string;
-  folder?: (number | null) | FolderInterface;
-  documentsAndFolders?: {
-    docs?: (
-      | {
-          relationTo?: 'payload-folders';
-          value: number | FolderInterface;
-        }
-      | {
-          relationTo?: 'media';
-          value: number | Media;
-        }
-      | {
-          relationTo?: 'gallery-albums';
-          value: number | GalleryAlbum;
-        }
-      | {
-          relationTo?: 'gallery-images';
-          value: number | GalleryImage;
-        }
-    )[];
-    hasNextPage?: boolean;
-    totalDocs?: number;
   };
   updatedAt: string;
   createdAt: string;
@@ -526,6 +491,31 @@ export interface PostsTag {
   title: string;
   slug?: string | null;
   slugLock?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-folders".
+ */
+export interface FolderInterface {
+  id: number;
+  name: string;
+  folder?: (number | null) | FolderInterface;
+  documentsAndFolders?: {
+    docs?: (
+      | {
+          relationTo?: 'payload-folders';
+          value: number | FolderInterface;
+        }
+      | {
+          relationTo?: 'media';
+          value: number | Media;
+        }
+    )[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
   updatedAt: string;
   createdAt: string;
 }
@@ -775,10 +765,15 @@ export interface Search {
   id: number;
   title?: string | null;
   priority?: number | null;
-  doc: {
-    relationTo: 'posts';
-    value: number | Post;
-  };
+  doc:
+    | {
+        relationTo: 'posts';
+        value: number | Post;
+      }
+    | {
+        relationTo: 'pages';
+        value: number | Page;
+      };
   updatedAt: string;
   createdAt: string;
 }
@@ -1212,7 +1207,6 @@ export interface GalleryAlbumsSelect<T extends boolean = true> {
         image?: T;
         description?: T;
       };
-  folder?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1247,7 +1241,6 @@ export interface GalleryImagesSelect<T extends boolean = true> {
         image?: T;
         description?: T;
       };
-  folder?: T;
   updatedAt?: T;
   createdAt?: T;
 }

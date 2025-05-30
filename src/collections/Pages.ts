@@ -70,7 +70,7 @@ export const Pages: CollectionConfig<'pages'> = {
       name: 'allowedRoles',
       admin: {
         position: 'sidebar',
-        condition: (data, siblingData) => {
+        condition: (siblingData) => {
           return siblingData?.visibility === 'PRIVILEGED';
         },
       },
