@@ -10,6 +10,9 @@ import { GalleryAlbums } from './collections/Gallery/Album';
 import { GalleryImages } from './collections/Gallery/Image';
 import { GalleryTags } from './collections/Gallery/Tags';
 import { Media } from './collections/Media/Media';
+import { Kits } from './collections/Models/Kits';
+import { Manufacturers } from './collections/Models/Manufacturers';
+import { Scales } from './collections/Models/Scales';
 import { Pages } from './collections/Pages';
 import { PostsCategories } from './collections/Posts/Categories';
 import { Posts } from './collections/Posts/Posts';
@@ -51,6 +54,9 @@ export default buildConfig({
     GalleryAlbums,
     GalleryImages,
     GalleryTags,
+    Kits,
+    Scales,
+    Manufacturers,
   ],
   editor: defaultLexical,
   secret: process.env.PAYLOAD_SECRET || '',
