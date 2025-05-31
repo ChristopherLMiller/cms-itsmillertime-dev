@@ -7,12 +7,15 @@ import { fileURLToPath } from 'url';
 
 import { resendAdapter } from '@payloadcms/email-resend';
 import { GalleryAlbums } from './collections/Gallery/Album';
+import { GalleryCategories } from './collections/Gallery/Categories';
 import { GalleryImages } from './collections/Gallery/Image';
 import { GalleryTags } from './collections/Gallery/Tags';
+import { Gardens } from './collections/Gardens';
 import { Media } from './collections/Media/Media';
 import { Kits } from './collections/Models/Kits';
 import { Manufacturers } from './collections/Models/Manufacturers';
 import { Scales } from './collections/Models/Scales';
+import { ModelsTags } from './collections/Models/Tags';
 import { Pages } from './collections/Pages';
 import { PostsCategories } from './collections/Posts/Categories';
 import { Posts } from './collections/Posts/Posts';
@@ -54,9 +57,12 @@ export default buildConfig({
     GalleryAlbums,
     GalleryImages,
     GalleryTags,
+    GalleryCategories,
+    Gardens,
     Kits,
     Scales,
     Manufacturers,
+    ModelsTags,
   ],
   editor: defaultLexical,
   secret: process.env.PAYLOAD_SECRET || '',

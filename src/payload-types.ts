@@ -77,9 +77,12 @@ export interface Config {
     'gallery-albums': GalleryAlbum;
     'gallery-images': GalleryImage;
     'gallery-tags': GalleryTag;
+    'gallery-categories': GalleryCategory;
+    gardens: Garden;
     kits: Kit;
     scales: Scale;
     manufacturers: Manufacturer;
+    'models-tags': ModelsTag;
     forms: Form;
     'form-submissions': FormSubmission;
     search: Search;
@@ -112,9 +115,12 @@ export interface Config {
     'gallery-albums': GalleryAlbumsSelect<false> | GalleryAlbumsSelect<true>;
     'gallery-images': GalleryImagesSelect<false> | GalleryImagesSelect<true>;
     'gallery-tags': GalleryTagsSelect<false> | GalleryTagsSelect<true>;
+    'gallery-categories': GalleryCategoriesSelect<false> | GalleryCategoriesSelect<true>;
+    gardens: GardensSelect<false> | GardensSelect<true>;
     kits: KitsSelect<false> | KitsSelect<true>;
     scales: ScalesSelect<false> | ScalesSelect<true>;
     manufacturers: ManufacturersSelect<false> | ManufacturersSelect<true>;
+    'models-tags': ModelsTagsSelect<false> | ModelsTagsSelect<true>;
     forms: FormsSelect<false> | FormsSelect<true>;
     'form-submissions': FormSubmissionsSelect<false> | FormSubmissionsSelect<true>;
     search: SearchSelect<false> | SearchSelect<true>;
@@ -394,6 +400,7 @@ export interface GalleryAlbum {
     slug?: string | null;
     slugLock?: boolean | null;
     isNsfw?: boolean | null;
+    category?: (number | null) | GalleryCategory;
     tags?: (number | GalleryTag)[] | null;
     visibility: 'ALL' | 'AUTHENTICATED' | 'PRIVILEGED';
     allowedRoles?: (number | Role)[] | null;
@@ -428,6 +435,20 @@ export interface GalleryAlbum {
     image?: (number | null) | Media;
     description?: string | null;
   };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Gallery categories.  Primary method of filtering galleries.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "gallery-categories".
+ */
+export interface GalleryCategory {
+  id: number;
+  title: string;
+  slug?: string | null;
+  slugLock?: boolean | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -571,6 +592,39 @@ export interface Page {
   _status?: ('draft' | 'published') | null;
 }
 /**
+ * Other things that don't have a spcecific home
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "gardens".
+ */
+export interface Garden {
+  id: number;
+  slug?: string | null;
+  slugLock?: boolean | null;
+  name: string;
+  featuredImage?: (number | null) | Media;
+  content?: {
+    root: {
+      type: string;
+      children: {
+        type: string;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  title?: string | null;
+  description?: string | null;
+  image?: (number | null) | Media;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
  * Model Kits
  *
  * This interface was referenced by `Config`'s JSON-Schema
@@ -579,6 +633,9 @@ export interface Page {
 export interface Kit {
   id: number;
   title: string;
+  kit_number: string;
+  year_released: number;
+  scalemates?: string | null;
   manufacturer: number | Manufacturer;
   scale: number | Scale;
   updatedAt: string;
@@ -605,6 +662,20 @@ export interface Manufacturer {
  * via the `definition` "scales".
  */
 export interface Scale {
+  id: number;
+  title: string;
+  slug?: string | null;
+  slugLock?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Models tags.  Used for more focused classification of models.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "models-tags".
+ */
+export interface ModelsTag {
   id: number;
   title: string;
   slug?: string | null;
@@ -965,6 +1036,14 @@ export interface PayloadLockedDocument {
         value: number | GalleryTag;
       } | null)
     | ({
+        relationTo: 'gallery-categories';
+        value: number | GalleryCategory;
+      } | null)
+    | ({
+        relationTo: 'gardens';
+        value: number | Garden;
+      } | null)
+    | ({
         relationTo: 'kits';
         value: number | Kit;
       } | null)
@@ -975,6 +1054,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'manufacturers';
         value: number | Manufacturer;
+      } | null)
+    | ({
+        relationTo: 'models-tags';
+        value: number | ModelsTag;
       } | null)
     | ({
         relationTo: 'forms';
@@ -1252,6 +1335,7 @@ export interface GalleryAlbumsSelect<T extends boolean = true> {
         slug?: T;
         slugLock?: T;
         isNsfw?: T;
+        category?: T;
         tags?: T;
         visibility?: T;
         allowedRoles?: T;
@@ -1317,10 +1401,40 @@ export interface GalleryTagsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "gallery-categories_select".
+ */
+export interface GalleryCategoriesSelect<T extends boolean = true> {
+  title?: T;
+  slug?: T;
+  slugLock?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "gardens_select".
+ */
+export interface GardensSelect<T extends boolean = true> {
+  slug?: T;
+  slugLock?: T;
+  name?: T;
+  featuredImage?: T;
+  content?: T;
+  title?: T;
+  description?: T;
+  image?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "kits_select".
  */
 export interface KitsSelect<T extends boolean = true> {
   title?: T;
+  kit_number?: T;
+  year_released?: T;
+  scalemates?: T;
   manufacturer?: T;
   scale?: T;
   updatedAt?: T;
@@ -1342,6 +1456,17 @@ export interface ScalesSelect<T extends boolean = true> {
  * via the `definition` "manufacturers_select".
  */
 export interface ManufacturersSelect<T extends boolean = true> {
+  title?: T;
+  slug?: T;
+  slugLock?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "models-tags_select".
+ */
+export interface ModelsTagsSelect<T extends boolean = true> {
   title?: T;
   slug?: T;
   slugLock?: T;
