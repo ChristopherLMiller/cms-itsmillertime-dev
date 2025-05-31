@@ -28,7 +28,7 @@
     "@payloadcms/ui": "^3.40.0",
     "blurhash": "^2.0.5",
     "cross-env": "^7.0.3",
-    "exif-parser": "^0.1.12",
+    "exifreader": "^4.31.0",
     "graphql": "^16.10.0",
     "next": "15.3.3",
     "payload": "3.40.0",

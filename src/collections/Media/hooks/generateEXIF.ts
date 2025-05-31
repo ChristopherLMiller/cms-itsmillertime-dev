@@ -1,4 +1,5 @@
-import exifParser from 'exif-parser';
+import ExifReader from 'exifreader';
+
 import { CollectionBeforeChangeHook } from 'payload';
 
 const exifSupportedMimeTypes = [
@@ -27,13 +28,11 @@ export const generateEXIF: CollectionBeforeChangeHook = async ({ req, data }) =>
 
       // Access the file buffer directly
       const buffer = uploadedFile.data;
-
-      const parser = exifParser.create(buffer);
-      const result = parser.parse();
+      const exif = await ExifReader.load(buffer, { async: true, expanded: true });
 
       return {
         ...data,
-        exif: result,
+        exif: exif || null,
       };
     } catch (error) {
       console.error('Error extracting EXIF data:', error);
