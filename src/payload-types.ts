@@ -77,6 +77,9 @@ export interface Config {
     'gallery-albums': GalleryAlbum;
     'gallery-images': GalleryImage;
     'gallery-tags': GalleryTag;
+    kits: Kit;
+    scales: Scale;
+    manufacturers: Manufacturer;
     forms: Form;
     'form-submissions': FormSubmission;
     search: Search;
@@ -109,6 +112,9 @@ export interface Config {
     'gallery-albums': GalleryAlbumsSelect<false> | GalleryAlbumsSelect<true>;
     'gallery-images': GalleryImagesSelect<false> | GalleryImagesSelect<true>;
     'gallery-tags': GalleryTagsSelect<false> | GalleryTagsSelect<true>;
+    kits: KitsSelect<false> | KitsSelect<true>;
+    scales: ScalesSelect<false> | ScalesSelect<true>;
+    manufacturers: ManufacturersSelect<false> | ManufacturersSelect<true>;
     forms: FormsSelect<false> | FormsSelect<true>;
     'form-submissions': FormSubmissionsSelect<false> | FormSubmissionsSelect<true>;
     search: SearchSelect<false> | SearchSelect<true>;
@@ -565,6 +571,48 @@ export interface Page {
   _status?: ('draft' | 'published') | null;
 }
 /**
+ * Model Kits
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "kits".
+ */
+export interface Kit {
+  id: number;
+  title: string;
+  manufacturer: number | Manufacturer;
+  scale: number | Scale;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Model kit manufacturers
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "manufacturers".
+ */
+export interface Manufacturer {
+  id: number;
+  title: string;
+  slug?: string | null;
+  slugLock?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Model kit scales
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "scales".
+ */
+export interface Scale {
+  id: number;
+  title: string;
+  slug?: string | null;
+  slugLock?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "forms".
  */
@@ -917,6 +965,18 @@ export interface PayloadLockedDocument {
         value: number | GalleryTag;
       } | null)
     | ({
+        relationTo: 'kits';
+        value: number | Kit;
+      } | null)
+    | ({
+        relationTo: 'scales';
+        value: number | Scale;
+      } | null)
+    | ({
+        relationTo: 'manufacturers';
+        value: number | Manufacturer;
+      } | null)
+    | ({
         relationTo: 'forms';
         value: number | Form;
       } | null)
@@ -1249,6 +1309,39 @@ export interface GalleryImagesSelect<T extends boolean = true> {
  * via the `definition` "gallery-tags_select".
  */
 export interface GalleryTagsSelect<T extends boolean = true> {
+  title?: T;
+  slug?: T;
+  slugLock?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "kits_select".
+ */
+export interface KitsSelect<T extends boolean = true> {
+  title?: T;
+  manufacturer?: T;
+  scale?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "scales_select".
+ */
+export interface ScalesSelect<T extends boolean = true> {
+  title?: T;
+  slug?: T;
+  slugLock?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "manufacturers_select".
+ */
+export interface ManufacturersSelect<T extends boolean = true> {
   title?: T;
   slug?: T;
   slugLock?: T;
