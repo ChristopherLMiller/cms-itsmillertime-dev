@@ -52,6 +52,14 @@ export const GalleryAlbums: CollectionConfig<'gallery-albums'> = {
           label: 'Is NSFW?',
         },
         {
+          name: 'category',
+          type: 'relationship',
+          relationTo: 'gallery-categories',
+          admin: {
+            position: 'sidebar',
+          },
+        },
+        {
           name: 'tags',
           type: 'relationship',
           relationTo: 'gallery-tags',

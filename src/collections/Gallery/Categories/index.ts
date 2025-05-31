@@ -2,20 +2,19 @@ import { RBAC } from '@/access/RBAC';
 import { slugField } from '@/fields/slug';
 import { CollectionConfig } from 'payload';
 
-export const Manufacturers: CollectionConfig<'manufacturers'> = {
-  slug: 'manufacturers',
-  access: RBAC('manufacturers'),
+export const GalleryCategories: CollectionConfig<'gallery-categories'> = {
+  slug: 'gallery-categories',
+  access: RBAC('gallery-categories'),
   admin: {
     useAsTitle: 'title',
-    group: 'Models',
-    description: 'Model kit manufacturers',
+    group: 'Gallery',
+    description: 'Gallery categories.  Primary method of filtering galleries.',
   },
   fields: [
     {
       name: 'title',
       type: 'text',
       required: true,
-      label: 'Brand Name',
     },
     ...slugField(),
   ],

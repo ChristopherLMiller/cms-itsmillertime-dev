@@ -26,7 +26,7 @@ export const plugins: Plugin[] = [
   }),
   seoPlugin({
     generateTitle: ({ doc }) => {
-      return doc?.title ? `${doc.title} | ItsMillerTime` : 'ItsMillerTime';
+      return `${doc?.title || doc?.name || 'Default'} | ItsMillerTime`;
     },
     generateURL: ({ doc }) => {
       const url = getServerSideURL();

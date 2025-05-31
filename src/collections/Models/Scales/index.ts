@@ -15,7 +15,8 @@ export const Scales: CollectionConfig<'scales'> = {
       name: 'title',
       type: 'text',
       required: true,
+      label: 'Scale',
     },
-    ...slugField(),
+    ...slugField('title'),
   ],
 };
