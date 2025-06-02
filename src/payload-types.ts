@@ -83,6 +83,7 @@ export interface Config {
     scales: Scale;
     manufacturers: Manufacturer;
     'models-tags': ModelsTag;
+    models: Model;
     forms: Form;
     'form-submissions': FormSubmission;
     search: Search;
@@ -121,6 +122,7 @@ export interface Config {
     scales: ScalesSelect<false> | ScalesSelect<true>;
     manufacturers: ManufacturersSelect<false> | ManufacturersSelect<true>;
     'models-tags': ModelsTagsSelect<false> | ModelsTagsSelect<true>;
+    models: ModelsSelect<false> | ModelsSelect<true>;
     forms: FormsSelect<false> | FormsSelect<true>;
     'form-submissions': FormSubmissionsSelect<false> | FormSubmissionsSelect<true>;
     search: SearchSelect<false> | SearchSelect<true>;
@@ -632,12 +634,14 @@ export interface Garden {
  */
 export interface Kit {
   id: number;
+  full_title: string;
   title: string;
   kit_number: string;
   year_released: number;
   scalemates?: string | null;
   manufacturer: number | Manufacturer;
   scale: number | Scale;
+  boxart?: (number | null) | Media;
   updatedAt: string;
   createdAt: string;
 }
@@ -680,6 +684,44 @@ export interface ModelsTag {
   title: string;
   slug?: string | null;
   slugLock?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * A built model, not to be confused with a kit
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "models".
+ */
+export interface Model {
+  id: number;
+  title: string;
+  meta: {
+    title?: string | null;
+    description?: string | null;
+    image?: (number | null) | Media;
+  };
+  buildLog?:
+    | {
+        content?: {
+          root: {
+            type: string;
+            children: {
+              type: string;
+              version: number;
+              [k: string]: unknown;
+            }[];
+            direction: ('ltr' | 'rtl') | null;
+            format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+            indent: number;
+            version: number;
+          };
+          [k: string]: unknown;
+        } | null;
+        id?: string | null;
+      }[]
+    | null;
+  image?: (number | Media)[] | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1060,6 +1102,10 @@ export interface PayloadLockedDocument {
         value: number | ModelsTag;
       } | null)
     | ({
+        relationTo: 'models';
+        value: number | Model;
+      } | null)
+    | ({
         relationTo: 'forms';
         value: number | Form;
       } | null)
@@ -1431,12 +1477,14 @@ export interface GardensSelect<T extends boolean = true> {
  * via the `definition` "kits_select".
  */
 export interface KitsSelect<T extends boolean = true> {
+  full_title?: T;
   title?: T;
   kit_number?: T;
   year_released?: T;
   scalemates?: T;
   manufacturer?: T;
   scale?: T;
+  boxart?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1470,6 +1518,29 @@ export interface ModelsTagsSelect<T extends boolean = true> {
   title?: T;
   slug?: T;
   slugLock?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "models_select".
+ */
+export interface ModelsSelect<T extends boolean = true> {
+  title?: T;
+  meta?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+        image?: T;
+      };
+  buildLog?:
+    | T
+    | {
+        content?: T;
+        id?: T;
+      };
+  image?: T;
   updatedAt?: T;
   createdAt?: T;
 }

@@ -14,6 +14,7 @@ import { Gardens } from './collections/Gardens';
 import { Media } from './collections/Media/Media';
 import { Kits } from './collections/Models/Kits';
 import { Manufacturers } from './collections/Models/Manufacturers';
+import { Models } from './collections/Models/Models';
 import { Scales } from './collections/Models/Scales';
 import { ModelsTags } from './collections/Models/Tags';
 import { Pages } from './collections/Pages';
@@ -63,6 +64,7 @@ export default buildConfig({
     Scales,
     Manufacturers,
     ModelsTags,
+    Models,
   ],
   editor: defaultLexical,
   secret: process.env.PAYLOAD_SECRET || '',
