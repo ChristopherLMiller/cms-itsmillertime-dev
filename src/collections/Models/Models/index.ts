@@ -60,9 +60,7 @@ export const Models: CollectionConfig<'models'> = {
             date: {
               pickerAppearance: 'dayOnly',
             },
-            position: 'sidebar',
             condition: (siblingData) => {
-              console.log(siblingData);
               return siblingData?.model_meta.status === 'COMPLETED';
             },
           },
@@ -72,17 +70,20 @@ export const Models: CollectionConfig<'models'> = {
           type: 'relationship',
           relationTo: 'kits',
           required: true,
+        },
+        {
+          name: 'tags',
+          type: 'relationship',
+          relationTo: 'models-tags',
+          hasMany: true,
           admin: {
-            position: 'sidebar',
+            appearance: 'drawer',
           },
         },
         {
           name: 'clockify_project_id',
           label: 'Clockify Project ID',
           type: 'text',
-          admin: {
-            position: 'sidebar',
-          },
         },
       ],
     },
