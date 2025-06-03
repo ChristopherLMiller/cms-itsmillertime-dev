@@ -668,6 +668,7 @@ export interface Model {
     status: 'NOT_STARTED' | 'IN_PROGRESS' | 'COMPLETED';
     completionDate?: string | null;
     kit: number | Kit;
+    tags?: (number | ModelsTag)[] | null;
     clockify_project_id?: string | null;
   };
   buildLog?:
@@ -700,6 +701,20 @@ export interface Model {
   createdAt: string;
 }
 /**
+ * Models tags.  Used for more focused classification of models.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "models-tags".
+ */
+export interface ModelsTag {
+  id: number;
+  title: string;
+  slug?: string | null;
+  slugLock?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
  * Model kit manufacturers
  *
  * This interface was referenced by `Config`'s JSON-Schema
@@ -720,20 +735,6 @@ export interface Manufacturer {
  * via the `definition` "scales".
  */
 export interface Scale {
-  id: number;
-  title: string;
-  slug?: string | null;
-  slugLock?: boolean | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * Models tags.  Used for more focused classification of models.
- *
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "models-tags".
- */
-export interface ModelsTag {
   id: number;
   title: string;
   slug?: string | null;
@@ -1552,6 +1553,7 @@ export interface ModelsSelect<T extends boolean = true> {
         status?: T;
         completionDate?: T;
         kit?: T;
+        tags?: T;
         clockify_project_id?: T;
       };
   buildLog?:
