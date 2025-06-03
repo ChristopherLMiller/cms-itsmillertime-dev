@@ -44,6 +44,13 @@ export const Kits: CollectionConfig<'kits'> = {
       label: 'Scalemates link',
     },
     {
+      name: 'models',
+      type: 'join',
+      collection: 'models',
+      label: 'Models from kit',
+      on: 'model_meta.kit',
+    },
+    {
       name: 'manufacturer',
       type: 'relationship',
       relationTo: 'manufacturers',

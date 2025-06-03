@@ -101,6 +101,9 @@ export interface Config {
     'gallery-albums': {
       images: 'gallery-images';
     };
+    kits: {
+      models: 'models';
+    };
     'payload-folders': {
       documentsAndFolders: 'payload-folders' | 'media';
     };
@@ -639,9 +642,60 @@ export interface Kit {
   kit_number: string;
   year_released: number;
   scalemates?: string | null;
+  models?: {
+    docs?: (number | Model)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
   manufacturer: number | Manufacturer;
   scale: number | Scale;
   boxart?: (number | null) | Media;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * A built model, not to be confused with a kit
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "models".
+ */
+export interface Model {
+  id: number;
+  title: string;
+  slug?: string | null;
+  slugLock?: boolean | null;
+  model_meta: {
+    status: 'NOT_STARTED' | 'IN_PROGRESS' | 'COMPLETED';
+    completionDate?: string | null;
+    kit: number | Kit;
+    clockify_project_id?: string | null;
+  };
+  buildLog?:
+    | {
+        content?: {
+          root: {
+            type: string;
+            children: {
+              type: string;
+              version: number;
+              [k: string]: unknown;
+            }[];
+            direction: ('ltr' | 'rtl') | null;
+            format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+            indent: number;
+            version: number;
+          };
+          [k: string]: unknown;
+        } | null;
+        id?: string | null;
+      }[]
+    | null;
+  image?: (number | Media)[] | null;
+  meta?: {
+    title?: string | null;
+    description?: string | null;
+    image?: (number | null) | Media;
+  };
   updatedAt: string;
   createdAt: string;
 }
@@ -684,44 +738,6 @@ export interface ModelsTag {
   title: string;
   slug?: string | null;
   slugLock?: boolean | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * A built model, not to be confused with a kit
- *
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "models".
- */
-export interface Model {
-  id: number;
-  title: string;
-  meta: {
-    title?: string | null;
-    description?: string | null;
-    image?: (number | null) | Media;
-  };
-  buildLog?:
-    | {
-        content?: {
-          root: {
-            type: string;
-            children: {
-              type: string;
-              version: number;
-              [k: string]: unknown;
-            }[];
-            direction: ('ltr' | 'rtl') | null;
-            format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-            indent: number;
-            version: number;
-          };
-          [k: string]: unknown;
-        } | null;
-        id?: string | null;
-      }[]
-    | null;
-  image?: (number | Media)[] | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1482,6 +1498,7 @@ export interface KitsSelect<T extends boolean = true> {
   kit_number?: T;
   year_released?: T;
   scalemates?: T;
+  models?: T;
   manufacturer?: T;
   scale?: T;
   boxart?: T;
@@ -1527,12 +1544,15 @@ export interface ModelsTagsSelect<T extends boolean = true> {
  */
 export interface ModelsSelect<T extends boolean = true> {
   title?: T;
-  meta?:
+  slug?: T;
+  slugLock?: T;
+  model_meta?:
     | T
     | {
-        title?: T;
-        description?: T;
-        image?: T;
+        status?: T;
+        completionDate?: T;
+        kit?: T;
+        clockify_project_id?: T;
       };
   buildLog?:
     | T
@@ -1541,6 +1561,13 @@ export interface ModelsSelect<T extends boolean = true> {
         id?: T;
       };
   image?: T;
+  meta?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+        image?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
 }
