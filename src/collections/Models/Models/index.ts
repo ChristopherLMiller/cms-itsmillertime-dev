@@ -10,8 +10,6 @@ import {
 import { lexicalEditor } from '@payloadcms/richtext-lexical';
 import { CollectionConfig } from 'payload';
 
-const defaultTitleValue = '[Auto-generated from kit]';
-
 export const Models: CollectionConfig<'models'> = {
   slug: 'models',
   access: RBAC('models'),
@@ -26,28 +24,16 @@ export const Models: CollectionConfig<'models'> = {
       type: 'text',
       required: true,
       label: 'Model name',
-      defaultValue: defaultTitleValue,
-      validate: (val: any, { data }: any) => {
-        // Allow empty title if kit is selected (it will be auto-populated)
-        if (!val && data?.kit) {
-          return true;
-        }
-        // Otherwise, require title
-        if (!val) {
-          return 'Model name is required';
-        }
-        return true;
-      },
     },
+    ...slugField('title'),
     {
       type: 'group',
-      name: 'meta',
+      name: 'model_meta',
       label: 'Model Meta',
       admin: {
         position: 'sidebar',
       },
       fields: [
-        ...slugField('title'),
         {
           name: 'status',
           type: 'select',
@@ -66,7 +52,6 @@ export const Models: CollectionConfig<'models'> = {
             },
           ],
           required: true,
-          defaultValue: 'NOT_STARTED',
         },
         {
           name: 'completionDate',
@@ -77,7 +62,8 @@ export const Models: CollectionConfig<'models'> = {
             },
             position: 'sidebar',
             condition: (siblingData) => {
-              return siblingData?.status === 'COMPLETED';
+              console.log(siblingData);
+              return siblingData?.model_meta.status === 'COMPLETED';
             },
           },
         },
@@ -178,25 +164,4 @@ export const Models: CollectionConfig<'models'> = {
       ],
     },
   ],
-  hooks: {
-    beforeChange: [
-      async ({ data, req }) => {
-        if ((!data.title || data.title === defaultTitleValue) && data?.kit) {
-          try {
-            const kit = await req.payload.findByID({
-              collection: 'kits',
-              id: data.kit,
-            });
-
-            if (kit?.full_title) {
-              data.title = kit.full_title;
-            }
-          } catch (error) {
-            console.log('Unable to generate title: ', error);
-          }
-        }
-        return data;
-      },
-    ],
-  },
 };
