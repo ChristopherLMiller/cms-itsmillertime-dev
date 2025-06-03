@@ -99,6 +99,11 @@ export const Models: CollectionConfig<'models'> = {
               label: 'Build Log',
               fields: [
                 {
+                  name: 'title',
+                  type: 'text',
+                  required: true,
+                },
+                {
                   name: 'content',
                   type: 'richText',
                   editor: lexicalEditor({
