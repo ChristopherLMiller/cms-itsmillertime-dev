@@ -673,6 +673,7 @@ export interface Model {
   };
   buildLog?:
     | {
+        title: string;
         content?: {
           root: {
             type: string;
@@ -1559,6 +1560,7 @@ export interface ModelsSelect<T extends boolean = true> {
   buildLog?:
     | T
     | {
+        title?: T;
         content?: T;
         id?: T;
       };
