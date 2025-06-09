@@ -35,6 +35,12 @@ export const Models: CollectionConfig<'models'> = {
       },
       fields: [
         {
+          name: 'featuredImage',
+          type: 'upload',
+          relationTo: 'media',
+          required: true,
+        },
+        {
           name: 'status',
           type: 'select',
           options: [
@@ -84,6 +90,30 @@ export const Models: CollectionConfig<'models'> = {
           name: 'clockify_project_id',
           label: 'Clockify Project ID',
           type: 'text',
+        },
+        {
+          name: 'videos',
+          type: 'array',
+          admin: {
+            initCollapsed: true,
+            components: {
+              RowLabel: {
+                path: '@/components/RowLabel#RowLabel',
+              },
+            },
+          },
+          fields: [
+            {
+              name: 'title',
+              type: 'text',
+              required: true,
+            },
+            {
+              name: 'url',
+              type: 'text',
+              label: 'Video URL',
+            },
+          ],
         },
       ],
     },

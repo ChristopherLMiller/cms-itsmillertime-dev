@@ -12,6 +12,7 @@ export const Kits: CollectionConfig<'kits'> = {
   fields: [
     {
       name: 'full_title',
+      label: 'Full Title',
       type: 'text',
       required: true,
       admin: {

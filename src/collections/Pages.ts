@@ -84,6 +84,14 @@ export const Pages: CollectionConfig<'pages'> = {
             {
               name: 'blocks',
               type: 'array',
+              admin: {
+                initCollapsed: true,
+                components: {
+                  RowLabel: {
+                    path: '@/components/RowLabel#RowLabel',
+                  },
+                },
+              },
               fields: [
                 {
                   name: 'block',

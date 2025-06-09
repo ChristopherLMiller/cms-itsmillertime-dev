@@ -665,11 +665,19 @@ export interface Model {
   slug?: string | null;
   slugLock?: boolean | null;
   model_meta: {
+    featuredImage: number | Media;
     status: 'NOT_STARTED' | 'IN_PROGRESS' | 'COMPLETED';
     completionDate?: string | null;
     kit: number | Kit;
     tags?: (number | ModelsTag)[] | null;
     clockify_project_id?: string | null;
+    videos?:
+      | {
+          title: string;
+          url?: string | null;
+          id?: string | null;
+        }[]
+      | null;
   };
   buildLog?:
     | {
@@ -1551,11 +1559,19 @@ export interface ModelsSelect<T extends boolean = true> {
   model_meta?:
     | T
     | {
+        featuredImage?: T;
         status?: T;
         completionDate?: T;
         kit?: T;
         tags?: T;
         clockify_project_id?: T;
+        videos?:
+          | T
+          | {
+              title?: T;
+              url?: T;
+              id?: T;
+            };
       };
   buildLog?:
     | T
