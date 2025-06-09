@@ -40,6 +40,12 @@ export const plugins: Plugin[] = [
       }
     },
     generateImage: async ({ doc }) => {
+      // Models
+      if (doc?.model_meta?.featuredImage) {
+        return doc?.model_meta?.featuredImage;
+      }
+
+      // All others
       if (doc?.featuredImage) {
         return doc?.featuredImage;
       }
