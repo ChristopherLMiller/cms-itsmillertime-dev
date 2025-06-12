@@ -1,4 +1,5 @@
 import { RBAC } from '@/access/RBAC';
+import { Groups } from '@/collections/groups';
 import { slugField } from '@/fields/slug';
 import { wordCountField } from '@/fields/wordCount';
 import {
@@ -26,7 +27,7 @@ export const Posts: CollectionConfig<'posts'> = {
     defaultColumns: ['title', 'slug', 'updatedAt'],
     useAsTitle: 'title',
     description: 'Blog Posts',
-    group: 'Blog',
+    group: Groups.blog,
   },
   fields: [
     {

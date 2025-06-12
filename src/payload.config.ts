@@ -11,6 +11,7 @@ import { GalleryCategories } from './collections/Gallery/Categories';
 import { GalleryImages } from './collections/Gallery/Image';
 import { GalleryTags } from './collections/Gallery/Tags';
 import { Gardens } from './collections/Gardens';
+import { MapMarkers } from './collections/Map';
 import { Media } from './collections/Media/Media';
 import { Kits } from './collections/Models/Kits';
 import { Manufacturers } from './collections/Models/Manufacturers';
@@ -48,6 +49,7 @@ export default buildConfig({
   },
   globals: [SiteMeta, SiteNavigation],
   collections: [
+    MapMarkers,
     Users,
     Media,
     Posts,

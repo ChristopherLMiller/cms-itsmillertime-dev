@@ -1,4 +1,5 @@
 import { RBAC } from '@/access/RBAC';
+import { Groups } from '@/collections/groups';
 import { CollectionConfig } from 'payload';
 
 export const Kits: CollectionConfig<'kits'> = {
@@ -6,7 +7,7 @@ export const Kits: CollectionConfig<'kits'> = {
   access: RBAC('kits'),
   admin: {
     useAsTitle: 'full_title',
-    group: 'Models',
+    group: Groups.models,
     description: 'Model Kits',
   },
   fields: [

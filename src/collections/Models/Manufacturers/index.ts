@@ -1,4 +1,5 @@
 import { RBAC } from '@/access/RBAC';
+import { Groups } from '@/collections/groups';
 import { slugField } from '@/fields/slug';
 import { CollectionConfig } from 'payload';
 
@@ -7,7 +8,7 @@ export const Manufacturers: CollectionConfig<'manufacturers'> = {
   access: RBAC('manufacturers'),
   admin: {
     useAsTitle: 'title',
-    group: 'Models',
+    group: Groups.models,
     description: 'Model kit manufacturers',
   },
   fields: [

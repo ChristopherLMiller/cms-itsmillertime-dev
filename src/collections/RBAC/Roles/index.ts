@@ -1,4 +1,5 @@
 import { RBAC } from '@/access/RBAC';
+import { Groups } from '@/collections/groups';
 import { permissionsField } from '@/fields/Permissions';
 import { CollectionConfig } from 'payload';
 
@@ -7,7 +8,7 @@ export const Roles: CollectionConfig<'roles'> = {
   access: RBAC('roles'),
   admin: {
     useAsTitle: 'name',
-    group: 'Authentication & Authorization',
+    group: Groups.authentication,
     description: 'User roles and permissions',
   },
   fields: [

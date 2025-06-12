@@ -67,6 +67,7 @@ export interface Config {
   };
   blocks: {};
   collections: {
+    'map-markers': MapMarker;
     users: User;
     media: Media;
     posts: Post;
@@ -109,6 +110,7 @@ export interface Config {
     };
   };
   collectionsSelect: {
+    'map-markers': MapMarkersSelect<false> | MapMarkersSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
     posts: PostsSelect<false> | PostsSelect<true>;
@@ -180,6 +182,137 @@ export interface UserAuthOperations {
   };
 }
 /**
+ * Map markers, used for plotting points of interest
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "map-markers".
+ */
+export interface MapMarker {
+  id: number;
+  title: string;
+  /**
+   * @minItems 2
+   * @maxItems 2
+   */
+  location: [number, number];
+  visits?: number | null;
+  rating?: number | null;
+  links?:
+    | {
+        title?: string | null;
+        album?: {
+          relationTo: 'gallery-albums';
+          value: number | GalleryAlbum;
+        } | null;
+        url?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Listing of all photo albums
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "gallery-albums".
+ */
+export interface GalleryAlbum {
+  id: number;
+  settings: {
+    slug?: string | null;
+    slugLock?: boolean | null;
+    isNsfw?: boolean | null;
+    category?: (number | null) | GalleryCategory;
+    tags?: (number | GalleryTag)[] | null;
+    visibility: 'ALL' | 'AUTHENTICATED' | 'PRIVILEGED';
+    allowedRoles?: (number | Role)[] | null;
+    allowedUsers?: (number | User)[] | null;
+  };
+  title: string;
+  content?: {
+    root: {
+      type: string;
+      children: {
+        type: string;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  images?: {
+    docs?: (number | GalleryImage)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
+  meta?: {
+    title?: string | null;
+    /**
+     * Maximum upload file size: 12MB. Recommended file size for images is <500KB.
+     */
+    image?: (number | null) | Media;
+    description?: string | null;
+  };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Gallery categories.  Primary method of filtering galleries.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "gallery-categories".
+ */
+export interface GalleryCategory {
+  id: number;
+  title: string;
+  slug?: string | null;
+  slugLock?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Gallery tags.  Used for more focused classification of gallery images.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "gallery-tags".
+ */
+export interface GalleryTag {
+  id: number;
+  title: string;
+  slug?: string | null;
+  slugLock?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * User roles and permissions
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "roles".
+ */
+export interface Role {
+  id: number;
+  name: string;
+  description?: string | null;
+  isDefault?: boolean | null;
+  permissions?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
  * User accounts
  *
  * This interface was referenced by `Config`'s JSON-Schema
@@ -202,25 +335,36 @@ export interface User {
   password?: string | null;
 }
 /**
- * User roles and permissions
+ * Image
  *
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "roles".
+ * via the `definition` "gallery-images".
  */
-export interface Role {
+export interface GalleryImage {
   id: number;
-  name: string;
-  description?: string | null;
-  isDefault?: boolean | null;
-  permissions?:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
+  settings: {
+    slug?: string | null;
+    slugLock?: boolean | null;
+    isNsfw?: boolean | null;
+    'gallery-tags'?: (number | GalleryTag)[] | null;
+    visibility: 'ALL' | 'AUTHENTICATED' | 'PRIVILEGED';
+    allowedRoles?: (number | Role)[] | null;
+    allowedUsers?: (number | User)[] | null;
+  };
+  selling?: {
+    isSellable?: boolean | null;
+  };
+  title: string;
+  image: number | Media;
+  albums?: (number | GalleryAlbum)[] | null;
+  meta?: {
+    title?: string | null;
+    /**
+     * Maximum upload file size: 12MB. Recommended file size for images is <500KB.
+     */
+    image?: (number | null) | Media;
+    description?: string | null;
+  };
   updatedAt: string;
   createdAt: string;
 }
@@ -344,118 +488,6 @@ export interface Media {
       filename?: string | null;
     };
   };
-}
-/**
- * Image
- *
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "gallery-images".
- */
-export interface GalleryImage {
-  id: number;
-  settings: {
-    slug?: string | null;
-    slugLock?: boolean | null;
-    isNsfw?: boolean | null;
-    'gallery-tags'?: (number | GalleryTag)[] | null;
-    visibility: 'ALL' | 'AUTHENTICATED' | 'PRIVILEGED';
-    allowedRoles?: (number | Role)[] | null;
-    allowedUsers?: (number | User)[] | null;
-  };
-  selling?: {
-    isSellable?: boolean | null;
-  };
-  title: string;
-  image: number | Media;
-  albums?: (number | GalleryAlbum)[] | null;
-  meta?: {
-    title?: string | null;
-    /**
-     * Maximum upload file size: 12MB. Recommended file size for images is <500KB.
-     */
-    image?: (number | null) | Media;
-    description?: string | null;
-  };
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * Gallery tags.  Used for more focused classification of gallery images.
- *
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "gallery-tags".
- */
-export interface GalleryTag {
-  id: number;
-  title: string;
-  slug?: string | null;
-  slugLock?: boolean | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * Listing of all photo albums
- *
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "gallery-albums".
- */
-export interface GalleryAlbum {
-  id: number;
-  settings: {
-    slug?: string | null;
-    slugLock?: boolean | null;
-    isNsfw?: boolean | null;
-    category?: (number | null) | GalleryCategory;
-    tags?: (number | GalleryTag)[] | null;
-    visibility: 'ALL' | 'AUTHENTICATED' | 'PRIVILEGED';
-    allowedRoles?: (number | Role)[] | null;
-    allowedUsers?: (number | User)[] | null;
-  };
-  title: string;
-  content?: {
-    root: {
-      type: string;
-      children: {
-        type: string;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  } | null;
-  images?: {
-    docs?: (number | GalleryImage)[];
-    hasNextPage?: boolean;
-    totalDocs?: number;
-  };
-  meta?: {
-    title?: string | null;
-    /**
-     * Maximum upload file size: 12MB. Recommended file size for images is <500KB.
-     */
-    image?: (number | null) | Media;
-    description?: string | null;
-  };
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * Gallery categories.  Primary method of filtering galleries.
- *
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "gallery-categories".
- */
-export interface GalleryCategory {
-  id: number;
-  title: string;
-  slug?: string | null;
-  slugLock?: boolean | null;
-  updatedAt: string;
-  createdAt: string;
 }
 /**
  * Blog Posts
@@ -1064,6 +1096,10 @@ export interface PayloadLockedDocument {
   id: number;
   document?:
     | ({
+        relationTo: 'map-markers';
+        value: number | MapMarker;
+      } | null)
+    | ({
         relationTo: 'users';
         value: number | User;
       } | null)
@@ -1192,6 +1228,26 @@ export interface PayloadMigration {
   batch?: number | null;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "map-markers_select".
+ */
+export interface MapMarkersSelect<T extends boolean = true> {
+  title?: T;
+  location?: T;
+  visits?: T;
+  rating?: T;
+  links?:
+    | T
+    | {
+        title?: T;
+        album?: T;
+        url?: T;
+        id?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

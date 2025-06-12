@@ -6,13 +6,14 @@ import {
 } from '@payloadcms/richtext-lexical';
 
 import { type CollectionConfig } from 'payload';
+import { Groups } from '../groups';
 import { generateBlurHash } from './hooks/generateBlurHash';
 import { generateEXIF } from './hooks/generateEXIF';
 
 export const Media: CollectionConfig = {
   slug: 'media',
   admin: {
-    group: 'Media Library',
+    group: Groups.media,
     description: 'Media Items, images and otherwise',
     defaultColumns: ['alt', 'caption'],
   },

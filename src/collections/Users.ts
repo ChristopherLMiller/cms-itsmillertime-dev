@@ -1,10 +1,11 @@
 import type { CollectionConfig } from 'payload';
+import { Groups } from './groups';
 
 export const Users: CollectionConfig = {
   slug: 'users',
   admin: {
     useAsTitle: 'email',
-    group: 'Authentication & Authorization',
+    group: Groups.authentication,
     description: 'User accounts',
     defaultColumns: ['displayName', 'email', 'roles', 'showNSFW'],
   },

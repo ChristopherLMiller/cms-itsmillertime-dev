@@ -1,6 +1,7 @@
 import { RBAC } from '@/access/RBAC';
 import { nsfwFilter } from '@/access/RBAC/filters/nsfw';
 import { visibilityFilter } from '@/access/RBAC/filters/visibility';
+import { Groups } from '@/collections/groups';
 import { slugField } from '@/fields/slug';
 import {
   MetaDescriptionField,
@@ -14,7 +15,7 @@ import { type CollectionConfig } from 'payload';
 export const GalleryImages: CollectionConfig<'gallery-images'> = {
   slug: 'gallery-images',
   admin: {
-    group: 'Gallery',
+    group: Groups.galleries,
     description: 'Image',
     useAsTitle: 'title',
     defaultColumns: ['title', 'slug', 'gallery-tags'],
