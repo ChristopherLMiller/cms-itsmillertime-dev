@@ -1,9 +1,10 @@
+import { Groups } from '@/collections/groups';
 import { GlobalConfig } from 'payload';
 
 export const SiteNavigation: GlobalConfig = {
   slug: 'site-navigation',
   admin: {
-    group: 'Global Properties',
+    group: Groups.global,
   },
   access: {
     read: () => true,

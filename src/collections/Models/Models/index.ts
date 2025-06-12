@@ -1,4 +1,5 @@
 import { RBAC } from '@/access/RBAC';
+import { Groups } from '@/collections/groups';
 import { slugField } from '@/fields/slug';
 import {
   MetaDescriptionField,
@@ -15,7 +16,7 @@ export const Models: CollectionConfig<'models'> = {
   access: RBAC('models'),
   admin: {
     useAsTitle: 'title',
-    group: 'Models',
+    group: Groups.models,
     description: 'A built model, not to be confused with a kit',
   },
   fields: [

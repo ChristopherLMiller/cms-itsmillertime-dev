@@ -1,9 +1,10 @@
+import { Groups } from '@/collections/groups';
 import { GlobalConfig } from 'payload';
 
 export const SiteMeta: GlobalConfig = {
   slug: 'site-meta',
   admin: {
-    group: 'Global Properties',
+    group: Groups.global,
   },
   access: {
     read: () => true,

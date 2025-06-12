@@ -1,6 +1,7 @@
 import { RBAC } from '@/access/RBAC';
 import { nsfwFilter } from '@/access/RBAC/filters/nsfw';
 import { visibilityFilter } from '@/access/RBAC/filters/visibility';
+import { Groups } from '@/collections/groups';
 import { slugField } from '@/fields/slug';
 import {
   MetaDescriptionField,
@@ -30,7 +31,7 @@ export const GalleryAlbums: CollectionConfig<'gallery-albums'> = {
     admin: RBAC('gallery-albums').admin,
   },
   admin: {
-    group: 'Gallery',
+    group: Groups.galleries,
     description: 'Listing of all photo albums',
     useAsTitle: 'title',
   },

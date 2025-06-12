@@ -15,6 +15,7 @@ import {
   lexicalEditor,
 } from '@payloadcms/richtext-lexical';
 import { CollectionConfig } from 'payload';
+import { Groups } from './groups';
 
 export const Pages: CollectionConfig<'pages'> = {
   slug: 'pages',
@@ -22,7 +23,7 @@ export const Pages: CollectionConfig<'pages'> = {
   admin: {
     defaultColumns: ['title', 'slug', 'updatedAt'],
     useAsTitle: 'title',
-    group: 'Pages',
+    group: Groups.pages,
     description: 'Singular dynamic page of the front end',
   },
   fields: [

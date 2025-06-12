@@ -9,13 +9,14 @@ import {
 } from '@payloadcms/plugin-seo/fields';
 import { lexicalEditor } from '@payloadcms/richtext-lexical';
 import { CollectionConfig } from 'payload';
+import { Groups } from './groups';
 
 export const Gardens: CollectionConfig<'gardens'> = {
   slug: 'gardens',
   access: RBAC('gardens'),
   admin: {
     useAsTitle: 'name',
-    group: 'Miscellaneous',
+    group: Groups.misc,
     description: "Other things that don't have a spcecific home",
   },
   fields: [
