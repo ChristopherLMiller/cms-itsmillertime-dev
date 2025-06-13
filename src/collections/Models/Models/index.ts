@@ -1,5 +1,6 @@
 import { RBAC } from '@/access/RBAC';
 import { Groups } from '@/collections/groups';
+import { clockifyProjectField } from '@/fields/clockifyProject';
 import { slugField } from '@/fields/slug';
 import {
   MetaDescriptionField,
@@ -27,6 +28,7 @@ export const Models: CollectionConfig<'models'> = {
       label: 'Model name',
     },
     ...slugField('title'),
+    clockifyProjectField,
     {
       type: 'group',
       name: 'model_meta',
@@ -87,11 +89,7 @@ export const Models: CollectionConfig<'models'> = {
             appearance: 'drawer',
           },
         },
-        {
-          name: 'clockify_project_id',
-          label: 'Clockify Project ID',
-          type: 'text',
-        },
+
         {
           name: 'videos',
           type: 'array',
