@@ -696,13 +696,16 @@ export interface Model {
   title: string;
   slug?: string | null;
   slugLock?: boolean | null;
+  /**
+   * Select a Clockify Project from your workspace
+   */
+  clockify_project?: string | null;
   model_meta: {
     featuredImage: number | Media;
     status: 'NOT_STARTED' | 'IN_PROGRESS' | 'COMPLETED';
     completionDate?: string | null;
     kit: number | Kit;
     tags?: (number | ModelsTag)[] | null;
-    clockify_project_id?: string | null;
     videos?:
       | {
           title: string;
@@ -1612,6 +1615,7 @@ export interface ModelsSelect<T extends boolean = true> {
   title?: T;
   slug?: T;
   slugLock?: T;
+  clockify_project?: T;
   model_meta?:
     | T
     | {
@@ -1620,7 +1624,6 @@ export interface ModelsSelect<T extends boolean = true> {
         completionDate?: T;
         kit?: T;
         tags?: T;
-        clockify_project_id?: T;
         videos?:
           | T
           | {
