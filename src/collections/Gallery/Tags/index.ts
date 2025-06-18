@@ -6,6 +6,10 @@ import { CollectionConfig } from 'payload';
 export const GalleryTags: CollectionConfig<'gallery-tags'> = {
   slug: 'gallery-tags',
   access: RBAC('gallery-tags'),
+  labels: {
+    singular: 'Tag',
+    plural: 'Tags',
+  },
   admin: {
     useAsTitle: 'title',
     group: Groups.galleries,

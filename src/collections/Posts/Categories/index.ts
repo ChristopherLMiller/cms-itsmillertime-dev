@@ -6,6 +6,10 @@ import { CollectionConfig } from 'payload';
 export const PostsCategories: CollectionConfig<'posts-categories'> = {
   slug: 'posts-categories',
   access: RBAC('posts-categories'),
+  labels: {
+    plural: 'Categories',
+    singular: 'Category',
+  },
   admin: {
     useAsTitle: 'title',
     group: Groups.blog,

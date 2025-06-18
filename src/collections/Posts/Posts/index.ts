@@ -15,6 +15,10 @@ import { CollectionConfig } from 'payload';
 export const Posts: CollectionConfig<'posts'> = {
   slug: 'posts',
   access: RBAC('posts'),
+  labels: {
+    singular: 'Article',
+    plural: 'Articles',
+  },
   defaultPopulate: {
     title: true,
     slug: true,
@@ -137,7 +141,7 @@ export const Posts: CollectionConfig<'posts'> = {
               },
             }),
             PreviewField({
-              hasGenerateFn: false,
+              hasGenerateFn: true,
               titlePath: 'meta.title',
               descriptionPath: 'meta.description',
             }),

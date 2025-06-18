@@ -1,6 +1,7 @@
-import { getServerSideURL } from '@/utilities/getURL';
-import { lexicalToText } from '@/utilities/lexicalToText';
-import { truncateText } from '@/utilities/truncateText';
+import { generateDescription } from '@/utilities/generateDescription';
+import { generateImage } from '@/utilities/generateImage';
+import { generateTitle } from '@/utilities/generateTitle';
+import { generateURL } from '@/utilities/generateURL';
 import { formBuilderPlugin } from '@payloadcms/plugin-form-builder';
 import { searchPlugin } from '@payloadcms/plugin-search';
 import { sentryPlugin } from '@payloadcms/plugin-sentry';
@@ -25,34 +26,13 @@ export const plugins: Plugin[] = [
     },
   }),
   seoPlugin({
-    generateTitle: ({ doc }) => {
-      return `${doc?.title || doc?.name || 'Default'} | ItsMillerTime`;
-    },
-    generateURL: ({ doc }) => {
-      const url = getServerSideURL();
-      return doc?.slug ? `${url}/${doc.slug}` : url;
-    },
-    generateDescription: ({ doc }) => {
-      if (doc?.content) {
-        return truncateText(lexicalToText(doc?.content));
-      } else {
-        return 'Default description, i need implemented';
-      }
-    },
-    generateImage: async ({ doc }) => {
-      // Models
-      if (doc?.model_meta?.featuredImage) {
-        return doc?.model_meta?.featuredImage;
-      }
-
-      // All others
-      if (doc?.featuredImage) {
-        return doc?.featuredImage;
-      }
-    },
+    generateTitle: generateTitle,
+    generateURL: generateURL,
+    generateDescription: generateDescription,
+    generateImage: generateImage,
   }),
   searchPlugin({
-    collections: ['posts', 'pages'],
+    collections: ['posts', 'pages', 'models', 'gardens'],
     defaultPriorities: {
       posts: 20,
     },

@@ -199,7 +199,7 @@ export interface MapMarker {
   rating?: number | null;
   links?:
     | {
-        title?: string | null;
+        title: string;
         album?: {
           relationTo: 'gallery-albums';
           value: number | GalleryAlbum;
@@ -219,15 +219,24 @@ export interface MapMarker {
  */
 export interface GalleryAlbum {
   id: number;
+  slug?: string | null;
+  slugLock?: boolean | null;
   settings: {
-    slug?: string | null;
-    slugLock?: boolean | null;
     isNsfw?: boolean | null;
     category?: (number | null) | GalleryCategory;
     tags?: (number | GalleryTag)[] | null;
     visibility: 'ALL' | 'AUTHENTICATED' | 'PRIVILEGED';
     allowedRoles?: (number | Role)[] | null;
     allowedUsers?: (number | User)[] | null;
+  };
+  tracking?: {
+    views?: number | null;
+    downloads?: number | null;
+    likes?: number | null;
+    dislikes?: number | null;
+    comments?: number | null;
+    shares?: number | null;
+    totalImages?: number | null;
   };
   title: string;
   content?: {
@@ -252,11 +261,11 @@ export interface GalleryAlbum {
   };
   meta?: {
     title?: string | null;
+    description?: string | null;
     /**
      * Maximum upload file size: 12MB. Recommended file size for images is <500KB.
      */
     image?: (number | null) | Media;
-    description?: string | null;
   };
   updatedAt: string;
   createdAt: string;
@@ -354,16 +363,39 @@ export interface GalleryImage {
   selling?: {
     isSellable?: boolean | null;
   };
+  tracking?: {
+    views?: number | null;
+    downloads?: number | null;
+    likes?: number | null;
+    dislikes?: number | null;
+    comments?: number | null;
+    shares?: number | null;
+  };
   title: string;
   image: number | Media;
+  content?: {
+    root: {
+      type: string;
+      children: {
+        type: string;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
   albums?: (number | GalleryAlbum)[] | null;
   meta?: {
     title?: string | null;
+    description?: string | null;
     /**
      * Maximum upload file size: 12MB. Recommended file size for images is <500KB.
      */
     image?: (number | null) | Media;
-    description?: string | null;
   };
   updatedAt: string;
   createdAt: string;
@@ -655,9 +687,11 @@ export interface Garden {
     };
     [k: string]: unknown;
   } | null;
-  title?: string | null;
-  description?: string | null;
-  image?: (number | null) | Media;
+  meta?: {
+    title?: string | null;
+    description?: string | null;
+    image?: (number | null) | Media;
+  };
   updatedAt: string;
   createdAt: string;
 }
@@ -995,6 +1029,14 @@ export interface Search {
     | {
         relationTo: 'pages';
         value: number | Page;
+      }
+    | {
+        relationTo: 'models';
+        value: number | Model;
+      }
+    | {
+        relationTo: 'gardens';
+        value: number | Garden;
       };
   updatedAt: string;
   createdAt: string;
@@ -1460,17 +1502,28 @@ export interface RolesSelect<T extends boolean = true> {
  * via the `definition` "gallery-albums_select".
  */
 export interface GalleryAlbumsSelect<T extends boolean = true> {
+  slug?: T;
+  slugLock?: T;
   settings?:
     | T
     | {
-        slug?: T;
-        slugLock?: T;
         isNsfw?: T;
         category?: T;
         tags?: T;
         visibility?: T;
         allowedRoles?: T;
         allowedUsers?: T;
+      };
+  tracking?:
+    | T
+    | {
+        views?: T;
+        downloads?: T;
+        likes?: T;
+        dislikes?: T;
+        comments?: T;
+        shares?: T;
+        totalImages?: T;
       };
   title?: T;
   content?: T;
@@ -1479,8 +1532,8 @@ export interface GalleryAlbumsSelect<T extends boolean = true> {
     | T
     | {
         title?: T;
-        image?: T;
         description?: T;
+        image?: T;
       };
   updatedAt?: T;
   createdAt?: T;
@@ -1506,15 +1559,26 @@ export interface GalleryImagesSelect<T extends boolean = true> {
     | {
         isSellable?: T;
       };
+  tracking?:
+    | T
+    | {
+        views?: T;
+        downloads?: T;
+        likes?: T;
+        dislikes?: T;
+        comments?: T;
+        shares?: T;
+      };
   title?: T;
   image?: T;
+  content?: T;
   albums?: T;
   meta?:
     | T
     | {
         title?: T;
-        image?: T;
         description?: T;
+        image?: T;
       };
   updatedAt?: T;
   createdAt?: T;
@@ -1551,9 +1615,13 @@ export interface GardensSelect<T extends boolean = true> {
   name?: T;
   featuredImage?: T;
   content?: T;
-  title?: T;
-  description?: T;
-  image?: T;
+  meta?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+        image?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
 }

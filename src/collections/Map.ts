@@ -40,10 +40,19 @@ export const MapMarkers: CollectionConfig<'map-markers'> = {
     {
       type: 'array',
       name: 'links',
+      admin: {
+        initCollapsed: true,
+        components: {
+          RowLabel: {
+            path: '@/components/RowLabel#RowLabel',
+          },
+        },
+      },
       fields: [
         {
           name: 'title',
           type: 'text',
+          required: true,
         },
         {
           type: 'relationship',

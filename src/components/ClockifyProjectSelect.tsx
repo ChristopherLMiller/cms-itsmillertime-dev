@@ -64,6 +64,7 @@ export const ClockifyProjectSelect: SelectFieldClientComponent = (props) => {
       </div>
     );
   }
+  console.log(options);
 
   return (
     <div className="field-type">
@@ -74,7 +75,8 @@ export const ClockifyProjectSelect: SelectFieldClientComponent = (props) => {
         options={options}
         value={value as string}
         onChange={(selectedOption) => {
-          setValue(selectedOption || '');
+          // @ts-expect-error - ts mismatch
+          setValue(selectedOption.value || '');
         }}
       />
     </div>

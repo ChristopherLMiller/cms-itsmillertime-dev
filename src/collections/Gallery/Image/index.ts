@@ -10,6 +10,13 @@ import {
   OverviewField,
   PreviewField,
 } from '@payloadcms/plugin-seo/fields';
+import {
+  FixedToolbarFeature,
+  HeadingFeature,
+  HorizontalRuleFeature,
+  InlineToolbarFeature,
+  lexicalEditor,
+} from '@payloadcms/richtext-lexical';
 import { type CollectionConfig } from 'payload';
 
 export const GalleryImages: CollectionConfig<'gallery-images'> = {
@@ -19,6 +26,10 @@ export const GalleryImages: CollectionConfig<'gallery-images'> = {
     description: 'Image',
     useAsTitle: 'title',
     defaultColumns: ['title', 'slug', 'gallery-tags'],
+  },
+  labels: {
+    singular: 'Image',
+    plural: 'Images',
   },
   access: {
     create: RBAC('gallery-images').create,
@@ -117,7 +128,64 @@ export const GalleryImages: CollectionConfig<'gallery-images'> = {
         },
       ],
     },
-
+    {
+      type: 'group',
+      name: 'tracking',
+      label: 'Image Meta',
+      admin: {
+        position: 'sidebar',
+      },
+      fields: [
+        {
+          name: 'views',
+          type: 'number',
+          defaultValue: 0,
+          admin: {
+            readOnly: true,
+          },
+        },
+        {
+          name: 'downloads',
+          type: 'number',
+          defaultValue: 0,
+          admin: {
+            readOnly: true,
+          },
+        },
+        {
+          name: 'likes',
+          type: 'number',
+          defaultValue: 0,
+          admin: {
+            readOnly: true,
+          },
+        },
+        {
+          name: 'dislikes',
+          type: 'number',
+          defaultValue: 0,
+          admin: {
+            readOnly: true,
+          },
+        },
+        {
+          name: 'comments',
+          type: 'number',
+          defaultValue: 0,
+          admin: {
+            readOnly: true,
+          },
+        },
+        {
+          name: 'shares',
+          type: 'number',
+          defaultValue: 0,
+          admin: {
+            readOnly: true,
+          },
+        },
+      ],
+    },
     {
       type: 'tabs',
       tabs: [
@@ -135,6 +203,21 @@ export const GalleryImages: CollectionConfig<'gallery-images'> = {
               relationTo: 'media',
               name: 'image',
               required: true,
+            },
+            {
+              name: 'content',
+              type: 'richText',
+              editor: lexicalEditor({
+                features: ({ rootFeatures }) => {
+                  return [
+                    ...rootFeatures,
+                    HeadingFeature({ enabledHeadingSizes: ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'] }),
+                    FixedToolbarFeature(),
+                    InlineToolbarFeature(),
+                    HorizontalRuleFeature(),
+                  ];
+                },
+              }),
             },
             {
               name: 'albums',
@@ -156,11 +239,12 @@ export const GalleryImages: CollectionConfig<'gallery-images'> = {
             MetaTitleField({
               hasGenerateFn: true,
             }),
-            MetaImageField({
-              relationTo: 'media',
-            }),
             MetaDescriptionField({
-              hasGenerateFn: false,
+              hasGenerateFn: true,
+            }),
+            MetaImageField({
+              hasGenerateFn: true,
+              relationTo: 'media',
             }),
             PreviewField({
               hasGenerateFn: true,
