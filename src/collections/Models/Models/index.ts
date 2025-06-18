@@ -15,6 +15,10 @@ import { CollectionConfig } from 'payload';
 export const Models: CollectionConfig<'models'> = {
   slug: 'models',
   access: RBAC('models'),
+  labels: {
+    singular: 'Model',
+    plural: 'Models',
+  },
   admin: {
     useAsTitle: 'title',
     group: Groups.models,
@@ -26,6 +30,24 @@ export const Models: CollectionConfig<'models'> = {
       type: 'text',
       required: true,
       label: 'Model name',
+      hooks: {
+        beforeChange: [
+          async ({ data, req, value }) => {
+            if (data?.title === undefined || data?.title === '') {
+              const kit = await req.payload.findByID({
+                collection: 'kits',
+                id: data?.model_meta?.kit,
+              });
+
+              if (kit?.title) {
+                return kit.full_title;
+              }
+            } else {
+              return value;
+            }
+          },
+        ],
+      },
     },
     ...slugField('title'),
     clockifyProjectField,
@@ -190,7 +212,7 @@ export const Models: CollectionConfig<'models'> = {
               },
             }),
             PreviewField({
-              hasGenerateFn: false,
+              hasGenerateFn: true,
               titlePath: 'meta.title',
               descriptionPath: 'meta.description',
             }),

@@ -20,6 +20,10 @@ import { Groups } from './groups';
 export const Pages: CollectionConfig<'pages'> = {
   slug: 'pages',
   access: RBAC('pages'),
+  labels: {
+    singular: 'Page',
+    plural: 'Pages',
+  },
   admin: {
     defaultColumns: ['title', 'slug', 'updatedAt'],
     useAsTitle: 'title',

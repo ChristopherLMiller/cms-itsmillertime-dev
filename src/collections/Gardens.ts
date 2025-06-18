@@ -14,6 +14,10 @@ import { Groups } from './groups';
 export const Gardens: CollectionConfig<'gardens'> = {
   slug: 'gardens',
   access: RBAC('gardens'),
+  labels: {
+    singular: 'Garden',
+    plural: 'Gardens',
+  },
   admin: {
     useAsTitle: 'name',
     group: Groups.misc,
@@ -50,6 +54,7 @@ export const Gardens: CollectionConfig<'gardens'> = {
         },
         {
           label: 'SEO',
+          name: 'meta',
           fields: [
             OverviewField({
               titlePath: 'meta.title',
@@ -72,7 +77,7 @@ export const Gardens: CollectionConfig<'gardens'> = {
               },
             }),
             PreviewField({
-              hasGenerateFn: false,
+              hasGenerateFn: true,
               titlePath: 'meta.title',
               descriptionPath: 'meta.description',
             }),

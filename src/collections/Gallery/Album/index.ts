@@ -30,12 +30,17 @@ export const GalleryAlbums: CollectionConfig<'gallery-albums'> = {
     unlock: RBAC('gallery-albums').unlock,
     admin: RBAC('gallery-albums').admin,
   },
+  labels: {
+    singular: 'Album',
+    plural: 'Albums',
+  },
   admin: {
     group: Groups.galleries,
     description: 'Listing of all photo albums',
     useAsTitle: 'title',
   },
   fields: [
+    ...slugField('title'),
     {
       type: 'group',
       name: 'settings',
@@ -44,8 +49,6 @@ export const GalleryAlbums: CollectionConfig<'gallery-albums'> = {
         position: 'sidebar',
       },
       fields: [
-        ...slugField('title'),
-
         {
           name: 'isNsfw',
           type: 'checkbox',
@@ -116,6 +119,72 @@ export const GalleryAlbums: CollectionConfig<'gallery-albums'> = {
       ],
     },
     {
+      type: 'group',
+      name: 'tracking',
+      label: 'Album Meta',
+      admin: {
+        position: 'sidebar',
+      },
+      fields: [
+        {
+          name: 'views',
+          type: 'number',
+          admin: {
+            readOnly: true,
+          },
+        },
+        {
+          name: 'downloads',
+          type: 'number',
+          admin: {
+            readOnly: true,
+          },
+        },
+        {
+          name: 'likes',
+          type: 'number',
+          admin: {
+            readOnly: true,
+          },
+        },
+        {
+          name: 'dislikes',
+          type: 'number',
+          admin: {
+            readOnly: true,
+          },
+        },
+        {
+          name: 'comments',
+          type: 'number',
+          admin: {
+            readOnly: true,
+          },
+        },
+        {
+          name: 'shares',
+          type: 'number',
+          admin: {
+            readOnly: true,
+          },
+        },
+        {
+          name: 'totalImages',
+          type: 'number',
+          admin: {
+            readOnly: true,
+          },
+          hooks: {
+            beforeChange: [
+              ({ data }) => {
+                return data?.images?.docs?.length || 0;
+              },
+            ],
+          },
+        },
+      ],
+    },
+    {
       type: 'tabs',
       tabs: [
         {
@@ -162,11 +231,13 @@ export const GalleryAlbums: CollectionConfig<'gallery-albums'> = {
             MetaTitleField({
               hasGenerateFn: true,
             }),
-            MetaImageField({
-              relationTo: 'media',
-            }),
+
             MetaDescriptionField({
-              hasGenerateFn: false,
+              hasGenerateFn: true,
+            }),
+            MetaImageField({
+              hasGenerateFn: true,
+              relationTo: 'media',
             }),
             PreviewField({
               hasGenerateFn: true,
