@@ -1,7 +1,7 @@
 // storage-adapter-import-placeholder
 import { postgresAdapter } from '@payloadcms/db-postgres';
 import path from 'path';
-import { buildConfig } from 'payload';
+import { buildConfig, PayloadRequest } from 'payload';
 import sharp from 'sharp';
 import { fileURLToPath } from 'url';
 
@@ -33,6 +33,38 @@ const filename = fileURLToPath(import.meta.url);
 const dirname = path.dirname(filename);
 
 export default buildConfig({
+  endpoints: [
+    {
+      path: '/health',
+      method: 'get',
+      handler: async (req: PayloadRequest) => {
+        try {
+          // Tests database connectivity
+          await req.payload.find({
+            collection: 'users',
+            limit: 1,
+          });
+          const response = {
+            healthStatus: 'healthy',
+            timestamp: new Date().toISOString(),
+            uptime: process.uptime(),
+            database: 'connected',
+          };
+
+          return Response.json(response, { status: 200 });
+        } catch (error) {
+          const response = {
+            healthStatus: 'unhealthy',
+            error: error instanceof Error ? error.message : 'Unknown error',
+            timestamp: new Date().toISOString(),
+            database: 'disconnected',
+          };
+
+          return Response.json(response, { status: 500 });
+        }
+      },
+    },
+  ],
   graphQL: {
     disable: true,
   },
