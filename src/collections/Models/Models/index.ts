@@ -139,6 +139,35 @@ export const Models: CollectionConfig<'models'> = {
       ],
     },
     {
+      type: 'group',
+      name: 'relatedResources',
+      label: 'Related Resources',
+      admin: {
+        position: 'sidebar',
+      },
+      fields: [
+        {
+          name: 'relatedPosts',
+          type: 'relationship',
+          hasMany: true,
+          relationTo: 'posts',
+        },
+        {
+          name: 'relatedModels',
+          type: 'relationship',
+          hasMany: true,
+          relationTo: 'models',
+          filterOptions: ({ id }) => {
+            return {
+              id: {
+                not_in: [id],
+              },
+            };
+          },
+        },
+      ],
+    },
+    {
       type: 'tabs',
       tabs: [
         {
