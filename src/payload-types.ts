@@ -748,6 +748,10 @@ export interface Model {
         }[]
       | null;
   };
+  relatedResources?: {
+    relatedPosts?: (number | Post)[] | null;
+    relatedModels?: (number | Model)[] | null;
+  };
   buildLog?:
     | {
         title: string;
@@ -1699,6 +1703,12 @@ export interface ModelsSelect<T extends boolean = true> {
               url?: T;
               id?: T;
             };
+      };
+  relatedResources?:
+    | T
+    | {
+        relatedPosts?: T;
+        relatedModels?: T;
       };
   buildLog?:
     | T
