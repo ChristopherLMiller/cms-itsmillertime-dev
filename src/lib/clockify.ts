@@ -28,7 +28,7 @@ export class Clockify {
   public async getProjects(): Promise<ClockifyProject[]> {
     try {
       const response = await fetch(
-        `${this.baseURL}/workspaces/${this.workspaceId}/projects?hydrated=true`,
+        `${this.baseURL}/workspaces/${this.workspaceId}/projects?hydrated=true&page-size=1000`,
         {
           headers: {
             'X-Api-Key': this.apiKey,
