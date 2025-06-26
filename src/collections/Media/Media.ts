@@ -17,6 +17,9 @@ export const Media: CollectionConfig = {
     description: 'Media Items, images and otherwise',
     defaultColumns: ['alt', 'caption'],
   },
+  defaultPopulate: {
+    exif: false,
+  },
   folders: true,
   access: RBAC('media'),
   fields: [
