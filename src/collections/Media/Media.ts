@@ -82,7 +82,7 @@ export const Media: CollectionConfig = {
             },
           ],
           admin: {
-            condition: ({ siblingData }) => Boolean(!siblingData?.exif),
+            condition: ({ siblingData }) => Boolean(siblingData?.exif !== null),
           },
         },
       ],
@@ -117,6 +117,9 @@ export const Media: CollectionConfig = {
       {
         name: 'thumbnail',
         width: 300,
+        formatOptions: {
+          format: 'jpg',
+        },
       },
       {
         name: 'square',
@@ -126,24 +129,39 @@ export const Media: CollectionConfig = {
       {
         name: 'small',
         width: 600,
+        formatOptions: {
+          format: 'avif',
+        },
       },
       {
         name: 'medium',
         width: 900,
+        formatOptions: {
+          format: 'avif',
+        },
       },
       {
         name: 'large',
         width: 1400,
+        formatOptions: {
+          format: 'avif',
+        },
       },
       {
         name: 'xlarge',
         width: 1920,
+        formatOptions: {
+          format: 'avif',
+        },
       },
       {
         name: 'og',
         width: 1200,
         height: 630,
         crop: 'center',
+        formatOptions: {
+          format: 'jpg',
+        },
       },
     ],
   },

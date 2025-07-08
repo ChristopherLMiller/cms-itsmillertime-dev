@@ -15,6 +15,7 @@
     "start": "cross-env NODE_OPTIONS=--no-deprecation next start"
   },
   "dependencies": {
+    "@logtail/pino": "^0.5.5",
     "@payloadcms/db-postgres": "3.44.0",
     "@payloadcms/email-resend": "3.44.0",
     "@payloadcms/next": "3.44.0",
@@ -40,6 +41,9 @@
     "sharp": "0.34.2",
     "slugify": "^1.6.6",
     "word-counting": "^1.1.4"
+  },
+  "peerDependencies": {
+    "pino": "~9.5.0"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.3.1",
