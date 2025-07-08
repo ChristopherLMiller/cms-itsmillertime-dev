@@ -12,6 +12,10 @@ const exifSupportedMimeTypes = [
 ];
 
 export const generateEXIF: CollectionBeforeChangeHook = async ({ req, data }) => {
+  if (data?.exif !== null) {
+    return data;
+  }
+
   // Check if we have an uploaded file
   if (req?.file) {
     try {
