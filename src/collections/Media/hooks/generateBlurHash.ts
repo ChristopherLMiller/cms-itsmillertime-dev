@@ -2,7 +2,7 @@ import { CollectionBeforeValidateHook } from 'payload';
 import { getPlaiceholder } from 'plaiceholder';
 
 export const generateBlurHash: CollectionBeforeValidateHook = async ({ req, data, operation }) => {
-  if (operation === 'create' || operation === 'update' || data.blurhash !== null) {
+  if (operation === 'create' || operation === 'update' || data?.blurhash !== null) {
     try {
       const uploadedFile = req.file;
 
