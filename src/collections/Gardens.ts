@@ -18,6 +18,7 @@ export const Gardens: CollectionConfig<'gardens'> = {
     singular: 'Garden',
     plural: 'Gardens',
   },
+  trash: true,
   admin: {
     useAsTitle: 'name',
     group: Groups.misc,

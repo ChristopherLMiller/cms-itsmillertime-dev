@@ -9,6 +9,7 @@ import { seoPlugin } from '@payloadcms/plugin-seo';
 import { s3Storage } from '@payloadcms/storage-s3';
 import * as Sentry from '@sentry/nextjs';
 import { Plugin } from 'payload';
+import { ecommercePlugin } from './ecommerce';
 
 export const plugins: Plugin[] = [
   formBuilderPlugin({
