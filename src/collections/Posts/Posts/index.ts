@@ -19,6 +19,7 @@ export const Posts: CollectionConfig<'posts'> = {
     singular: 'Article',
     plural: 'Articles',
   },
+  trash: true,
   defaultPopulate: {
     title: true,
     slug: true,

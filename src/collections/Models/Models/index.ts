@@ -19,6 +19,7 @@ export const Models: CollectionConfig<'models'> = {
     singular: 'Model',
     plural: 'Models',
   },
+  trash: true,
   admin: {
     useAsTitle: 'title',
     group: Groups.models,

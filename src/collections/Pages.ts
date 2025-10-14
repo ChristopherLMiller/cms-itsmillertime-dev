@@ -30,6 +30,7 @@ export const Pages: CollectionConfig<'pages'> = {
     group: Groups.pages,
     description: 'Singular dynamic page of the front end',
   },
+  trash: true,
   fields: [
     {
       type: 'row',

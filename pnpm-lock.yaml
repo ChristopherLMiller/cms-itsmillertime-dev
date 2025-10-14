@@ -23,6 +23,9 @@ importers:
       '@payloadcms/plugin-cloud-storage':
         specifier: 3.59.1
         version: 3.59.1(@types/react@19.2.2)(monaco-editor@0.52.2)(next@15.5.4(@babel/core@7.28.0)(@opentelemetry/api@1.9.0)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)(sass@1.77.4))(payload@3.59.1(graphql@16.11.0)(typescript@5.8.3))(react-dom@19.2.0(react@19.2.0))(react@19.2.0)(typescript@5.8.3)
+      '@payloadcms/plugin-ecommerce':
+        specifier: ^3.59.1
+        version: 3.59.1(@types/react@19.2.2)(monaco-editor@0.52.2)(next@15.5.4(@babel/core@7.28.0)(@opentelemetry/api@1.9.0)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)(sass@1.77.4))(payload@3.59.1(graphql@16.11.0)(typescript@5.8.3))(react-dom@19.2.0(react@19.2.0))(react@19.2.0)(typescript@5.8.3)
       '@payloadcms/plugin-form-builder':
         specifier: ^3.59.1
         version: 3.59.1(@types/react@19.2.2)(monaco-editor@0.52.2)(next@15.5.4(@babel/core@7.28.0)(@opentelemetry/api@1.9.0)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)(sass@1.77.4))(payload@3.59.1(graphql@16.11.0)(typescript@5.8.3))(react-dom@19.2.0(react@19.2.0))(react@19.2.0)(typescript@5.8.3)
@@ -1753,6 +1756,13 @@ packages:
 
   '@payloadcms/plugin-cloud-storage@3.59.1':
     resolution: {integrity: sha512-XsXtCxkI47djSHHgq9Cyp3bMUxJeUWjB2QjB18eWT9z4w7oQiL9B35F0dKkDj/WkJ5dh0cGyHR4nGF+QC9rbrQ==}
+    peerDependencies:
+      payload: 3.59.1
+      react: ^19.0.0 || ^19.0.0-rc-65a56d0e-20241020
+      react-dom: ^19.0.0 || ^19.0.0-rc-65a56d0e-20241020
+
+  '@payloadcms/plugin-ecommerce@3.59.1':
+    resolution: {integrity: sha512-rDZfLRBdsxpnYFkQ0+hYy7c4JVeFqzgEXIw26gXsVyeUTN6Oqtk6uqiZMtGdZUxKw2iCJ2hufOyFZbuHnFs9Qw==}
     peerDependencies:
       payload: 3.59.1
       react: ^19.0.0 || ^19.0.0-rc-65a56d0e-20241020
@@ -7387,6 +7397,21 @@ snapshots:
       find-node-modules: 2.1.3
       payload: 3.59.1(graphql@16.11.0)(typescript@5.8.3)
       range-parser: 1.2.1
+      react: 19.2.0
+      react-dom: 19.2.0(react@19.2.0)
+    transitivePeerDependencies:
+      - '@types/react'
+      - monaco-editor
+      - next
+      - supports-color
+      - typescript
+
+  '@payloadcms/plugin-ecommerce@3.59.1(@types/react@19.2.2)(monaco-editor@0.52.2)(next@15.5.4(@babel/core@7.28.0)(@opentelemetry/api@1.9.0)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)(sass@1.77.4))(payload@3.59.1(graphql@16.11.0)(typescript@5.8.3))(react-dom@19.2.0(react@19.2.0))(react@19.2.0)(typescript@5.8.3)':
+    dependencies:
+      '@payloadcms/translations': 3.59.1
+      '@payloadcms/ui': 3.59.1(@types/react@19.2.2)(monaco-editor@0.52.2)(next@15.5.4(@babel/core@7.28.0)(@opentelemetry/api@1.9.0)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)(sass@1.77.4))(payload@3.59.1(graphql@16.11.0)(typescript@5.8.3))(react-dom@19.2.0(react@19.2.0))(react@19.2.0)(typescript@5.8.3)
+      payload: 3.59.1(graphql@16.11.0)(typescript@5.8.3)
+      qs-esm: 7.0.2
       react: 19.2.0
       react-dom: 19.2.0(react@19.2.0)
     transitivePeerDependencies:
