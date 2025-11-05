@@ -2,7 +2,6 @@ import { generateDescription } from '@/utilities/generateDescription';
 import { generateImage } from '@/utilities/generateImage';
 import { generateTitle } from '@/utilities/generateTitle';
 import { generateURL } from '@/utilities/generateURL';
-import { formBuilderPlugin } from '@payloadcms/plugin-form-builder';
 import { searchPlugin } from '@payloadcms/plugin-search';
 import { sentryPlugin } from '@payloadcms/plugin-sentry';
 import { seoPlugin } from '@payloadcms/plugin-seo';

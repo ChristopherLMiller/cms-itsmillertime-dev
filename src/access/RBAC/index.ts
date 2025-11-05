@@ -17,8 +17,9 @@ export const RBAC = (collection: Collection['slug']) => {
     allRoles.push(await getDefaultRole(req));
 
     // First check for user, and then push default role or the users role
-    if (req.user !== null) {
-      allRoles.push(...req.user?.roles);
+    // Only check roles for User type, not PayloadMcpApiKey
+    if (req.user !== null && req.user.collection === 'users') {
+      allRoles.push(...req.user.roles);
     }
 
     const roleIDs = allRoles.map((role) => {

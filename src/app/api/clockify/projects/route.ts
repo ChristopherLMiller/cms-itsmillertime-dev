@@ -1,7 +1,7 @@
 import { Clockify } from '@/lib/clockify';
 import { NextRequest, NextResponse } from 'next/server';
 
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
   try {
     const clockify = new Clockify();
     const projects = await clockify.getProjects();

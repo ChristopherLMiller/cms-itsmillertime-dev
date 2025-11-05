@@ -1,7 +1,6 @@
 import { RBAC } from '@/access/RBAC';
 import { Groups } from '@/collections/groups';
 import { slugField } from '@/fields/slug';
-import { wordCountField } from '@/fields/wordCount';
 import { lexicalToText } from '@/utilities/lexicalToText';
 import {
   MetaDescriptionField,
@@ -69,7 +68,7 @@ export const Posts: CollectionConfig<'posts'> = {
       },
       hooks: {
         beforeChange: [
-          ({ siblingData, value }) => {
+          ({ siblingData }) => {
             const plainText = lexicalToText(siblingData?.content);
             const wordCount = plainText.split(/\s+/).filter(Boolean).length;
             return wordCount;

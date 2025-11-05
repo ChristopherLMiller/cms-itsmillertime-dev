@@ -10,7 +10,6 @@ import {
   PreviewField,
 } from '@payloadcms/plugin-seo/fields';
 import { lexicalEditor } from '@payloadcms/richtext-lexical';
-import { argon2Sync } from 'crypto';
 import { CollectionConfig } from 'payload';
 
 export const Models: CollectionConfig<'models'> = {
