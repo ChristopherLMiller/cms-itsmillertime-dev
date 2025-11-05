@@ -8,14 +8,5 @@ const adminOrPublishedStatus = () => true;
 const customerOnlyFieldAccess = () => true;
 
 export function ecommercePlugin() {
-  return payloadEcommercePlugin({
-    access: {
-      adminOnly,
-      adminOnlyFieldAccess,
-      adminOrCustomerOwner,
-      adminOrPublishedStatus,
-      customerOnlyFieldAccess,
-    },
-    customers: { slug: 'users' },
-  });
+  return payloadEcommercePlugin();
 }
