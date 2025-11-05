@@ -1,5 +1,6 @@
 'use client';
 
+import { ClockifyProject } from '@/lib/clockify';
 import { SelectInput, useField } from '@payloadcms/ui';
 import { SelectFieldClientComponent } from 'payload';
 import { useEffect, useState } from 'react';
@@ -7,6 +8,12 @@ import { useEffect, useState } from 'react';
 interface ClockifyProjectOption {
   label: string;
   value: string;
+}
+
+interface ClockifyProjectWithClient extends ClockifyProject {
+  client?: {
+    name: string;
+  } | null;
 }
 
 export const ClockifyProjectSelect: SelectFieldClientComponent = (props) => {
@@ -28,9 +35,9 @@ export const ClockifyProjectSelect: SelectFieldClientComponent = (props) => {
           throw new Error(`Failed to fetch projects: ${response.statusText}`);
         }
 
-        const projects = await response.json();
+        const projects: ClockifyProjectWithClient[] = await response.json();
 
-        const projectOptions: ClockifyProjectOption[] = projects.map((project: any) => ({
+        const projectOptions: ClockifyProjectOption[] = projects.map((project) => ({
           label: `${project?.client?.name || 'NO CLIENT'} - ${project.name}`,
           value: project.id,
         }));

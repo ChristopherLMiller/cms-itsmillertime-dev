@@ -11,7 +11,8 @@ export const nsfwFilter = async ({ req }: { req: PayloadRequest }): Promise<Wher
   }
 
   // If the user has showNSFW set to false, then filter those
-  if (!req?.user?.showNSFW) {
+  // Only check showNSFW for User type, not PayloadMcpApiKey
+  if (req.user.collection === 'users' && !req.user.showNSFW) {
     return {
       'settings.isNsfw': {
         not_equals: true,

@@ -37,14 +37,21 @@ export const visibilityFilter = async ({ req }: { req: PayloadRequest }): Promis
           },
           {
             or: [
-              {
-                'settings.allowedRoles.id': {
-                  in: req?.user?.roles.map((role) => (typeof role === 'object' ? role.id : role)),
-                },
-              },
+              // Only check roles for User type, not PayloadMcpApiKey
+              ...(req.user.collection === 'users'
+                ? [
+                    {
+                      'settings.allowedRoles.id': {
+                        in: req.user.roles.map((role) =>
+                          typeof role === 'object' ? role.id : role,
+                        ),
+                      },
+                    },
+                  ]
+                : []),
               {
                 'settings.allowedUsers.id': {
-                  in: [req?.user?.id],
+                  in: [req.user.id],
                 },
               },
             ],
