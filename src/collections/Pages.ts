@@ -25,6 +25,7 @@ export const Pages: CollectionConfig<'pages'> = {
     plural: 'Pages',
   },
   admin: {
+    enableRichTextLink: true,
     defaultColumns: ['title', 'slug', 'updatedAt'],
     useAsTitle: 'title',
     group: Groups.pages,

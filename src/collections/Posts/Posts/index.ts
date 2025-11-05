@@ -2,6 +2,7 @@ import { RBAC } from '@/access/RBAC';
 import { Groups } from '@/collections/groups';
 import { slugField } from '@/fields/slug';
 import { wordCountField } from '@/fields/wordCount';
+import { lexicalToText } from '@/utilities/lexicalToText';
 import {
   MetaDescriptionField,
   MetaImageField,
@@ -33,6 +34,7 @@ export const Posts: CollectionConfig<'posts'> = {
     useAsTitle: 'title',
     description: 'Blog Posts',
     group: Groups.blog,
+    enableRichTextLink: true,
   },
   fields: [
     {
@@ -56,7 +58,25 @@ export const Posts: CollectionConfig<'posts'> = {
       },
     },
     ...slugField('title'),
-    ...wordCountField('content'),
+    {
+      name: 'word_count',
+      type: 'number',
+      index: false,
+      label: 'Word Count',
+      admin: {
+        position: 'sidebar',
+        readOnly: true,
+      },
+      hooks: {
+        beforeChange: [
+          ({ siblingData, value }) => {
+            const plainText = lexicalToText(siblingData?.content);
+            const wordCount = plainText.split(/\s+/).filter(Boolean).length;
+            return wordCount;
+          },
+        ],
+      },
+    },
     {
       name: 'category',
       type: 'relationship',

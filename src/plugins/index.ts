@@ -10,22 +10,11 @@ import { s3Storage } from '@payloadcms/storage-s3';
 import * as Sentry from '@sentry/nextjs';
 import { Plugin } from 'payload';
 import { ecommercePlugin } from './ecommerce';
+import { mcpPlugin } from './mcp';
 
 export const plugins: Plugin[] = [
-  formBuilderPlugin({
-    fields: {
-      text: true,
-      textarea: true,
-      select: true,
-      email: true,
-      state: true,
-      country: true,
-      checkbox: true,
-      number: true,
-      message: true,
-      payment: false,
-    },
-  }),
+  ecommercePlugin(),
+  mcpPlugin(),
   seoPlugin({
     generateTitle: generateTitle,
     generateURL: generateURL,
