@@ -10,6 +10,7 @@ import {
   PreviewField,
 } from '@payloadcms/plugin-seo/fields';
 import { lexicalEditor } from '@payloadcms/richtext-lexical';
+import { argon2Sync } from 'crypto';
 import { CollectionConfig } from 'payload';
 
 export const Models: CollectionConfig<'models'> = {
@@ -24,6 +25,23 @@ export const Models: CollectionConfig<'models'> = {
     useAsTitle: 'title',
     group: Groups.models,
     description: 'A built model, not to be confused with a kit',
+  },
+  hooks: {
+    beforeOperation: [
+      ({ args, operation }) => {
+        if (operation == 'read') {
+          if (!args.where) {
+            args.where = {};
+          }
+
+          if (!args.where['model_meta.status']) {
+            args.where['model_meta.status'] = {
+              not_equals: 'NOT_STARTED',
+            };
+          }
+        }
+      },
+    ],
   },
   fields: [
     {
