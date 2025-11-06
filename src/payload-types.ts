@@ -88,7 +88,6 @@ export interface Config {
     models: Model;
     'payload-mcp-api-keys': PayloadMcpApiKey;
     search: Search;
-    'payload-kv': PayloadKv;
     'payload-jobs': PayloadJob;
     'payload-folders': FolderInterface;
     'payload-locked-documents': PayloadLockedDocument;
@@ -131,7 +130,6 @@ export interface Config {
     models: ModelsSelect<false> | ModelsSelect<true>;
     'payload-mcp-api-keys': PayloadMcpApiKeysSelect<false> | PayloadMcpApiKeysSelect<true>;
     search: SearchSelect<false> | SearchSelect<true>;
-    'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-jobs': PayloadJobsSelect<false> | PayloadJobsSelect<true>;
     'payload-folders': PayloadFoldersSelect<false> | PayloadFoldersSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
@@ -895,6 +893,276 @@ export interface PayloadMcpApiKey {
      */
     delete?: boolean | null;
   };
+  galleryAlbums?: {
+    /**
+     * Allow clients to find gallery-albums.
+     */
+    find?: boolean | null;
+    /**
+     * Allow clients to create gallery-albums.
+     */
+    create?: boolean | null;
+    /**
+     * Allow clients to update gallery-albums.
+     */
+    update?: boolean | null;
+    /**
+     * Allow clients to delete gallery-albums.
+     */
+    delete?: boolean | null;
+  };
+  galleryImages?: {
+    /**
+     * Allow clients to find gallery-images.
+     */
+    find?: boolean | null;
+    /**
+     * Allow clients to create gallery-images.
+     */
+    create?: boolean | null;
+    /**
+     * Allow clients to update gallery-images.
+     */
+    update?: boolean | null;
+    /**
+     * Allow clients to delete gallery-images.
+     */
+    delete?: boolean | null;
+  };
+  galleryTags?: {
+    /**
+     * Allow clients to find gallery-tags.
+     */
+    find?: boolean | null;
+    /**
+     * Allow clients to create gallery-tags.
+     */
+    create?: boolean | null;
+    /**
+     * Allow clients to update gallery-tags.
+     */
+    update?: boolean | null;
+    /**
+     * Allow clients to delete gallery-tags.
+     */
+    delete?: boolean | null;
+  };
+  galleryCategories?: {
+    /**
+     * Allow clients to find gallery-categories.
+     */
+    find?: boolean | null;
+    /**
+     * Allow clients to create gallery-categories.
+     */
+    create?: boolean | null;
+    /**
+     * Allow clients to update gallery-categories.
+     */
+    update?: boolean | null;
+    /**
+     * Allow clients to delete gallery-categories.
+     */
+    delete?: boolean | null;
+  };
+  media?: {
+    /**
+     * Allow clients to find media.
+     */
+    find?: boolean | null;
+    /**
+     * Allow clients to create media.
+     */
+    create?: boolean | null;
+    /**
+     * Allow clients to update media.
+     */
+    update?: boolean | null;
+    /**
+     * Allow clients to delete media.
+     */
+    delete?: boolean | null;
+  };
+  gardens?: {
+    /**
+     * Allow clients to find gardens.
+     */
+    find?: boolean | null;
+    /**
+     * Allow clients to create gardens.
+     */
+    create?: boolean | null;
+    /**
+     * Allow clients to update gardens.
+     */
+    update?: boolean | null;
+    /**
+     * Allow clients to delete gardens.
+     */
+    delete?: boolean | null;
+  };
+  kits?: {
+    /**
+     * Allow clients to find kits.
+     */
+    find?: boolean | null;
+    /**
+     * Allow clients to create kits.
+     */
+    create?: boolean | null;
+    /**
+     * Allow clients to update kits.
+     */
+    update?: boolean | null;
+    /**
+     * Allow clients to delete kits.
+     */
+    delete?: boolean | null;
+  };
+  scales?: {
+    /**
+     * Allow clients to find scales.
+     */
+    find?: boolean | null;
+    /**
+     * Allow clients to create scales.
+     */
+    create?: boolean | null;
+    /**
+     * Allow clients to update scales.
+     */
+    update?: boolean | null;
+    /**
+     * Allow clients to delete scales.
+     */
+    delete?: boolean | null;
+  };
+  manufacturers?: {
+    /**
+     * Allow clients to find manufacturers.
+     */
+    find?: boolean | null;
+    /**
+     * Allow clients to create manufacturers.
+     */
+    create?: boolean | null;
+    /**
+     * Allow clients to update manufacturers.
+     */
+    update?: boolean | null;
+    /**
+     * Allow clients to delete manufacturers.
+     */
+    delete?: boolean | null;
+  };
+  modelsTags?: {
+    /**
+     * Allow clients to find models-tags.
+     */
+    find?: boolean | null;
+    /**
+     * Allow clients to create models-tags.
+     */
+    create?: boolean | null;
+    /**
+     * Allow clients to update models-tags.
+     */
+    update?: boolean | null;
+    /**
+     * Allow clients to delete models-tags.
+     */
+    delete?: boolean | null;
+  };
+  posts?: {
+    /**
+     * Allow clients to find posts.
+     */
+    find?: boolean | null;
+    /**
+     * Allow clients to create posts.
+     */
+    create?: boolean | null;
+    /**
+     * Allow clients to update posts.
+     */
+    update?: boolean | null;
+    /**
+     * Allow clients to delete posts.
+     */
+    delete?: boolean | null;
+  };
+  postsCategories?: {
+    /**
+     * Allow clients to find posts-categories.
+     */
+    find?: boolean | null;
+    /**
+     * Allow clients to create posts-categories.
+     */
+    create?: boolean | null;
+    /**
+     * Allow clients to update posts-categories.
+     */
+    update?: boolean | null;
+    /**
+     * Allow clients to delete posts-categories.
+     */
+    delete?: boolean | null;
+  };
+  postsTags?: {
+    /**
+     * Allow clients to find posts-tags.
+     */
+    find?: boolean | null;
+    /**
+     * Allow clients to create posts-tags.
+     */
+    create?: boolean | null;
+    /**
+     * Allow clients to update posts-tags.
+     */
+    update?: boolean | null;
+    /**
+     * Allow clients to delete posts-tags.
+     */
+    delete?: boolean | null;
+  };
+  pages?: {
+    /**
+     * Allow clients to find pages.
+     */
+    find?: boolean | null;
+    /**
+     * Allow clients to create pages.
+     */
+    create?: boolean | null;
+    /**
+     * Allow clients to update pages.
+     */
+    update?: boolean | null;
+    /**
+     * Allow clients to delete pages.
+     */
+    delete?: boolean | null;
+  };
+  mapMarkers?: {
+    /**
+     * Allow clients to find map-markers.
+     */
+    find?: boolean | null;
+    /**
+     * Allow clients to create map-markers.
+     */
+    create?: boolean | null;
+    /**
+     * Allow clients to update map-markers.
+     */
+    update?: boolean | null;
+    /**
+     * Allow clients to delete map-markers.
+     */
+    delete?: boolean | null;
+  };
   updatedAt: string;
   createdAt: string;
   enableAPIKey?: boolean | null;
@@ -930,23 +1198,6 @@ export interface Search {
       };
   updatedAt: string;
   createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "payload-kv".
- */
-export interface PayloadKv {
-  id: number;
-  key: string;
-  data:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1126,10 +1377,6 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'search';
         value: number | Search;
-      } | null)
-    | ({
-        relationTo: 'payload-kv';
-        value: number | PayloadKv;
       } | null)
     | ({
         relationTo: 'payload-jobs';
@@ -1668,6 +1915,126 @@ export interface PayloadMcpApiKeysSelect<T extends boolean = true> {
         update?: T;
         delete?: T;
       };
+  galleryAlbums?:
+    | T
+    | {
+        find?: T;
+        create?: T;
+        update?: T;
+        delete?: T;
+      };
+  galleryImages?:
+    | T
+    | {
+        find?: T;
+        create?: T;
+        update?: T;
+        delete?: T;
+      };
+  galleryTags?:
+    | T
+    | {
+        find?: T;
+        create?: T;
+        update?: T;
+        delete?: T;
+      };
+  galleryCategories?:
+    | T
+    | {
+        find?: T;
+        create?: T;
+        update?: T;
+        delete?: T;
+      };
+  media?:
+    | T
+    | {
+        find?: T;
+        create?: T;
+        update?: T;
+        delete?: T;
+      };
+  gardens?:
+    | T
+    | {
+        find?: T;
+        create?: T;
+        update?: T;
+        delete?: T;
+      };
+  kits?:
+    | T
+    | {
+        find?: T;
+        create?: T;
+        update?: T;
+        delete?: T;
+      };
+  scales?:
+    | T
+    | {
+        find?: T;
+        create?: T;
+        update?: T;
+        delete?: T;
+      };
+  manufacturers?:
+    | T
+    | {
+        find?: T;
+        create?: T;
+        update?: T;
+        delete?: T;
+      };
+  modelsTags?:
+    | T
+    | {
+        find?: T;
+        create?: T;
+        update?: T;
+        delete?: T;
+      };
+  posts?:
+    | T
+    | {
+        find?: T;
+        create?: T;
+        update?: T;
+        delete?: T;
+      };
+  postsCategories?:
+    | T
+    | {
+        find?: T;
+        create?: T;
+        update?: T;
+        delete?: T;
+      };
+  postsTags?:
+    | T
+    | {
+        find?: T;
+        create?: T;
+        update?: T;
+        delete?: T;
+      };
+  pages?:
+    | T
+    | {
+        find?: T;
+        create?: T;
+        update?: T;
+        delete?: T;
+      };
+  mapMarkers?:
+    | T
+    | {
+        find?: T;
+        create?: T;
+        update?: T;
+        delete?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
   enableAPIKey?: T;
@@ -1684,14 +2051,6 @@ export interface SearchSelect<T extends boolean = true> {
   doc?: T;
   updatedAt?: T;
   createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "payload-kv_select".
- */
-export interface PayloadKvSelect<T extends boolean = true> {
-  key?: T;
-  data?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
