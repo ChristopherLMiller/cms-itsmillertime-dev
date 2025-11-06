@@ -1,5 +1,6 @@
 // storage-adapter-import-placeholder
 import { postgresAdapter } from '@payloadcms/db-postgres';
+import { redisKVAdapter } from '@payloadcms/kv-redis';
 import path from 'path';
 import { buildConfig, PayloadRequest } from 'payload';
 import sharp from 'sharp';
@@ -68,9 +69,10 @@ export default buildConfig({
   graphQL: {
     disable: true,
   },
-  folders: {
-    debug: true,
-  },
+  kv: redisKVAdapter({
+    keyPrefix: 'payload:',
+    redisURL: process.env.REDIS_URL || '',
+  }),
   telemetry: false,
   cors: '*',
   admin: {
