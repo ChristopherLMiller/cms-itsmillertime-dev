@@ -5,6 +5,7 @@ import path from 'path';
 import { buildConfig, PayloadRequest } from 'payload';
 import sharp from 'sharp';
 import { fileURLToPath } from 'url';
+import pg from 'pg';
 
 import { resendAdapter } from '@payloadcms/email-resend';
 import { GalleryAlbums } from './collections/Gallery/Album';
@@ -111,6 +112,7 @@ export default buildConfig({
     pool: {
       connectionString: process.env.DATABASE_URI || '',
     },
+    pg,
   }),
   sharp,
   plugins: plugins,

@@ -5,6 +5,7 @@ import { CollectionConfig } from 'payload';
 export const Kits: CollectionConfig<'kits'> = {
   slug: 'kits',
   access: RBAC('kits'),
+  enableQueryPresets: true,
   admin: {
     useAsTitle: 'full_title',
     group: Groups.models,

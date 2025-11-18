@@ -19,6 +19,7 @@ export const Posts: CollectionConfig<'posts'> = {
     singular: 'Article',
     plural: 'Articles',
   },
+  enableQueryPresets: true,
   trash: true,
   defaultPopulate: {
     title: true,
