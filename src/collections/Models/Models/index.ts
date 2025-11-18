@@ -15,6 +15,7 @@ import { CollectionConfig } from 'payload';
 export const Models: CollectionConfig<'models'> = {
   slug: 'models',
   access: RBAC('models'),
+  enableQueryPresets: true,
   labels: {
     singular: 'Model',
     plural: 'Models',
