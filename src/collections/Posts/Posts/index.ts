@@ -35,6 +35,15 @@ export const Posts: CollectionConfig<'posts'> = {
     description: 'Blog Posts',
     group: Groups.blog,
     enableRichTextLink: true,
+    components: {
+      edit: {
+        beforeDocumentControls: [
+          {
+            path: '@/components/PreviewButton#PreviewButton',
+          },
+        ],
+      },
+    },
   },
   fields: [
     {

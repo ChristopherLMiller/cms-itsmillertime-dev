@@ -30,6 +30,7 @@ import { OverviewComponent as OverviewComponent_a8a977ebc872c5d5ea7ee689724c0860
 import { MetaTitleComponent as MetaTitleComponent_a8a977ebc872c5d5ea7ee689724c0860 } from '@payloadcms/plugin-seo/client'
 import { MetaDescriptionComponent as MetaDescriptionComponent_a8a977ebc872c5d5ea7ee689724c0860 } from '@payloadcms/plugin-seo/client'
 import { PreviewComponent as PreviewComponent_a8a977ebc872c5d5ea7ee689724c0860 } from '@payloadcms/plugin-seo/client'
+import { PreviewButton as PreviewButton_79203ba44a9a04c09693f7622ccf249a } from '@/components/PreviewButton'
 import { MetaImageComponent as MetaImageComponent_a8a977ebc872c5d5ea7ee689724c0860 } from '@payloadcms/plugin-seo/client'
 import { PermissionsTableServer as PermissionsTableServer_c241219cabf1243b196563005c8cc6c1 } from '@/fields/Permissions/PermissionsTableServer'
 import { ClockifyProjectSelect as ClockifyProjectSelect_b8bb1889944a5b33eae5b7c527a1ff0a } from '@/components/ClockifyProjectSelect'
@@ -77,6 +78,7 @@ export const importMap = {
   "@payloadcms/plugin-seo/client#MetaTitleComponent": MetaTitleComponent_a8a977ebc872c5d5ea7ee689724c0860,
   "@payloadcms/plugin-seo/client#MetaDescriptionComponent": MetaDescriptionComponent_a8a977ebc872c5d5ea7ee689724c0860,
   "@payloadcms/plugin-seo/client#PreviewComponent": PreviewComponent_a8a977ebc872c5d5ea7ee689724c0860,
+  "@/components/PreviewButton#PreviewButton": PreviewButton_79203ba44a9a04c09693f7622ccf249a,
   "@payloadcms/plugin-seo/client#MetaImageComponent": MetaImageComponent_a8a977ebc872c5d5ea7ee689724c0860,
   "@/fields/Permissions/PermissionsTableServer#PermissionsTableServer": PermissionsTableServer_c241219cabf1243b196563005c8cc6c1,
   "@/components/ClockifyProjectSelect#ClockifyProjectSelect": ClockifyProjectSelect_b8bb1889944a5b33eae5b7c527a1ff0a,
