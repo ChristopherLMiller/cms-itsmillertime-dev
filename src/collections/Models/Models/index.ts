@@ -25,6 +25,15 @@ export const Models: CollectionConfig<'models'> = {
     useAsTitle: 'title',
     group: Groups.models,
     description: 'A built model, not to be confused with a kit',
+    components: {
+      edit: {
+        beforeDocumentControls: [
+          {
+            path: '@/components/PreviewButton#PreviewButton',
+          },
+        ],
+      },
+    },
   },
   hooks: {
     beforeOperation: [

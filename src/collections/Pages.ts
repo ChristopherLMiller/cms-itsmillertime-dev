@@ -30,6 +30,15 @@ export const Pages: CollectionConfig<'pages'> = {
     useAsTitle: 'title',
     group: Groups.pages,
     description: 'Singular dynamic page of the front end',
+    components: {
+      edit: {
+        beforeDocumentControls: [
+          {
+            path: '@/components/PreviewButton#PreviewButton',
+          },
+        ],
+      },
+    },
   },
   trash: true,
   fields: [
