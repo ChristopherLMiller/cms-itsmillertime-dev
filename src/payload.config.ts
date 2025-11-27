@@ -82,6 +82,10 @@ export default buildConfig({
       baseDir: path.resolve(dirname),
     },
   },
+  folders: {
+    collectionSpecific: true,
+    browseByFolder: false,
+  },
   globals: [SiteMeta, SiteNavigation],
   collections: [
     MapMarkers,
