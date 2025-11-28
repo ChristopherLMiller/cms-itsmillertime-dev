@@ -126,15 +126,43 @@ export default buildConfig({
   sharp,
   plugins: plugins,
   serverURL: process.env.PAYLOAD_SERVER_URL,
-  email: resendAdapter({
-    defaultFromAddress: 'support@itsmillertime.dev',
-    defaultFromName: 'Support',
-    apiKey: process.env.RESEND_API_KEY || '',
-  }),
   upload: {
     abortOnLimit: true,
     limits: {
       fileSize: 5 * 1024 * 1024 * 1024, // 5GB
     },
+  },
+  jobs: {
+    tasks: [
+      {
+        slug: 'send-welcome-email',
+        retries: 3,
+        inputSchema: [
+          {
+            name: 'userEmail',
+            type: 'email',
+            required: true,
+          },
+          {
+            name: 'userName',
+            type: 'text',
+            required: true,
+          },
+        ],
+        handler: async ({ input, req }) => {
+          await req.payload.sendEmail({
+            to: input.userEmail,
+            subject: 'Welcome!',
+            text: `Hi ${input.username}, welcome to our platform!`,
+          });
+
+          return {
+            output: {
+              emailSent: true,
+            },
+          };
+        },
+      },
+    ],
   },
 });
