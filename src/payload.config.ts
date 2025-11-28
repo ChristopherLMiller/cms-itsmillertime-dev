@@ -35,6 +35,11 @@ const filename = fileURLToPath(import.meta.url);
 const dirname = path.dirname(filename);
 
 export default buildConfig({
+  email: resendAdapter({
+    defaultFromAddress: 'support@itsmillertime.dev',
+    defaultFromName: 'Payload CMS',
+    apiKey: process.env.RESEND_API_KEY || '',
+  }),
   endpoints: [
     {
       path: '/health',

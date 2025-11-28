@@ -100,25 +100,20 @@ export const Media: CollectionConfig = {
   upload: {
     disableLocalStorage: true,
     adminThumbnail: 'thumbnail',
+    cacheTags: true,
     focalPoint: true,
     displayPreview: true,
     withMetadata: true,
-    pasteURL: {
-      allowList: [
-        {
-          hostname: 'images.itsmillertime.dev',
-        },
-      ],
-    },
-    formatOptions: {
-      format: 'avif',
-    },
+    pasteURL: undefined,
     imageSizes: [
       {
         name: 'thumbnail',
         width: 300,
         formatOptions: {
           format: 'jpg',
+          options: {
+            quality: 80,
+          },
         },
       },
       {
@@ -131,6 +126,10 @@ export const Media: CollectionConfig = {
         width: 600,
         formatOptions: {
           format: 'avif',
+          options: {
+            quality: 65,
+            effort: 3,
+          },
         },
       },
       {
@@ -138,6 +137,10 @@ export const Media: CollectionConfig = {
         width: 900,
         formatOptions: {
           format: 'avif',
+          options: {
+            quality: 70,
+            effort: 3,
+          },
         },
       },
       {
@@ -145,6 +148,10 @@ export const Media: CollectionConfig = {
         width: 1400,
         formatOptions: {
           format: 'avif',
+          options: {
+            quality: 75,
+            effort: 4,
+          },
         },
       },
       {
@@ -152,6 +159,10 @@ export const Media: CollectionConfig = {
         width: 1920,
         formatOptions: {
           format: 'avif',
+          options: {
+            quality: 80,
+            effort: 4,
+          },
         },
       },
       {
@@ -161,6 +172,9 @@ export const Media: CollectionConfig = {
         crop: 'center',
         formatOptions: {
           format: 'jpg',
+          options: {
+            quality: 85,
+          },
         },
       },
     ],
