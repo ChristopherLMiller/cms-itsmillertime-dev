@@ -33,4 +33,20 @@ export const Users: CollectionConfig = {
       },
     },
   ],
+  hooks: {
+    afterChange: [
+      async ({ req, doc, operation }) => {
+        // Only send welcome email for new users
+        if (operation === 'create') {
+          await req.payload.jobs.queue({
+            task: 'sendWelcomeEmail',
+            input: {
+              userEmail: doc.email,
+              userName: doc.name,
+            },
+          });
+        }
+      },
+    ],
+  },
 };

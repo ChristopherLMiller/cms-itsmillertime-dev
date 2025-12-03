@@ -24,6 +24,33 @@ export const Media: CollectionConfig = {
   access: RBAC('media'),
   fields: [
     {
+      name: 'exif',
+      type: 'json',
+      admin: {
+        position: 'sidebar',
+        readOnly: true,
+        components: {
+          Field: {
+            path: '@/components/EXIFDisplay#EXIFDisplay',
+          },
+        },
+      },
+    },
+    {
+      name: 'blurhash',
+      type: 'text',
+      admin: {
+        position: 'sidebar',
+        disableListColumn: true,
+        disableListFilter: true,
+        components: {
+          Field: {
+            path: '@/components/BlurhashField#BlurhashField',
+          },
+        },
+      },
+    },
+    {
       type: 'tabs',
       tabs: [
         {
@@ -70,31 +97,7 @@ export const Media: CollectionConfig = {
             },
           ],
         },
-        {
-          label: 'EXIF',
-          fields: [
-            {
-              name: 'exif',
-              type: 'json',
-              admin: {
-                readOnly: true,
-              },
-            },
-          ],
-          admin: {
-            condition: ({ siblingData }) => Boolean(siblingData?.exif !== null),
-          },
-        },
       ],
-    },
-    {
-      name: 'blurhash',
-      type: 'text',
-      admin: {
-        hidden: true,
-        disableListColumn: true,
-        disableListFilter: true,
-      },
     },
   ],
   upload: {
