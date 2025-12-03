@@ -133,9 +133,17 @@ export default buildConfig({
     },
   },
   jobs: {
+    jobsCollectionOverrides: ({ defaultJobsCollection }) => {
+      if (!defaultJobsCollection.admin) {
+        defaultJobsCollection.admin = {};
+      }
+
+      defaultJobsCollection.admin.hidden = false;
+      return defaultJobsCollection;
+    },
     tasks: [
       {
-        slug: 'send-welcome-email',
+        slug: 'sendWelcomeEmail',
         retries: 3,
         inputSchema: [
           {
@@ -162,6 +170,11 @@ export default buildConfig({
             },
           };
         },
+      },
+    ],
+    autoRun: [
+      {
+        cron: '*/5 * * * *',
       },
     ],
   },

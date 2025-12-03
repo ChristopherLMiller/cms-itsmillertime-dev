@@ -141,6 +141,7 @@ export interface Config {
   db: {
     defaultIDType: number;
   };
+  fallbackLocale: null;
   globals: {
     'site-meta': SiteMeta;
     'site-navigation': SiteNavigation;
@@ -159,6 +160,7 @@ export interface Config {
       });
   jobs: {
     tasks: {
+      sendWelcomeEmail: TaskSendWelcomeEmail;
       schedulePublish: TaskSchedulePublish;
       inline: {
         input: unknown;
@@ -438,6 +440,16 @@ export interface GalleryImage {
  */
 export interface Media {
   id: number;
+  exif?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  blurhash?: string | null;
   alt: string;
   caption?: {
     root: {
@@ -470,16 +482,6 @@ export interface Media {
     hasNextPage?: boolean;
     totalDocs?: number;
   };
-  exif?:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
-  blurhash?: string | null;
   folder?: (number | null) | FolderInterface;
   updatedAt: string;
   createdAt: string;
@@ -1255,7 +1257,7 @@ export interface PayloadJob {
     | {
         executedAt: string;
         completedAt: string;
-        taskSlug: 'inline' | 'schedulePublish';
+        taskSlug: 'inline' | 'sendWelcomeEmail' | 'schedulePublish';
         taskID: string;
         input?:
           | {
@@ -1288,7 +1290,7 @@ export interface PayloadJob {
         id?: string | null;
       }[]
     | null;
-  taskSlug?: ('inline' | 'schedulePublish') | null;
+  taskSlug?: ('inline' | 'sendWelcomeEmail' | 'schedulePublish') | null;
   queue?: string | null;
   waitUntil?: string | null;
   processing?: boolean | null;
@@ -1536,12 +1538,12 @@ export interface UsersSelect<T extends boolean = true> {
  * via the `definition` "media_select".
  */
 export interface MediaSelect<T extends boolean = true> {
+  exif?: T;
+  blurhash?: T;
   alt?: T;
   caption?: T;
   'gallery-images'?: T;
   relatedPosts?: T;
-  exif?: T;
-  blurhash?: T;
   folder?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -2310,6 +2312,17 @@ export interface SiteNavigationSelect<T extends boolean = true> {
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TaskSendWelcomeEmail".
+ */
+export interface TaskSendWelcomeEmail {
+  input: {
+    userEmail: string;
+    userName: string;
+  };
+  output?: unknown;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
