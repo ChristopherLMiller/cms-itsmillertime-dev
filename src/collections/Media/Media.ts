@@ -33,6 +33,9 @@ export const Media: CollectionConfig = {
           Field: {
             path: '@/components/EXIFDisplay#EXIFDisplay',
           },
+          Cell: {
+            path: '@/components/EXIFCell#EXIFCell',
+          },
         },
       },
     },

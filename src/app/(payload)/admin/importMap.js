@@ -1,4 +1,5 @@
 import { RowLabel as RowLabel_d4655109717a6f5707cd0a6520a4fd9e } from '@/components/RowLabel'
+import { EXIFCell as EXIFCell_4480aec29364ed5b9b8eceaa4eff77ef } from '@/components/EXIFCell'
 import { EXIFDisplay as EXIFDisplay_6fcfec44911dfff19a45246c27579691 } from '@/components/EXIFDisplay'
 import { BlurhashField as BlurhashField_cca06512cc763e8c25c885f0d870995d } from '@/components/BlurhashField'
 import { RscEntryLexicalCell as RscEntryLexicalCell_44fe37237e0ebf4470c9990d8cb7b07e } from '@payloadcms/richtext-lexical/rsc'
@@ -49,6 +50,7 @@ import { S3ClientUploadHandler as S3ClientUploadHandler_f97aa6c64367fa259c5bc056
 
 export const importMap = {
   "@/components/RowLabel#RowLabel": RowLabel_d4655109717a6f5707cd0a6520a4fd9e,
+  "@/components/EXIFCell#EXIFCell": EXIFCell_4480aec29364ed5b9b8eceaa4eff77ef,
   "@/components/EXIFDisplay#EXIFDisplay": EXIFDisplay_6fcfec44911dfff19a45246c27579691,
   "@/components/BlurhashField#BlurhashField": BlurhashField_cca06512cc763e8c25c885f0d870995d,
   "@payloadcms/richtext-lexical/rsc#RscEntryLexicalCell": RscEntryLexicalCell_44fe37237e0ebf4470c9990d8cb7b07e,
