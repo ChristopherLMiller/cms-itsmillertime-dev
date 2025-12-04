@@ -1,6 +1,6 @@
 {
   "name": "cms-itsmillertime-dev",
-  "version": "3.5.0",
+  "version": "3.5.1",
   "description": "A blank template to get started with Payload 3.0",
   "license": "MIT",
   "type": "module",
@@ -15,31 +15,31 @@
     "start": "cross-env NODE_OPTIONS=--no-deprecation next start"
   },
   "dependencies": {
-    "@payloadcms/db-postgres": "3.65.0",
-    "@payloadcms/email-resend": "3.65.0",
-    "@payloadcms/kv-redis": "^3.65.0",
-    "@payloadcms/next": "3.65.0",
-    "@payloadcms/payload-cloud": "3.65.0",
-    "@payloadcms/plugin-cloud-storage": "3.65.0",
-    "@payloadcms/plugin-ecommerce": "^3.65.0",
-    "@payloadcms/plugin-mcp": "^3.65.0",
-    "@payloadcms/plugin-search": "3.65.0",
-    "@payloadcms/plugin-sentry": "3.65.0",
-    "@payloadcms/plugin-seo": "3.65.0",
-    "@payloadcms/richtext-lexical": "3.65.0",
-    "@payloadcms/storage-s3": "3.65.0",
-    "@payloadcms/ui": "3.65.0",
-    "@sentry/nextjs": "^10.22.0",
+    "@payloadcms/db-postgres": "3.66.0",
+    "@payloadcms/email-resend": "3.66.0",
+    "@payloadcms/kv-redis": "^3.66.0",
+    "@payloadcms/next": "3.66.0",
+    "@payloadcms/payload-cloud": "3.66.0",
+    "@payloadcms/plugin-cloud-storage": "3.66.0",
+    "@payloadcms/plugin-ecommerce": "^3.66.0",
+    "@payloadcms/plugin-mcp": "^3.66.0",
+    "@payloadcms/plugin-search": "3.66.0",
+    "@payloadcms/plugin-sentry": "3.66.0",
+    "@payloadcms/plugin-seo": "3.66.0",
+    "@payloadcms/richtext-lexical": "3.66.0",
+    "@payloadcms/storage-s3": "3.66.0",
+    "@payloadcms/ui": "3.66.0",
+    "@sentry/nextjs": "^10.28.0",
     "blurhash": "^2.0.5",
     "cross-env": "^10.1.0",
     "exifreader": "^4.32.0",
-    "next": "^15.5.0",
-    "payload": "3.65.0",
+    "next": "^15.5.7",
+    "payload": "3.66.0",
     "pg": "8.16.3",
     "plaiceholder": "^3.0.0",
-    "react": "19.2.0",
-    "react-dom": "19.2.0",
-    "sharp": "0.34.4",
+    "react": "19.2.1",
+    "react-dom": "19.2.1",
+    "sharp": "0.34.5",
     "slugify": "^1.6.6",
     "word-counting": "^1.1.4"
   },
@@ -57,6 +57,9 @@
   "pnpm": {
     "onlyBuiltDependencies": [
       "sharp"
+    ],
+    "ignoredBuiltDependencies": [
+      "@sentry/cli"
     ]
   }
 }

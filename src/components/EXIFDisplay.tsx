@@ -1,7 +1,14 @@
 'use client';
 
 import React, { useMemo, useState } from 'react';
-import { Button, useDocumentInfo, useField } from '@payloadcms/ui';
+import {
+  Button,
+  Drawer,
+  DrawerToggler,
+  useDocumentInfo,
+  useField,
+  useDrawerSlug,
+} from '@payloadcms/ui';
 import type { JSONFieldClientProps } from 'payload';
 
 interface EXIFFieldValue {
@@ -43,6 +50,7 @@ export const EXIFDisplay: React.FC<JSONFieldClientProps> = () => {
   const { id } = useDocumentInfo();
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const drawerSlug = useDrawerSlug('exif-raw-data');
 
   // Check if EXIF data is empty object
   const isEmptyObject = useMemo(() => {
@@ -55,15 +63,39 @@ export const EXIFDisplay: React.FC<JSONFieldClientProps> = () => {
   // Check if EXIF data is undefined or null
   const isUndefinedOrNull = exifData === undefined || exifData === null;
 
+  // Check if EXIF data is full or reduced
+  const isFullEXIF = useMemo(() => {
+    if (!exifData || exifData === null || typeof exifData !== 'object') {
+      return false;
+    }
+
+    const data = exifData as Record<string, unknown>;
+
+    // Check for presence of xmp section (strong indicator of full EXIF)
+    if (!data.xmp || typeof data.xmp !== 'object') {
+      return false;
+    }
+
+    // Check for key EXIF fields that indicate full data
+    const exif = data.exif;
+    if (!exif || typeof exif !== 'object') {
+      return false;
+    }
+
+    const exifObj = exif as Record<string, unknown>;
+    const hasMake = 'Make' in exifObj;
+    const hasModel = 'Model' in exifObj;
+    const hasFNumber = 'FNumber' in exifObj;
+    const hasExposureTime = 'ExposureTime' in exifObj;
+
+    // Full EXIF should have at least some of these key fields
+    return hasMake || hasModel || hasFNumber || hasExposureTime;
+  }, [exifData]);
+
   // Memoize the data extraction to prevent unnecessary re-renders
   const { exif, xmp, composite } = useMemo(() => {
     if (!exifData || exifData === null || typeof exifData !== 'object') {
       return { exif: {}, xmp: {}, composite: {} };
-    }
-
-    // Debug logging (remove in production)
-    if (process.env.NODE_ENV === 'development') {
-      console.log('EXIF Data structure:', exifData);
     }
 
     // Safely extract nested objects with defensive checks
@@ -84,7 +116,6 @@ export const EXIFDisplay: React.FC<JSONFieldClientProps> = () => {
   }, [exifData]);
 
   try {
-
     const handleGenerateEXIF = async () => {
       if (!id) {
         setError('Document ID not found');
@@ -364,6 +395,23 @@ export const EXIFDisplay: React.FC<JSONFieldClientProps> = () => {
         );
       }
 
+      // If reduced EXIF data, show warning message but still allow viewing raw data
+      if (!isFullEXIF) {
+        return (
+          <div
+            style={{
+              marginTop: '0.75rem',
+              color: 'var(--theme-elevation-600)',
+              fontSize: '1rem',
+            }}
+          >
+            <div style={{ marginBottom: '0.5rem' }}>
+              Partial EXIF data available. Some metadata may be missing.
+            </div>
+          </div>
+        );
+      }
+
       // If we have data, try to format and display it
       if (typeof exifData !== 'object' || exifData === null) {
         return null;
@@ -485,12 +533,45 @@ export const EXIFDisplay: React.FC<JSONFieldClientProps> = () => {
 
     // Always render the header with content
     return (
-      <div style={{ marginTop: '1rem' }}>
-        <h3 className="field-group__title" style={{ marginBottom: '0.75rem' }}>
-          EXIF Data
-        </h3>
-        {renderContent()}
-      </div>
+      <>
+        <div style={{ marginTop: '1rem' }}>
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              marginBottom: '0.75rem',
+            }}
+          >
+            <h3 className="field-group__title" style={{ margin: 0 }}>
+              EXIF Data
+            </h3>
+            {!isUndefinedOrNull && !isEmptyObject && (
+              <DrawerToggler slug={drawerSlug}>View Raw Data</DrawerToggler>
+            )}
+          </div>
+          {renderContent()}
+        </div>
+
+        {/* Drawer for raw EXIF data */}
+        <Drawer slug={drawerSlug} title="Raw EXIF Data">
+          <pre
+            style={{
+              fontSize: '0.875rem',
+              lineHeight: '1.5',
+              color: 'var(--theme-elevation-900)',
+              backgroundColor: 'var(--theme-elevation-50)',
+              padding: '1rem',
+              borderRadius: 'var(--style-radius-s)',
+              overflow: 'auto',
+              whiteSpace: 'pre-wrap',
+              wordBreak: 'break-word',
+            }}
+          >
+            {JSON.stringify(exifData, null, 2)}
+          </pre>
+        </Drawer>
+      </>
     );
   } catch (error) {
     console.error('Error rendering EXIF display:', error);
