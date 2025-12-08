@@ -8,7 +8,6 @@ import {
 import { type CollectionConfig } from 'payload';
 import { Groups } from '../groups';
 import { generateBlurHash } from './hooks/generateBlurHash';
-import { generateEXIF } from './hooks/generateEXIF';
 
 export const Media: CollectionConfig = {
   slug: 'media',
@@ -186,7 +185,23 @@ export const Media: CollectionConfig = {
     ],
   },
   hooks: {
-    beforeChange: [generateEXIF],
+    afterChange: [
+      async ({ req, doc, operation }) => {
+        // Only run if its create or update
+        if (operation === 'create' || operation === 'update') {
+          if (doc.mimeType && doc.mimeType.startsWith('image/')) {
+            console.log(`Generating EXIF for image ${doc.id}`);
+            await req.payload.jobs.queue({
+              task: 'generateImageEXIF',
+              queue: 'metadata',
+              input: {
+                imageId: doc.id,
+              },
+            });
+          }
+        }
+      },
+    ],
     beforeValidate: [generateBlurHash],
   },
 };

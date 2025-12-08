@@ -30,6 +30,7 @@ import { defaultLexical } from './fields/defaultLexical';
 import { SiteMeta } from './globals/site-meta';
 import { SiteNavigation } from './globals/site-navigation';
 import { plugins } from './plugins';
+import ExifReader from 'exifreader';
 
 const filename = fileURLToPath(import.meta.url);
 const dirname = path.dirname(filename);
@@ -171,10 +172,107 @@ export default buildConfig({
           };
         },
       },
+      {
+        slug: 'generateImageEXIF',
+        retries: 1,
+        inputSchema: [
+          {
+            name: 'imageId',
+            type: 'number',
+            required: true,
+          },
+        ],
+        handler: async ({ input, req }) => {
+          const image = await req.payload.findByID({
+            collection: 'media',
+            id: input.imageId,
+          });
+
+          // If the field isn't empty its already been generated, no need to proceed
+          if (image.exif && image.exif !== null && image.exif !== undefined) {
+            console.log('EXIF already generated');
+            return {
+              output: {
+                exifGenerated: false,
+                error: 'EXIF already generated',
+              },
+            };
+          }
+
+          // Now get the image file from payload storage so we can use that
+          if (!image.filename) {
+            console.log(`Image ${image.id} filename not found`);
+            return {
+              output: {
+                exifGenerated: false,
+                error: 'Image filename not found',
+              },
+            };
+          }
+
+          // Access storage through req.payload (storage may not be in TypeScript types but is available at runtime)
+          // @ts-ignore
+          const storage = (req.payload as any).storage;
+          let fileBuffer: Buffer;
+
+          if (storage) {
+            // Use payload.storage to read the file
+            fileBuffer = await storage.read({
+              collection: 'media',
+              filename: image.filename,
+            });
+          } else {
+            // Fallback to fetching from URL if storage is not available
+            if (!image.url) {
+              console.log(`Image ${image.id} URL not found`);
+              return {
+                output: {
+                  exifGenerated: false,
+                  error: 'Storage not available and image URL not found',
+                },
+              };
+            }
+            const response = await fetch(image.url);
+            if (!response.ok) {
+              console.log(`Failed to fetch image: ${response.statusText}`);
+              return {
+                output: {
+                  exifGenerated: false,
+                  error: `Failed to fetch image: ${response.statusText}`,
+                },
+              };
+            }
+            fileBuffer = Buffer.from(await response.arrayBuffer());
+          }
+
+          // Now get the EXIF
+          const exif = (await ExifReader.load(fileBuffer, { async: true, expanded: true })) as any;
+
+          // updat the image with the EXIF data
+          await req.payload.update({
+            collection: 'media',
+            id: image.id,
+            data: {
+              exif: exif || null,
+            },
+          });
+
+          return {
+            output: {
+              exifGenerated: true,
+            },
+          };
+        },
+      },
     ],
     autoRun: [
       {
-        cron: '*/5 * * * *',
+        cron: '* * * * * *',
+        queue: 'default',
+      },
+      {
+        queue: 'metadata',
+        cron: '0 * * * * *',
       },
     ],
   },

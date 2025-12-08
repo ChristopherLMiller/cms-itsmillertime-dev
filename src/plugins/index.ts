@@ -29,7 +29,9 @@ export const plugins: Plugin[] = [
   }),
   s3Storage({
     collections: {
-      media: true,
+      media: {
+        signedDownloads: true,
+      },
     },
     bucket: process.env.CLOUDFLARE_BUCKET as string,
     config: {
