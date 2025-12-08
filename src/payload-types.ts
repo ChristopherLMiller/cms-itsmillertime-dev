@@ -161,6 +161,7 @@ export interface Config {
   jobs: {
     tasks: {
       sendWelcomeEmail: TaskSendWelcomeEmail;
+      generateImageEXIF: TaskGenerateImageEXIF;
       schedulePublish: TaskSchedulePublish;
       inline: {
         input: unknown;
@@ -1257,7 +1258,7 @@ export interface PayloadJob {
     | {
         executedAt: string;
         completedAt: string;
-        taskSlug: 'inline' | 'sendWelcomeEmail' | 'schedulePublish';
+        taskSlug: 'inline' | 'sendWelcomeEmail' | 'generateImageEXIF' | 'schedulePublish';
         taskID: string;
         input?:
           | {
@@ -1290,7 +1291,7 @@ export interface PayloadJob {
         id?: string | null;
       }[]
     | null;
-  taskSlug?: ('inline' | 'sendWelcomeEmail' | 'schedulePublish') | null;
+  taskSlug?: ('inline' | 'sendWelcomeEmail' | 'generateImageEXIF' | 'schedulePublish') | null;
   queue?: string | null;
   waitUntil?: string | null;
   processing?: boolean | null;
@@ -2321,6 +2322,16 @@ export interface TaskSendWelcomeEmail {
   input: {
     userEmail: string;
     userName: string;
+  };
+  output?: unknown;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TaskGenerateImageEXIF".
+ */
+export interface TaskGenerateImageEXIF {
+  input: {
+    imageId: number;
   };
   output?: unknown;
 }

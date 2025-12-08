@@ -46,7 +46,7 @@ interface EXIFData {
 }
 
 export const EXIFDisplay: React.FC<JSONFieldClientProps> = () => {
-  const { value: exifData, setValue } = useField<EXIFData | null | undefined>();
+  const { value: exifData } = useField<EXIFData | null | undefined>();
   const { id } = useDocumentInfo();
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -126,31 +126,38 @@ export const EXIFDisplay: React.FC<JSONFieldClientProps> = () => {
       setError(null);
 
       try {
-        const response = await fetch('/api/media/regenerate-exif', {
+        // Queue the job using Payload's jobs API
+        const response = await fetch('/api/payload-jobs', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({ id }),
+          body: JSON.stringify({
+            taskSlug: 'generateImageEXIF',
+            queue: 'metadata',
+            input: {
+              imageId: typeof id === 'string' ? parseInt(id, 10) : id,
+            },
+          }),
         });
 
         if (!response.ok) {
           const errorData = await response.json();
-          throw new Error(errorData.error || 'Failed to generate EXIF data');
+          throw new Error(
+            errorData.message || errorData.error || 'Failed to queue EXIF generation job',
+          );
         }
 
-        const result = await response.json();
+        await response.json();
 
-        // Update the field value with the new EXIF data
-        if (result.exif) {
-          setValue(result.exif);
-        }
-
-        // Reload the page to refresh the form data
-        window.location.reload();
+        // Job has been queued successfully
+        // Show success message and reload after a short delay to allow the job to process
+        // The job will run automatically via the autoRun cron configuration
+        setTimeout(() => {
+          window.location.reload();
+        }, 2000);
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to generate EXIF data');
-      } finally {
+        setError(err instanceof Error ? err.message : 'Failed to queue EXIF generation job');
         setIsGenerating(false);
       }
     };
