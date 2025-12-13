@@ -1,8 +1,24 @@
 // utilities/lexicalToText.ts
 
-export const lexicalToText = (lexicalJSON: string): string => {
+export const lexicalToText = (lexicalJSON: string | undefined | null): string => {
+  // Handle undefined, null, or empty input
+  if (!lexicalJSON) {
+    return '';
+  }
+
   // If it's a string, parse it to JSON
-  const lexicalData = typeof lexicalJSON === 'string' ? JSON.parse(lexicalJSON) : lexicalJSON;
+  let lexicalData;
+  try {
+    lexicalData = typeof lexicalJSON === 'string' ? JSON.parse(lexicalJSON) : lexicalJSON;
+  } catch (error) {
+    // If parsing fails, return empty string
+    return '';
+  }
+
+  // Handle case where parsed data is not an object or doesn't have root
+  if (!lexicalData || typeof lexicalData !== 'object' || !lexicalData.root) {
+    return '';
+  }
 
   // Extract all text nodes recursively
   let plainText = '';

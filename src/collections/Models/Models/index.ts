@@ -39,12 +39,13 @@ export const Models: CollectionConfig<'models'> = {
     beforeOperation: [
       ({ args, operation }) => {
         if (operation == 'read') {
-          if (!args.where) {
-            args.where = {};
+          const readArgs = args as any;
+          if (!readArgs.where) {
+            readArgs.where = {};
           }
 
-          if (!args.where['model_meta.status']) {
-            args.where['model_meta.status'] = {
+          if (!readArgs.where['model_meta.status']) {
+            readArgs.where['model_meta.status'] = {
               not_equals: 'NOT_STARTED',
             };
           }
