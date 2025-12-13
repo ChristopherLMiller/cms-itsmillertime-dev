@@ -9,6 +9,7 @@ import { s3Storage } from '@payloadcms/storage-s3';
 import * as Sentry from '@sentry/nextjs';
 import { Plugin } from 'payload';
 import { mcpPlugin } from './mcp';
+import { payloadPluginWebhooks } from 'payload-plugin-webhooks';
 
 export const plugins: Plugin[] = [
   mcpPlugin(),
@@ -26,6 +27,41 @@ export const plugins: Plugin[] = [
   }),
   sentryPlugin({
     Sentry,
+  }),
+  payloadPluginWebhooks({
+    streamAuth: async (req) => {
+      const apiKey = req.headers.get('x-api-key');
+
+      if (!apiKey) {
+        return false;
+      }
+
+      try {
+        const result = await req.payload.find({
+          collection: 'api-keys',
+          where: {
+            key: {
+              equals: apiKey,
+            },
+            active: { equals: true },
+          },
+          limit: 1,
+        });
+        if (result.docs.length > 0) {
+          await req.payload.update({
+            collection: 'api-keys',
+            id: result.docs[0].id,
+            data: { lastUsed: new Date().toISOString() },
+          });
+          return true;
+        }
+
+        return false;
+      } catch (error) {
+        console.error(`Error authorizing webhook stream: ${error}`);
+        return false;
+      }
+    },
   }),
   s3Storage({
     collections: {

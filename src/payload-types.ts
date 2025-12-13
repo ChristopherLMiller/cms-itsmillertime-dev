@@ -88,6 +88,7 @@ export interface Config {
     models: Model;
     'payload-mcp-api-keys': PayloadMcpApiKey;
     search: Search;
+    'api-keys': ApiKey;
     'payload-jobs': PayloadJob;
     'payload-folders': FolderInterface;
     'payload-locked-documents': PayloadLockedDocument;
@@ -131,6 +132,7 @@ export interface Config {
     models: ModelsSelect<false> | ModelsSelect<true>;
     'payload-mcp-api-keys': PayloadMcpApiKeysSelect<false> | PayloadMcpApiKeysSelect<true>;
     search: SearchSelect<false> | SearchSelect<true>;
+    'api-keys': ApiKeysSelect<false> | ApiKeysSelect<true>;
     'payload-jobs': PayloadJobsSelect<false> | PayloadJobsSelect<true>;
     'payload-folders': PayloadFoldersSelect<false> | PayloadFoldersSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
@@ -145,10 +147,12 @@ export interface Config {
   globals: {
     'site-meta': SiteMeta;
     'site-navigation': SiteNavigation;
+    webhooks: Webhook;
   };
   globalsSelect: {
     'site-meta': SiteMetaSelect<false> | SiteMetaSelect<true>;
     'site-navigation': SiteNavigationSelect<false> | SiteNavigationSelect<true>;
+    webhooks: WebhooksSelect<false> | WebhooksSelect<true>;
   };
   locale: null;
   user:
@@ -1207,6 +1211,33 @@ export interface Search {
   createdAt: string;
 }
 /**
+ * Manage API keys for webhook stream authentication.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "api-keys".
+ */
+export interface ApiKey {
+  id: number;
+  /**
+   * The user this API key belongs to
+   */
+  user: number | User;
+  /**
+   * The API key value. Keep this secret!
+   */
+  key: string;
+  /**
+   * Disable this to temporarily deactivate the API key without deleting it
+   */
+  active?: boolean | null;
+  /**
+   * Last time this API key was used
+   */
+  lastUsed?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-jobs".
  */
@@ -1386,6 +1417,10 @@ export interface PayloadLockedDocument {
         value: number | Search;
       } | null)
     | ({
+        relationTo: 'api-keys';
+        value: number | ApiKey;
+      } | null)
+    | ({
         relationTo: 'payload-folders';
         value: number | FolderInterface;
       } | null);
@@ -1481,6 +1516,7 @@ export interface PayloadQueryPreset {
     | number
     | boolean
     | null;
+  groupBy?: string | null;
   relatedCollection: 'posts' | 'kits' | 'models';
   /**
    * This is a temporary field used to determine if updating the preset would remove the user's access to it. When `true`, this record will be deleted after running the preset's `validate` function.
@@ -2105,6 +2141,18 @@ export interface SearchSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "api-keys_select".
+ */
+export interface ApiKeysSelect<T extends boolean = true> {
+  user?: T;
+  key?: T;
+  active?: T;
+  lastUsed?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-jobs_select".
  */
 export interface PayloadJobsSelect<T extends boolean = true> {
@@ -2209,6 +2257,7 @@ export interface PayloadQueryPresetsSelect<T extends boolean = true> {
       };
   where?: T;
   columns?: T;
+  groupBy?: T;
   relatedCollection?: T;
   isTemp?: T;
   updatedAt?: T;
@@ -2265,6 +2314,58 @@ export interface SiteNavigation {
   createdAt?: string | null;
 }
 /**
+ * Configure which collections and CRUD operations should emit webhook events.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "webhooks".
+ */
+export interface Webhook {
+  id: number;
+  /**
+   * Configure webhook events for each collection.
+   */
+  collections?:
+    | {
+        /**
+         * Select a collection
+         */
+        collection:
+          | 'map-markers'
+          | 'media'
+          | 'posts'
+          | 'posts-categories'
+          | 'posts-tags'
+          | 'pages'
+          | 'roles'
+          | 'gallery-albums'
+          | 'gallery-images'
+          | 'gallery-tags'
+          | 'gallery-categories'
+          | 'gardens'
+          | 'kits'
+          | 'scales'
+          | 'manufacturers'
+          | 'models-tags'
+          | 'models'
+          | 'payload-mcp-api-keys'
+          | 'search';
+        enabled?: boolean | null;
+        /**
+         * Select which CRUD operations should emit webhook events.
+         */
+        operations?: {
+          create?: boolean | null;
+          read?: boolean | null;
+          update?: boolean | null;
+          delete?: boolean | null;
+        };
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "site-meta_select".
  */
@@ -2308,6 +2409,30 @@ export interface SiteNavigationSelect<T extends boolean = true> {
         visibility?: T;
         allowedRoles?: T;
         allowedUsers?: T;
+        id?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "webhooks_select".
+ */
+export interface WebhooksSelect<T extends boolean = true> {
+  collections?:
+    | T
+    | {
+        collection?: T;
+        enabled?: T;
+        operations?:
+          | T
+          | {
+              create?: T;
+              read?: T;
+              update?: T;
+              delete?: T;
+            };
         id?: T;
       };
   updatedAt?: T;

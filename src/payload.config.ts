@@ -211,7 +211,6 @@ export default buildConfig({
           }
 
           // Access storage through req.payload (storage may not be in TypeScript types but is available at runtime)
-          // @ts-ignore
           const storage = (req.payload as any).storage;
           let fileBuffer: Buffer;
 
