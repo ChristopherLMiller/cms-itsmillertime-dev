@@ -5,7 +5,6 @@ import path from 'path';
 import { buildConfig, PayloadRequest } from 'payload';
 import sharp from 'sharp';
 import { fileURLToPath } from 'url';
-
 import { resendAdapter } from '@payloadcms/email-resend';
 import { GalleryAlbums } from './collections/Gallery/Album';
 import { GalleryCategories } from './collections/Gallery/Categories';
@@ -124,7 +123,7 @@ export default buildConfig({
   }),
   sharp,
   plugins: plugins,
-  //serverURL: process.env.PAYLOAD_SERVER_URL,
+  serverURL: process.env.PAYLOAD_SERVER_URL,
   upload: {
     abortOnLimit: true,
     limits: {
