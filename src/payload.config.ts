@@ -85,6 +85,9 @@ export default buildConfig({
     importMap: {
       baseDir: path.resolve(dirname),
     },
+    components: {
+      providers: ['@/components/NavBadgeProvider'],
+    },
   },
   folders: {
     collectionSpecific: true,

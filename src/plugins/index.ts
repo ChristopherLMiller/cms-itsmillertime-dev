@@ -9,7 +9,9 @@ import { s3Storage } from '@payloadcms/storage-s3';
 import * as Sentry from '@sentry/nextjs';
 import { Plugin } from 'payload';
 import { mcpPlugin } from './mcp';
+import { payloadSidebar } from 'payload-sidebar-plugin';
 import { payloadPluginWebhooks } from 'payload-plugin-webhooks';
+import { Groups } from '@/collections/groups';
 
 export const plugins: Plugin[] = [
   mcpPlugin(),
@@ -62,6 +64,48 @@ export const plugins: Plugin[] = [
         return false;
       }
     },
+  }),
+  payloadSidebar({
+    groupOrder: {
+      [Groups.media]: 1,
+      [Groups.blog]: 2,
+      [Groups.models]: 3,
+      [Groups.galleries]: 4,
+      [Groups.pages]: 5,
+      [Groups.authentication]: 6,
+      [Groups.global]: 7,
+      [Groups.misc]: 8,
+    },
+    icons: {
+      posts: 'file-pen',
+      'posts-categories': 'folder',
+      'posts-tags': 'tag',
+      kits: 'box',
+      scales: 'scale',
+      manufacturers: 'factory',
+      models: 'airplane',
+      'models-tags': 'tag',
+      'gallery-albums': 'images',
+      'gallery-images': 'image',
+      'gallery-tags': 'tag',
+      'gallery-categories': 'folder',
+      pages: 'page',
+      users: 'user',
+      roles: 'users',
+      'site-meta': 'layout',
+      'site-navigation': 'globe',
+      'map-markers': 'map',
+      gardenss: 'book',
+    },
+    customLinks: [
+      {
+        label: 'Plausible',
+        href: 'https://plausible.itsmillertime.dev',
+        group: Groups.misc,
+        icon: 'chart-line',
+        external: true,
+      },
+    ],
   }),
   s3Storage({
     collections: {
