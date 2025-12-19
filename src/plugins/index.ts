@@ -12,6 +12,8 @@ import { mcpPlugin } from './mcp';
 import { payloadSidebar } from 'payload-sidebar-plugin';
 import { payloadPluginWebhooks } from 'payload-plugin-webhooks';
 import { Groups } from '@/collections/groups';
+import { groupCollapsed } from 'node:console';
+import { payloadCmdk } from '@veiag/payload-cmdk';
 
 export const plugins: Plugin[] = [
   mcpPlugin(),
@@ -30,6 +32,7 @@ export const plugins: Plugin[] = [
   sentryPlugin({
     Sentry,
   }),
+  payloadCmdk({}),
   payloadPluginWebhooks({
     streamAuth: async (req) => {
       const apiKey = req.headers.get('x-api-key');
@@ -98,6 +101,12 @@ export const plugins: Plugin[] = [
       gardenss: 'book',
     },
     customLinks: [
+      {
+        label: 'Frontend',
+        href: 'https://www.itsmillertime.dev',
+        group: Groups.misc,
+        external: true,
+      },
       {
         label: 'Plausible',
         href: 'https://plausible.itsmillertime.dev',

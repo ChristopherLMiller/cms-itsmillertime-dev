@@ -87,6 +87,11 @@ export default buildConfig({
     },
     components: {
       providers: ['@/components/NavBadgeProvider'],
+      views: {
+        dashboard: {
+          Component: '@/components/Dashboard#Dashboard',
+        },
+      },
     },
   },
   folders: {

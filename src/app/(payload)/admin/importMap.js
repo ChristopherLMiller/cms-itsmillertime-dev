@@ -51,9 +51,12 @@ import { QueryPresetsGroupByCell as QueryPresetsGroupByCell_3817bf644402e67bfe65
 import { QueryPresetsGroupByField as QueryPresetsGroupByField_3817bf644402e67bfe6577f60ef982de } from '@payloadcms/ui'
 import { WebhookCollectionRowLabel as WebhookCollectionRowLabel_fcb2dafdf0f59a6c3a11842622e2d1b2 } from 'payload-plugin-webhooks/client'
 import { CustomNav as CustomNav_7a25bf58b9bf0789c79437d44273b9e5 } from 'payload-sidebar-plugin/rsc'
+import { SearchButton as SearchButton_3bf5d3e334c5eaf4f0d216451590d3c2 } from '@veiag/payload-cmdk/client'
 import { default as default_e5727cf75af5a5f3715e1efb9b6b07eb } from '@/components/NavBadgeProvider'
 import { AdminErrorBoundary as AdminErrorBoundary_e5a9e14bdbe97e70ba60697217fe7688 } from '@payloadcms/plugin-sentry/client'
+import { CommandMenuProvider as CommandMenuProvider_3bf5d3e334c5eaf4f0d216451590d3c2 } from '@veiag/payload-cmdk/client'
 import { S3ClientUploadHandler as S3ClientUploadHandler_f97aa6c64367fa259c5bc0567239ef24 } from '@payloadcms/storage-s3/client'
+import { Dashboard as Dashboard_b39f2d96c5778d5698b3c9e7777aa63a } from '@/components/Dashboard'
 
 export const importMap = {
   "@/components/RowLabel#RowLabel": RowLabel_d4655109717a6f5707cd0a6520a4fd9e,
@@ -109,7 +112,10 @@ export const importMap = {
   "@payloadcms/ui#QueryPresetsGroupByField": QueryPresetsGroupByField_3817bf644402e67bfe6577f60ef982de,
   "payload-plugin-webhooks/client#WebhookCollectionRowLabel": WebhookCollectionRowLabel_fcb2dafdf0f59a6c3a11842622e2d1b2,
   "payload-sidebar-plugin/rsc#CustomNav": CustomNav_7a25bf58b9bf0789c79437d44273b9e5,
+  "@veiag/payload-cmdk/client#SearchButton": SearchButton_3bf5d3e334c5eaf4f0d216451590d3c2,
   "@/components/NavBadgeProvider#default": default_e5727cf75af5a5f3715e1efb9b6b07eb,
   "@payloadcms/plugin-sentry/client#AdminErrorBoundary": AdminErrorBoundary_e5a9e14bdbe97e70ba60697217fe7688,
-  "@payloadcms/storage-s3/client#S3ClientUploadHandler": S3ClientUploadHandler_f97aa6c64367fa259c5bc0567239ef24
+  "@veiag/payload-cmdk/client#CommandMenuProvider": CommandMenuProvider_3bf5d3e334c5eaf4f0d216451590d3c2,
+  "@payloadcms/storage-s3/client#S3ClientUploadHandler": S3ClientUploadHandler_f97aa6c64367fa259c5bc0567239ef24,
+  "@/components/Dashboard#Dashboard": Dashboard_b39f2d96c5778d5698b3c9e7777aa63a
 }
