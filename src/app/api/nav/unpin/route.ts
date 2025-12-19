@@ -9,7 +9,18 @@ export async function POST(request: Request) {
   try {
     const payload = await getPayload({ config });
     const headersList = await headers();
-    const { user } = await payload.auth({ headers: headersList });
+
+    // Extract payload-token from cookie and pass as Authorization header
+    const cookieHeader = headersList.get('cookie');
+    const payloadTokenMatch = cookieHeader?.match(/payload-token=([^;]+)/);
+    const payloadToken = payloadTokenMatch ? payloadTokenMatch[1] : null;
+
+    const authHeaders = new Headers(headersList);
+    if (payloadToken) {
+      authHeaders.set('Authorization', `JWT ${payloadToken}`);
+    }
+
+    const { user } = await payload.auth({ headers: authHeaders });
 
     if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
