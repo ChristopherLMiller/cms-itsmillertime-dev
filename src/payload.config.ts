@@ -131,7 +131,6 @@ export default buildConfig({
   }),
   sharp,
   plugins: plugins,
-  serverURL: process.env.PAYLOAD_SERVER_URL,
   upload: {
     abortOnLimit: true,
     limits: {

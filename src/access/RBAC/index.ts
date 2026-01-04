@@ -18,7 +18,9 @@ export const RBAC = (collection: Collection['slug']) => {
 
     // First check for user, and then push default role or the users role
     // Only check roles for User type, not PayloadMcpApiKey
-    if (req.user !== null && req.user.collection === 'users') {
+    if (req.user !== null) {
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-expect-error - req.user.roles may exist but not in types
       allRoles.push(...req.user.roles);
     }
 
@@ -33,24 +35,32 @@ export const RBAC = (collection: Collection['slug']) => {
       collection: 'roles',
       where: { id: { in: roleIDs } },
     });
-
     return roles;
   };
 
   const isAuthorized = async (operation: OperationKey, req: PayloadRequest): Promise<boolean> => {
-    const userRoles = await getApplicableRoles(req);
+    const userRoles = await getApplicableRoles(req); // Get all the roles of the request user (typically default role + user's assigned roles)
+
+    // Map over all roles to extract their permissions objects
+    // If userRoles has 2 items, rolePermissions will have 2 permission objects
     const rolePermissions = userRoles.map((role) => role.permissions);
 
     try {
-      let isAuthorized = false;
-      rolePermissions.forEach((permissionNode) => {
+      let isAuthorized = false; // Default to false
+
+      // Extract collection-specific permissions from each permission node
+      const collectionPerms = rolePermissions.map((permissionNode) => {
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
-        if (permissionNode[collection] && permissionNode[collection][operation] === true) {
+        return permissionNode[collection];
+      });
+
+      // Check if any of the collection permissions allow the operation
+      collectionPerms.forEach((collectionPerm) => {
+        if (collectionPerm && collectionPerm[operation] === true) {
           isAuthorized = true;
         }
       });
-
       return isAuthorized;
     } catch (error) {
       console.error(error);
