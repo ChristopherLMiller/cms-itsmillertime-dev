@@ -7,13 +7,12 @@ import { sentryPlugin } from '@payloadcms/plugin-sentry';
 import { seoPlugin } from '@payloadcms/plugin-seo';
 import { s3Storage } from '@payloadcms/storage-s3';
 import * as Sentry from '@sentry/nextjs';
-import { Plugin } from 'payload';
 import { mcpPlugin } from './mcp';
 import { payloadSidebar } from 'payload-sidebar-plugin';
 import { payloadPluginWebhooks } from 'payload-plugin-webhooks';
 import { Groups } from '@/collections/groups';
-import { groupCollapsed } from 'node:console';
 import { payloadCmdk } from '@veiag/payload-cmdk';
+import type { Plugin } from 'payload';
 
 export const plugins: Plugin[] = [
   mcpPlugin(),

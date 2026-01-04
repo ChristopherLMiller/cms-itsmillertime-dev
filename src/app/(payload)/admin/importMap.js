@@ -57,6 +57,7 @@ import { AdminErrorBoundary as AdminErrorBoundary_e5a9e14bdbe97e70ba60697217fe76
 import { CommandMenuProvider as CommandMenuProvider_3bf5d3e334c5eaf4f0d216451590d3c2 } from '@veiag/payload-cmdk/client'
 import { S3ClientUploadHandler as S3ClientUploadHandler_f97aa6c64367fa259c5bc0567239ef24 } from '@payloadcms/storage-s3/client'
 import { Dashboard as Dashboard_b39f2d96c5778d5698b3c9e7777aa63a } from '@/components/Dashboard'
+import { CollectionCards as CollectionCards_ab83ff7e88da8d3530831f296ec4756a } from '@payloadcms/ui/rsc'
 
 export const importMap = {
   "@/components/RowLabel#RowLabel": RowLabel_d4655109717a6f5707cd0a6520a4fd9e,
@@ -117,5 +118,6 @@ export const importMap = {
   "@payloadcms/plugin-sentry/client#AdminErrorBoundary": AdminErrorBoundary_e5a9e14bdbe97e70ba60697217fe7688,
   "@veiag/payload-cmdk/client#CommandMenuProvider": CommandMenuProvider_3bf5d3e334c5eaf4f0d216451590d3c2,
   "@payloadcms/storage-s3/client#S3ClientUploadHandler": S3ClientUploadHandler_f97aa6c64367fa259c5bc0567239ef24,
-  "@/components/Dashboard#Dashboard": Dashboard_b39f2d96c5778d5698b3c9e7777aa63a
+  "@/components/Dashboard#Dashboard": Dashboard_b39f2d96c5778d5698b3c9e7777aa63a,
+  "@payloadcms/ui/rsc#CollectionCards": CollectionCards_ab83ff7e88da8d3530831f296ec4756a
 }
