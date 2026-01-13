@@ -29,6 +29,7 @@ export const plugins: Plugin[] = [
     },
   }),
   sentryPlugin({
+    enabled: process.env.NODE_ENV === 'production',
     Sentry,
   }),
   payloadCmdk({}),
@@ -118,6 +119,9 @@ export const plugins: Plugin[] = [
   s3Storage({
     collections: {
       media: {
+        signedDownloads: true,
+      },
+      'gallery-images': {
         signedDownloads: true,
       },
     },

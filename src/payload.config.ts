@@ -235,7 +235,8 @@ export default buildConfig({
                 },
               };
             }
-            const response = await fetch(image.url);
+            console.log(`Fetching image from ${process.env.NEXT_PUBLIC_SERVER_URL}${image.url}`);
+            const response = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}${image.url}`);
             if (!response.ok) {
               console.log(`Failed to fetch image: ${response.statusText}`);
               return {

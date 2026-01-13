@@ -2,7 +2,13 @@ import { RBAC } from '@/access/RBAC';
 import { nsfwFilter } from '@/access/RBAC/filters/nsfw';
 import { visibilityFilter } from '@/access/RBAC/filters/visibility';
 import { Groups } from '@/collections/groups';
-import { slugField } from '@/fields/slug';
+import { imageContentFields, imageTechnicalFields } from '@/collections/shared/imageFields';
+import { baseUploadConfig } from '@/collections/shared/uploadConfig';
+import {
+  sharedImageBeforeValidateHooks,
+  sharedImageAfterChangeHook,
+} from '@/collections/shared/imageHooks';
+import { slugField } from 'payload';
 import {
   MetaDescriptionField,
   MetaImageField,
@@ -10,13 +16,6 @@ import {
   OverviewField,
   PreviewField,
 } from '@payloadcms/plugin-seo/fields';
-import {
-  FixedToolbarFeature,
-  HeadingFeature,
-  HorizontalRuleFeature,
-  InlineToolbarFeature,
-  lexicalEditor,
-} from '@payloadcms/richtext-lexical';
 import { type CollectionConfig } from 'payload';
 
 export const GalleryImages: CollectionConfig<'gallery-images'> = {
@@ -24,7 +23,7 @@ export const GalleryImages: CollectionConfig<'gallery-images'> = {
   admin: {
     group: Groups.galleries,
     description: 'Image',
-    useAsTitle: 'title',
+    useAsTitle: 'alt',
     defaultColumns: ['title', 'slug', 'gallery-tags'],
   },
   labels: {
@@ -40,7 +39,12 @@ export const GalleryImages: CollectionConfig<'gallery-images'> = {
     unlock: RBAC('gallery-images').unlock,
     admin: RBAC('gallery-images').admin,
   },
+  upload: baseUploadConfig,
   fields: [
+    slugField({
+      useAsSlug: 'alt',
+      position: 'sidebar',
+    }),
     {
       type: 'group',
       name: 'settings',
@@ -49,7 +53,6 @@ export const GalleryImages: CollectionConfig<'gallery-images'> = {
         position: 'sidebar',
       },
       fields: [
-        ...slugField('title'),
         {
           name: 'isNsfw',
           type: 'checkbox',
@@ -112,22 +115,7 @@ export const GalleryImages: CollectionConfig<'gallery-images'> = {
         },
       ],
     },
-    {
-      type: 'group',
-      name: 'selling',
-      label: 'Product Listing',
-      admin: {
-        position: 'sidebar',
-      },
-      fields: [
-        {
-          type: 'checkbox',
-          name: 'isSellable',
-          defaultValue: false,
-          label: 'Is Sellable?',
-        },
-      ],
-    },
+    ...imageTechnicalFields,
     {
       type: 'group',
       name: 'tracking',
@@ -192,33 +180,8 @@ export const GalleryImages: CollectionConfig<'gallery-images'> = {
         {
           label: 'Content',
           fields: [
-            {
-              type: 'text',
-              name: 'title',
-              label: 'Title',
-              required: true,
-            },
-            {
-              type: 'upload',
-              relationTo: 'media',
-              name: 'image',
-              required: true,
-            },
-            {
-              name: 'content',
-              type: 'richText',
-              editor: lexicalEditor({
-                features: ({ rootFeatures }) => {
-                  return [
-                    ...rootFeatures,
-                    HeadingFeature({ enabledHeadingSizes: ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'] }),
-                    FixedToolbarFeature(),
-                    InlineToolbarFeature(),
-                    HorizontalRuleFeature(),
-                  ];
-                },
-              }),
-            },
+            ...imageContentFields,
+
             {
               name: 'albums',
               type: 'relationship',
@@ -244,7 +207,7 @@ export const GalleryImages: CollectionConfig<'gallery-images'> = {
             }),
             MetaImageField({
               hasGenerateFn: true,
-              relationTo: 'media',
+              relationTo: 'gallery-images',
             }),
             PreviewField({
               hasGenerateFn: true,
@@ -256,4 +219,8 @@ export const GalleryImages: CollectionConfig<'gallery-images'> = {
       ],
     },
   ],
+  hooks: {
+    afterChange: [sharedImageAfterChangeHook],
+    beforeValidate: sharedImageBeforeValidateHooks,
+  },
 };

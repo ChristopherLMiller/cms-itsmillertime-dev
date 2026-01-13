@@ -98,7 +98,6 @@ export interface Config {
   };
   collectionsJoins: {
     media: {
-      'gallery-images': 'gallery-images';
       relatedPosts: 'posts';
     };
     'gallery-albums': {
@@ -388,18 +387,28 @@ export interface User {
  */
 export interface GalleryImage {
   id: number;
+  /**
+   * When enabled, the slug will auto-generate from the title field on save and autosave.
+   */
+  generateSlug?: boolean | null;
+  slug: string;
   settings: {
-    slug?: string | null;
-    slugLock?: boolean | null;
     isNsfw?: boolean | null;
     'gallery-tags'?: (number | GalleryTag)[] | null;
     visibility: 'ALL' | 'AUTHENTICATED' | 'PRIVILEGED';
     allowedRoles?: (number | Role)[] | null;
     allowedUsers?: (number | User)[] | null;
   };
-  selling?: {
-    isSellable?: boolean | null;
-  };
+  exif?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  blurhash?: string | null;
   tracking?: {
     views?: number | null;
     downloads?: number | null;
@@ -408,9 +417,8 @@ export interface GalleryImage {
     comments?: number | null;
     shares?: number | null;
   };
-  title: string;
-  image: number | Media;
-  content?: {
+  alt: string;
+  caption?: {
     root: {
       type: string;
       children: {
@@ -432,10 +440,77 @@ export interface GalleryImage {
     /**
      * Maximum upload file size: 12MB. Recommended file size for images is <500KB.
      */
-    image?: (number | null) | Media;
+    image?: (number | null) | GalleryImage;
   };
   updatedAt: string;
   createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+  sizes?: {
+    thumbnail?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    square?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    small?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    medium?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    large?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    xlarge?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    og?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+  };
 }
 /**
  * Media Items, images and otherwise
@@ -471,14 +546,6 @@ export interface Media {
     };
     [k: string]: unknown;
   } | null;
-  'gallery-images'?: {
-    docs?: {
-      relationTo?: 'gallery-images';
-      value: number | GalleryImage;
-    }[];
-    hasNextPage?: boolean;
-    totalDocs?: number;
-  };
   relatedPosts?: {
     docs?: {
       relationTo?: 'posts';
@@ -1579,7 +1646,6 @@ export interface MediaSelect<T extends boolean = true> {
   blurhash?: T;
   alt?: T;
   caption?: T;
-  'gallery-images'?: T;
   relatedPosts?: T;
   folder?: T;
   updatedAt?: T;
@@ -1803,22 +1869,19 @@ export interface GalleryAlbumsSelect<T extends boolean = true> {
  * via the `definition` "gallery-images_select".
  */
 export interface GalleryImagesSelect<T extends boolean = true> {
+  generateSlug?: T;
+  slug?: T;
   settings?:
     | T
     | {
-        slug?: T;
-        slugLock?: T;
         isNsfw?: T;
         'gallery-tags'?: T;
         visibility?: T;
         allowedRoles?: T;
         allowedUsers?: T;
       };
-  selling?:
-    | T
-    | {
-        isSellable?: T;
-      };
+  exif?: T;
+  blurhash?: T;
   tracking?:
     | T
     | {
@@ -1829,9 +1892,8 @@ export interface GalleryImagesSelect<T extends boolean = true> {
         comments?: T;
         shares?: T;
       };
-  title?: T;
-  image?: T;
-  content?: T;
+  alt?: T;
+  caption?: T;
   albums?: T;
   meta?:
     | T
@@ -1842,6 +1904,89 @@ export interface GalleryImagesSelect<T extends boolean = true> {
       };
   updatedAt?: T;
   createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+  sizes?:
+    | T
+    | {
+        thumbnail?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
+        square?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
+        small?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
+        medium?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
+        large?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
+        xlarge?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
+        og?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
+      };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
