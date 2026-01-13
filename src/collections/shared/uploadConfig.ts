@@ -1,7 +1,7 @@
-import type { CollectionConfig } from 'payload';
+import type { CollectionConfig, UploadConfig } from 'payload';
 
 // Shared upload configuration for image sizing
-export const sharedImageSizes: CollectionConfig['upload']['imageSizes'] = [
+export const sharedImageSizes: NonNullable<Extract<CollectionConfig['upload'], object>>['imageSizes'] = [
   {
     name: 'thumbnail',
     width: 300,
@@ -76,7 +76,7 @@ export const sharedImageSizes: CollectionConfig['upload']['imageSizes'] = [
 ];
 
 // Base upload config that both collections can extend
-export const baseUploadConfig: Partial<CollectionConfig['upload']> = {
+export const baseUploadConfig: Extract<CollectionConfig['upload'], object> = {
   disableLocalStorage: true,
   adminThumbnail: 'thumbnail',
   cacheTags: true,
