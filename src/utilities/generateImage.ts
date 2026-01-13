@@ -12,11 +12,11 @@ export const generateImage: GenerateImage = async ({ req, doc, collectionConfig 
           collection: 'gallery-images',
           id: doc?.images.docs[0],
         });
-        return (firstImage.image as Media).id;
+        return firstImage.id;
       }
     }
     case 'gallery-images': {
-      return doc?.image;
+      return doc?.id;
     }
     default: {
       console.log('Default image handler');
