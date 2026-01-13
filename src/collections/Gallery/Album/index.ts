@@ -216,6 +216,7 @@ export const GalleryAlbums: CollectionConfig<'gallery-albums'> = {
               type: 'join',
               collection: 'gallery-images',
               on: 'albums',
+              hasMany: true,
             },
           ],
         },
