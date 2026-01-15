@@ -238,7 +238,7 @@ export const GalleryAlbums: CollectionConfig<'gallery-albums'> = {
             }),
             MetaImageField({
               hasGenerateFn: true,
-              relationTo: 'media',
+              relationTo: 'gallery-images',
             }),
             PreviewField({
               hasGenerateFn: true,

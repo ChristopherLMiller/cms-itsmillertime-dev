@@ -246,13 +246,17 @@ export default buildConfig({
                 },
               };
             }
+            console.log('Image fetched, creating buffer from respose');
             fileBuffer = Buffer.from(await response.arrayBuffer());
           }
 
           // Now get the EXIF
+          console.log('Loading EXIF from buffer');
           const exif = (await ExifReader.load(fileBuffer, { async: true, expanded: true })) as any;
+          console.log('EXIF loaded', exif);
 
           // updat the image with the EXIF data
+          console.log('Updating image with EXIF data');
           await req.payload.update({
             collection: 'media',
             id: image.id,
