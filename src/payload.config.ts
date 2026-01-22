@@ -148,48 +148,26 @@ export default buildConfig({
     },
     tasks: [
       {
-        slug: 'sendWelcomeEmail',
-        retries: 3,
+        slug: 'generateImageEXIF',
+        retries: 5,
         inputSchema: [
           {
-            name: 'userEmail',
-            type: 'email',
+            name: 'id',
+            type: 'number',
             required: true,
           },
           {
-            name: 'userName',
+            name: 'collection',
             type: 'text',
             required: true,
           },
         ],
         handler: async ({ input, req }) => {
-          await req.payload.sendEmail({
-            to: input.userEmail,
-            subject: 'Welcome!',
-            text: `Hi ${input.username}, welcome to our platform!`,
-          });
+          console.log(`Start of EXIF generation task for ${input.collection} - ${input.id}`);
 
-          return {
-            output: {
-              emailSent: true,
-            },
-          };
-        },
-      },
-      {
-        slug: 'generateImageEXIF',
-        retries: 1,
-        inputSchema: [
-          {
-            name: 'imageId',
-            type: 'number',
-            required: true,
-          },
-        ],
-        handler: async ({ input, req }) => {
           const image = await req.payload.findByID({
-            collection: 'media',
-            id: input.imageId,
+            collection: input.collection,
+            id: input.id,
           });
 
           // If the field isn't empty its already been generated, no need to proceed
@@ -221,7 +199,7 @@ export default buildConfig({
           if (storage) {
             // Use payload.storage to read the file
             fileBuffer = await storage.read({
-              collection: 'media',
+              collection: input.collection,
               filename: image.filename,
             });
           } else {
@@ -253,12 +231,11 @@ export default buildConfig({
           // Now get the EXIF
           console.log('Loading EXIF from buffer');
           const exif = (await ExifReader.load(fileBuffer, { async: true, expanded: true })) as any;
-          console.log('EXIF loaded', exif);
 
           // updat the image with the EXIF data
           console.log('Updating image with EXIF data');
           await req.payload.update({
-            collection: 'media',
+            collection: input.collection,
             id: image.id,
             data: {
               exif: exif || null,
@@ -279,8 +256,8 @@ export default buildConfig({
         queue: 'default',
       },
       {
-        queue: 'metadata',
-        cron: '0 * * * * *',
+        queue: 'exif',
+        cron: '* * * * * *',
       },
     ],
   },

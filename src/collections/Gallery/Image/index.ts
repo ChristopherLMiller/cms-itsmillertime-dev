@@ -4,10 +4,6 @@ import { visibilityFilter } from '@/access/RBAC/filters/visibility';
 import { Groups } from '@/collections/groups';
 import { imageContentFields, imageTechnicalFields } from '@/collections/shared/imageFields';
 import { baseUploadConfig } from '@/collections/shared/uploadConfig';
-import {
-  sharedImageBeforeValidateHooks,
-  sharedImageAfterChangeHook,
-} from '@/collections/shared/imageHooks';
 import { slugField } from 'payload';
 import {
   MetaDescriptionField,
@@ -17,6 +13,9 @@ import {
   PreviewField,
 } from '@payloadcms/plugin-seo/fields';
 import { type CollectionConfig } from 'payload';
+import { generateEXIF } from '@/collections/shared/generateEXIF';
+import { generateBlurHash } from '@/collections/shared/generateBlurHash';
+import { defaultAltText } from '@/collections/shared/defaultAltText';
 
 export const GalleryImages: CollectionConfig<'gallery-images'> = {
   slug: 'gallery-images',
@@ -221,7 +220,7 @@ export const GalleryImages: CollectionConfig<'gallery-images'> = {
     },
   ],
   hooks: {
-    afterChange: [sharedImageAfterChangeHook],
-    beforeValidate: sharedImageBeforeValidateHooks,
+    afterChange: [generateEXIF],
+    beforeValidate: [defaultAltText, generateBlurHash],
   },
 };

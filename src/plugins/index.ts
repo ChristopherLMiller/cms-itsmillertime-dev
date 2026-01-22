@@ -119,20 +119,10 @@ export const plugins: Plugin[] = [
   s3Storage({
     collections: {
       media: {
-        signedDownloads: true,
+        signedDownloads: false,
       },
       'gallery-images': {
-        signedDownloads: {
-          shouldUseSignedURL: async ({ req, filename, collection }) => {
-            console.log('Checking if we should use signed URL for', filename);
-
-            // Check that the collection is indeed a gallery image
-            if (collection.slug === 'gallery-images') {
-              //console.log(req);
-            }
-            return false;
-          },
-        },
+        signedDownloads: false,
       },
     },
     bucket: process.env.CLOUDFLARE_BUCKET as string,
