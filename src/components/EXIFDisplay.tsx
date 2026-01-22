@@ -8,6 +8,7 @@ import {
   useDocumentInfo,
   useField,
   useDrawerSlug,
+  usePayloadAPI,
 } from '@payloadcms/ui';
 import type { JSONFieldClientProps } from 'payload';
 
@@ -47,10 +48,11 @@ interface EXIFData {
 
 export const EXIFDisplay: React.FC<JSONFieldClientProps> = () => {
   const { value: exifData } = useField<EXIFData | null | undefined>();
-  const { id } = useDocumentInfo();
+  const { id, collectionSlug } = useDocumentInfo();
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const drawerSlug = useDrawerSlug('exif-raw-data');
+  const payloadAPI = usePayloadAPI(process.env.NEXT_PUBLIC_SERVER_URL!);
 
   // Check if EXIF data is empty object
   const isEmptyObject = useMemo(() => {
@@ -134,9 +136,10 @@ export const EXIFDisplay: React.FC<JSONFieldClientProps> = () => {
           },
           body: JSON.stringify({
             taskSlug: 'generateImageEXIF',
-            queue: 'metadata',
+            queue: 'exif',
             input: {
-              imageId: typeof id === 'string' ? parseInt(id, 10) : id,
+              id: typeof id === 'string' ? parseInt(id, 10) : id,
+              collection: collectionSlug,
             },
           }),
         });

@@ -13,7 +13,6 @@ import { payloadPluginWebhooks } from 'payload-plugin-webhooks';
 import { Groups } from '@/collections/groups';
 import { payloadCmdk } from '@veiag/payload-cmdk';
 import type { Plugin } from 'payload';
-import { shouldUseSignedURL } from '@/utilities/shouldUseSignedURL';
 
 export const plugins: Plugin[] = [
   mcpPlugin(),

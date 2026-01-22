@@ -3,10 +3,9 @@ import { type CollectionConfig } from 'payload';
 import { Groups } from '../groups';
 import { imageContentFields, imageTechnicalFields } from '../shared/imageFields';
 import { baseUploadConfig } from '../shared/uploadConfig';
-import {
-  sharedImageBeforeValidateHooks,
-  sharedImageAfterChangeHook,
-} from '../shared/imageHooks';
+import { defaultAltText } from '../shared/defaultAltText';
+import { generateBlurHash } from '../shared/generateBlurHash';
+import { generateEXIF } from '../shared/generateEXIF';
 
 export const Media: CollectionConfig = {
   slug: 'media',
@@ -49,7 +48,7 @@ export const Media: CollectionConfig = {
   ],
   upload: baseUploadConfig,
   hooks: {
-    afterChange: [sharedImageAfterChangeHook],
-    beforeValidate: sharedImageBeforeValidateHooks,
+    afterChange: [generateEXIF],
+    beforeValidate: [defaultAltText, generateBlurHash],
   },
 };
