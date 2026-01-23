@@ -91,6 +91,10 @@ export default buildConfig({
         dashboard: {
           Component: '@/components/Dashboard#Dashboard',
         },
+        bgg: {
+          Component: '@/components/BGG',
+          path: '/bgg',
+        },
       },
     },
   },

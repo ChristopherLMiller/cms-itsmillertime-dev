@@ -114,6 +114,12 @@ export const plugins: Plugin[] = [
         icon: 'chart-line',
         external: true,
       },
+      {
+        label: 'Board Games',
+        href: '/admin/bgg',
+        group: Groups.pages,
+        external: false,
+      },
     ],
   }),
   s3Storage({
