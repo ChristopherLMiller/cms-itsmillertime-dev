@@ -1,6 +1,6 @@
 {
   "name": "cms-itsmillertime-dev",
-  "version": "3.8.1",
+  "version": "3.8.2",
   "description": "A blank template to get started with Payload 3.0",
   "license": "MIT",
   "type": "module",
@@ -41,6 +41,7 @@
     "cross-env": "^10.1.0",
     "date-fns": "^4.1.0",
     "exifreader": "^4.36.0",
+    "fast-xml-parser": "^5.3.3",
     "lucide-react": "^0.562.0",
     "next": "^15.5.9",
     "payload": "3.72.0",
