@@ -32,6 +32,12 @@ export const Users: CollectionConfig = {
         position: 'sidebar',
       },
     },
+    {
+      type: 'text',
+      name: 'bggUsername',
+      required: false,
+      label: 'BoardGameGeek Username',
+    },
   ],
   hooks: {
     afterChange: [

@@ -360,6 +360,7 @@ export interface User {
   roles: (number | Role)[];
   displayName?: string | null;
   showNSFW?: boolean | null;
+  bggUsername?: string | null;
   updatedAt: string;
   createdAt: string;
   email: string;
@@ -1624,6 +1625,7 @@ export interface UsersSelect<T extends boolean = true> {
   roles?: T;
   displayName?: T;
   showNSFW?: T;
+  bggUsername?: T;
   updatedAt?: T;
   createdAt?: T;
   email?: T;

@@ -1,7 +1,8 @@
 import { NextRequest } from 'next/server';
-import { getPayload, KVAdapter } from 'payload';
+import { getPayload, KVAdapter, PayloadRequest } from 'payload';
 import config from '@payload-config';
 import { parseBGGCollection } from '@/lib/bgg/parseCollection';
+import { hasAPIAccess } from '@/access/RBAC/filters/hasAPIAccess';
 
 const CACHE_VERSION = 'v2'; // Matches the version of BGG API
 const FRESH_MS = 5 * 60 * 1000; // 5 minutes
@@ -26,6 +27,12 @@ export async function GET(req: NextRequest) {
   const kv = payload.kv;
   const key = `bgg:${CACHE_VERSION}:collection:${username}`;
   const now = Date.now();
+
+  // If the user is not authenticated get out
+  // TODO: Implement this properly with RBAC overhaul
+  /*if (await hasAPIAccess({ req })) {
+    return Response.json({ error: 'Unauthorized' }, { status: 401 });
+  }*/
 
   const cached = (await kv.get(key)) as CacheEntry | null;
 
