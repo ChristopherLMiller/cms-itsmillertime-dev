@@ -1,13 +1,6 @@
 import { RBAC } from '@/access/RBAC';
 import { Groups } from '@/collections/groups';
 import { slugField } from '@/fields/slug';
-import {
-  MetaDescriptionField,
-  MetaImageField,
-  MetaTitleField,
-  OverviewField,
-  PreviewField,
-} from '@payloadcms/plugin-seo/fields';
 import { lexicalEditor } from '@payloadcms/richtext-lexical';
 import { CollectionConfig } from 'payload';
 
@@ -24,10 +17,6 @@ export const Projects: CollectionConfig<'projects'> = {
     title: true,
     slug: true,
     shortDescription: true,
-    meta: {
-      image: true,
-      description: true,
-    },
   },
   admin: {
     defaultColumns: ['title', 'projectStatus', 'category', 'featured', 'updatedAt'],
