@@ -22,6 +22,9 @@ import { Pages } from './collections/Pages';
 import { PostsCategories } from './collections/Posts/Categories';
 import { Posts } from './collections/Posts/Posts';
 import { PostsTags } from './collections/Posts/Tags';
+import { ProjectsCategories } from './collections/Projects/Categories';
+import { Projects } from './collections/Projects/Projects';
+import { ProjectsTechnologies } from './collections/Projects/Technologies';
 import { Roles } from './collections/RBAC/Roles';
 import { Users } from './collections/Users';
 import { defaultLexical } from './fields/defaultLexical';
@@ -122,6 +125,9 @@ export default buildConfig({
     Manufacturers,
     ModelsTags,
     Models,
+    Projects,
+    ProjectsCategories,
+    ProjectsTechnologies,
   ],
   editor: defaultLexical,
   secret: process.env.PAYLOAD_SECRET || '',

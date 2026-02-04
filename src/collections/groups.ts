@@ -5,6 +5,7 @@ export const Groups = {
   media: 'Media Library',
   models: 'Models',
   blog: 'Blog',
+  projects: 'Projects',
   authentication: 'Authentication & Authorization',
   global: 'Global Properties',
 };
