@@ -86,6 +86,9 @@ export interface Config {
     manufacturers: Manufacturer;
     'models-tags': ModelsTag;
     models: Model;
+    projects: Project;
+    'projects-categories': ProjectsCategory;
+    'projects-technologies': ProjectsTechnology;
     'payload-mcp-api-keys': PayloadMcpApiKey;
     search: Search;
     'api-keys': ApiKey;
@@ -129,6 +132,9 @@ export interface Config {
     manufacturers: ManufacturersSelect<false> | ManufacturersSelect<true>;
     'models-tags': ModelsTagsSelect<false> | ModelsTagsSelect<true>;
     models: ModelsSelect<false> | ModelsSelect<true>;
+    projects: ProjectsSelect<false> | ProjectsSelect<true>;
+    'projects-categories': ProjectsCategoriesSelect<false> | ProjectsCategoriesSelect<true>;
+    'projects-technologies': ProjectsTechnologiesSelect<false> | ProjectsTechnologiesSelect<true>;
     'payload-mcp-api-keys': PayloadMcpApiKeysSelect<false> | PayloadMcpApiKeysSelect<true>;
     search: SearchSelect<false> | SearchSelect<true>;
     'api-keys': ApiKeysSelect<false> | ApiKeysSelect<true>;
@@ -939,6 +945,128 @@ export interface Scale {
   createdAt: string;
 }
 /**
+ * Coding projects and portfolio items
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "projects".
+ */
+export interface Project {
+  id: number;
+  slug?: string | null;
+  slugLock?: boolean | null;
+  projectStatus: 'inProgress' | 'active' | 'completed' | 'archived' | 'experimental';
+  /**
+   * Highlight this project on the homepage
+   */
+  featured?: boolean | null;
+  category?: (number | null) | ProjectsCategory;
+  technologies?: (number | ProjectsTechnology)[] | null;
+  /**
+   * Current version (e.g., 1.2.0, v2.0.0-beta)
+   */
+  version?: string | null;
+  license?: ('MIT' | 'Apache-2.0' | 'GPL-3.0' | 'BSD-3-Clause' | 'ISC' | 'Proprietary' | 'Unlicensed' | 'Other') | null;
+  role?: ('creator' | 'maintainer' | 'contributor' | 'collaborator') | null;
+  relatedResources?: {
+    relatedPosts?: (number | Post)[] | null;
+    relatedProjects?: (number | Project)[] | null;
+  };
+  title: string;
+  /**
+   * A brief one-liner description for cards and listings
+   */
+  shortDescription: string;
+  featuredImage?: (number | null) | Media;
+  content?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  /**
+   * External links related to this project
+   */
+  links?:
+    | {
+        type: 'github' | 'live' | 'npm' | 'docs' | 'custom';
+        /**
+         * Full URL including https://
+         */
+        url: string;
+        /**
+         * Custom label for this link
+         */
+        label?: string | null;
+        /**
+         * Hex color for this link (e.g., #ff5500)
+         */
+        color?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Screenshots and images showcasing the project
+   */
+  screenshots?: (number | Media)[] | null;
+  updatedAt: string;
+  createdAt: string;
+  deletedAt?: string | null;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * Project categories. Used for classifying project types (Web App, CLI, Library, etc.).
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "projects-categories".
+ */
+export interface ProjectsCategory {
+  id: number;
+  title: string;
+  /**
+   * Optional description of this category
+   */
+  description?: string | null;
+  slug?: string | null;
+  slugLock?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Technologies and frameworks used in projects (React, Node.js, TypeScript, etc.).
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "projects-technologies".
+ */
+export interface ProjectsTechnology {
+  id: number;
+  title: string;
+  /**
+   * Hex color for this technology (e.g., #61dafb for React)
+   */
+  color?: string | null;
+  /**
+   * Optional icon/logo for this technology
+   */
+  icon?: (number | null) | Media;
+  /**
+   * Link to official site or documentation
+   */
+  url?: string | null;
+  slug?: string | null;
+  slugLock?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
  * API keys control which collections, resources, tools, and prompts MCP clients can access
  *
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1481,6 +1609,18 @@ export interface PayloadLockedDocument {
         value: number | Model;
       } | null)
     | ({
+        relationTo: 'projects';
+        value: number | Project;
+      } | null)
+    | ({
+        relationTo: 'projects-categories';
+        value: number | ProjectsCategory;
+      } | null)
+    | ({
+        relationTo: 'projects-technologies';
+        value: number | ProjectsTechnology;
+      } | null)
+    | ({
         relationTo: 'payload-mcp-api-keys';
         value: number | PayloadMcpApiKey;
       } | null)
@@ -1589,7 +1729,7 @@ export interface PayloadQueryPreset {
     | boolean
     | null;
   groupBy?: string | null;
-  relatedCollection: 'posts' | 'kits' | 'models';
+  relatedCollection: 'posts' | 'kits' | 'models' | 'projects';
   /**
    * This is a temporary field used to determine if updating the preset would remove the user's access to it. When `true`, this record will be deleted after running the preset's `validate` function.
    */
@@ -2140,6 +2280,71 @@ export interface ModelsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "projects_select".
+ */
+export interface ProjectsSelect<T extends boolean = true> {
+  slug?: T;
+  slugLock?: T;
+  projectStatus?: T;
+  featured?: T;
+  category?: T;
+  technologies?: T;
+  version?: T;
+  license?: T;
+  role?: T;
+  relatedResources?:
+    | T
+    | {
+        relatedPosts?: T;
+        relatedProjects?: T;
+      };
+  title?: T;
+  shortDescription?: T;
+  featuredImage?: T;
+  content?: T;
+  links?:
+    | T
+    | {
+        type?: T;
+        url?: T;
+        label?: T;
+        color?: T;
+        id?: T;
+      };
+  screenshots?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  deletedAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "projects-categories_select".
+ */
+export interface ProjectsCategoriesSelect<T extends boolean = true> {
+  title?: T;
+  description?: T;
+  slug?: T;
+  slugLock?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "projects-technologies_select".
+ */
+export interface ProjectsTechnologiesSelect<T extends boolean = true> {
+  title?: T;
+  color?: T;
+  icon?: T;
+  url?: T;
+  slug?: T;
+  slugLock?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-mcp-api-keys_select".
  */
 export interface PayloadMcpApiKeysSelect<T extends boolean = true> {
@@ -2499,6 +2704,9 @@ export interface Webhook {
           | 'manufacturers'
           | 'models-tags'
           | 'models'
+          | 'projects'
+          | 'projects-categories'
+          | 'projects-technologies'
           | 'payload-mcp-api-keys'
           | 'search';
         enabled?: boolean | null;
@@ -2618,6 +2826,10 @@ export interface TaskSchedulePublish {
       | ({
           relationTo: 'pages';
           value: number | Page;
+        } | null)
+      | ({
+          relationTo: 'projects';
+          value: number | Project;
         } | null);
     global?: string | null;
     user?: (number | null) | User;
