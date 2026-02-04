@@ -976,7 +976,6 @@ export interface Project {
    * A brief one-liner description for cards and listings
    */
   shortDescription: string;
-  featuredImage?: (number | null) | Media;
   content?: {
     root: {
       type: string;
@@ -2300,7 +2299,6 @@ export interface ProjectsSelect<T extends boolean = true> {
       };
   title?: T;
   shortDescription?: T;
-  featuredImage?: T;
   content?: T;
   links?:
     | T
