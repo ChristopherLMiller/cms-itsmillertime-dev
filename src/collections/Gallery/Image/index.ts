@@ -29,7 +29,7 @@ export const GalleryImages: CollectionConfig<'gallery-images'> = {
     singular: 'Image',
     plural: 'Images',
   },
-  folders: true,
+  folders: false,
   access: {
     create: RBAC('gallery-images').create,
     read: RBAC('gallery-images').applyFilters('read', [nsfwFilter, visibilityFilter]),
