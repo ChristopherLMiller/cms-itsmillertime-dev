@@ -110,7 +110,7 @@ export interface Config {
       models: 'models';
     };
     'payload-folders': {
-      documentsAndFolders: 'payload-folders' | 'media' | 'gallery-images';
+      documentsAndFolders: 'payload-folders' | 'media';
     };
   };
   collectionsSelect: {
@@ -160,13 +160,7 @@ export interface Config {
     webhooks: WebhooksSelect<false> | WebhooksSelect<true>;
   };
   locale: null;
-  user:
-    | (User & {
-        collection: 'users';
-      })
-    | (PayloadMcpApiKey & {
-        collection: 'payload-mcp-api-keys';
-      });
+  user: User | PayloadMcpApiKey;
   jobs: {
     tasks: {
       generateImageEXIF: TaskGenerateImageEXIF;
@@ -384,6 +378,7 @@ export interface User {
       }[]
     | null;
   password?: string | null;
+  collection: 'users';
 }
 /**
  * Image
@@ -448,7 +443,6 @@ export interface GalleryImage {
      */
     image?: (number | null) | GalleryImage;
   };
-  folder?: (number | null) | FolderInterface;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -518,36 +512,6 @@ export interface GalleryImage {
       filename?: string | null;
     };
   };
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "payload-folders".
- */
-export interface FolderInterface {
-  id: number;
-  name: string;
-  folder?: (number | null) | FolderInterface;
-  documentsAndFolders?: {
-    docs?: (
-      | {
-          relationTo?: 'payload-folders';
-          value: number | FolderInterface;
-        }
-      | {
-          relationTo?: 'media';
-          value: number | Media;
-        }
-      | {
-          relationTo?: 'gallery-images';
-          value: number | GalleryImage;
-        }
-    )[];
-    hasNextPage?: boolean;
-    totalDocs?: number;
-  };
-  folderType?: ('media' | 'gallery-images')[] | null;
-  updatedAt: string;
-  createdAt: string;
 }
 /**
  * Media Items, images and otherwise
@@ -729,6 +693,32 @@ export interface PostsTag {
   title: string;
   slug?: string | null;
   slugLock?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-folders".
+ */
+export interface FolderInterface {
+  id: number;
+  name: string;
+  folder?: (number | null) | FolderInterface;
+  documentsAndFolders?: {
+    docs?: (
+      | {
+          relationTo?: 'payload-folders';
+          value: number | FolderInterface;
+        }
+      | {
+          relationTo?: 'media';
+          value: number | Media;
+        }
+    )[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
+  folderType?: 'media'[] | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1378,6 +1368,7 @@ export interface PayloadMcpApiKey {
   enableAPIKey?: boolean | null;
   apiKey?: string | null;
   apiKeyIndex?: string | null;
+  collection: 'payload-mcp-api-keys';
 }
 /**
  * This is a collection of automatically created search results. These results are used by the global site search and will be updated automatically as documents in the CMS are created or updated.
@@ -2047,7 +2038,6 @@ export interface GalleryImagesSelect<T extends boolean = true> {
         description?: T;
         image?: T;
       };
-  folder?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
