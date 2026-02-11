@@ -44,28 +44,35 @@ export const Users: CollectionConfig = {
               };
             }
 
-            // No matching Payload user found — user must be pre-created by an admin.
-            // To enable auto-provisioning for social login users, uncomment the block below.
-            // Note: you'll need a default role ID to assign.
-            //
-            // const newUser = await payload.create({
-            //   collection: 'users',
-            //   data: {
-            //     email: session.user.email,
-            //     password: crypto.randomUUID(), // random password since they'll use social login
-            //     displayName: session.user.name || session.user.email,
-            //     roles: [YOUR_DEFAULT_ROLE_ID],
-            //   },
-            // });
-            //
-            // return {
-            //   user: {
-            //     collection: 'users',
-            //     ...newUser,
-            //   },
-            // };
+            // Auto-provision user on first social login
+            const defaultRole = await payload.find({
+              collection: 'roles',
+              where: {
+                isDefault: { equals: true },
+              },
+              limit: 1,
+            });
 
-            return { user: null };
+            if (!defaultRole.docs[0]) {
+              console.error('No default role found — cannot auto-provision user');
+              return { user: null };
+            }
+
+            const newUser = await payload.create({
+              collection: 'users',
+              data: {
+                email: session.user.email,
+                password: crypto.randomUUID(), // random password since they'll use social login
+                displayName: session.user.name || session.user.email,
+                roles: [defaultRole.docs[0].id],
+              },
+            });
+
+            return {
+              user: {
+                ...newUser,
+              },
+            };
           } catch (error) {
             console.error('Better Auth strategy error:', error);
             return { user: null };
