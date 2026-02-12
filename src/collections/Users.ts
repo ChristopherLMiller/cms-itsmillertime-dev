@@ -1,9 +1,11 @@
 import type { CollectionConfig } from 'payload';
+import { RBAC } from '@/access/RBAC';
 import { Groups } from './groups';
 import { auth } from '@/lib/auth';
 
 export const Users: CollectionConfig = {
   slug: 'users',
+  access: RBAC('users'),
   admin: {
     useAsTitle: 'email',
     group: Groups.authentication,
