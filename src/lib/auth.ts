@@ -26,5 +26,7 @@ export const auth = betterAuth({
       maxAge: 5 * 60, // Cache session for 5 minutes to reduce DB lookups
     },
   },
-  trustedOrigins: [process.env.NEXT_PUBLIC_SERVER_URL || 'http://localhost:3000'],
+  trustedOrigins: process.env.TRUSTED_ORIGINS
+    ? process.env.TRUSTED_ORIGINS.split(',').map((o) => o.trim()).filter(Boolean)
+    : [process.env.NEXT_PUBLIC_SERVER_URL || 'http://localhost:3000'],
 });
