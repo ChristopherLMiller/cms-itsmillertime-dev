@@ -13,8 +13,10 @@ import { payloadPluginWebhooks } from 'payload-plugin-webhooks';
 import { Groups } from '@/collections/groups';
 import { payloadCmdk } from '@veiag/payload-cmdk';
 import type { Plugin } from 'payload';
+import { betterAuthPlugin } from './better-auth';
 
 export const plugins: Plugin[] = [
+  ...betterAuthPlugin(),
   mcpPlugin(),
   seoPlugin({
     generateTitle: generateTitle,

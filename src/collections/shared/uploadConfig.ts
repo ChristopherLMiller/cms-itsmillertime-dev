@@ -1,7 +1,9 @@
-import type { CollectionConfig, UploadConfig } from 'payload';
+import type { CollectionConfig } from 'payload';
 
 // Shared upload configuration for image sizing
-export const sharedImageSizes: NonNullable<Extract<CollectionConfig['upload'], object>>['imageSizes'] = [
+export const sharedImageSizes: NonNullable<
+  Extract<CollectionConfig['upload'], object>
+>['imageSizes'] = [
   {
     name: 'thumbnail',
     width: 300,

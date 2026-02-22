@@ -1,8 +1,8 @@
 import { PayloadRequest, Where } from 'payload';
 
 export const visibilityFilter = async ({ req }: { req: PayloadRequest }): Promise<Where> => {
-  // if we are on the local API allow it (admin)
-  if (req.payloadAPI === 'local') {
+  // if we are on the local API allow it (admin) or its MCP
+  if (req.payloadAPI === 'local' || req.user?.collection === 'payload-mcp-api-keys') {
     return {
       'settings.visibility': {
         in: ['ALL', 'AUTHENTICATED', 'PRIVILEGED'],
@@ -42,9 +42,7 @@ export const visibilityFilter = async ({ req }: { req: PayloadRequest }): Promis
                 ? [
                     {
                       'settings.allowedRoles.id': {
-                        in: req.user.roles.map((role) =>
-                          typeof role === 'object' ? role.id : role,
-                        ),
+                        in: req.user.role.map((role) => role),
                       },
                     },
                   ]

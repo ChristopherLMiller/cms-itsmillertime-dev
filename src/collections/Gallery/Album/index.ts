@@ -1,6 +1,6 @@
-import { RBAC } from '@/access/RBAC';
-import { nsfwFilter } from '@/access/RBAC/filters/nsfw';
-import { visibilityFilter } from '@/access/RBAC/filters/visibility';
+import { RBAC } from '@/access/new';
+import { nsfwFilter } from '@/access/new/filters/nsfwFilter';
+import { visibilityFilter } from '@/access/new/filters/visibilityFilter';
 import { Groups } from '@/collections/groups';
 import { slugField } from '@/fields/slug';
 import {
@@ -22,13 +22,13 @@ import { CollectionConfig } from 'payload';
 export const GalleryAlbums: CollectionConfig<'gallery-albums'> = {
   slug: 'gallery-albums',
   access: {
-    create: RBAC('gallery-albums').create,
-    read: RBAC('gallery-albums').applyFilters('read', [nsfwFilter, visibilityFilter]),
-    update: RBAC('gallery-albums').update,
-    delete: RBAC('gallery-albums').remove,
-    readVersions: RBAC('gallery-albums').readVersions,
-    unlock: RBAC('gallery-albums').unlock,
-    admin: RBAC('gallery-albums').admin,
+    read: RBAC().allowAll().applyFilter([nsfwFilter, visibilityFilter]).result(),
+    create: RBAC().allowedRoles(['admin']).result(),
+    update: RBAC().allowedRoles(['admin']).result(),
+    delete: RBAC().allowedRoles(['admin']).result(),
+    readVersions: RBAC().allowedRoles(['admin']).result(),
+    unlock: RBAC().allowedRoles(['admin']).result(),
+    admin: RBAC().allowedRoles(['admin']).result(),
   },
   labels: {
     singular: 'Album',

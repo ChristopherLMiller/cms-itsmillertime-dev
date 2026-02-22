@@ -1,4 +1,4 @@
-import { RBAC } from '@/access/RBAC';
+import { RBAC } from '@/access/new';
 import { slugField } from '@/fields/slug';
 import {
   MetaDescriptionField,
@@ -19,7 +19,15 @@ import { Groups } from './groups';
 
 export const Pages: CollectionConfig<'pages'> = {
   slug: 'pages',
-  access: RBAC('pages'),
+  access: {
+    read: RBAC().allowAll().result(),
+    create: RBAC().allowedRoles(['admin']).result(),
+    update: RBAC().allowedRoles(['admin']).result(),
+    delete: RBAC().allowedRoles(['admin']).result(),
+    readVersions: RBAC().allowedRoles(['admin']).result(),
+    unlock: RBAC().allowedRoles(['admin']).result(),
+    admin: RBAC().allowedRoles(['admin']).result(),
+  },
   labels: {
     singular: 'Page',
     plural: 'Pages',
@@ -145,6 +153,7 @@ export const Pages: CollectionConfig<'pages'> = {
               relationTo: 'media',
             }),
             PreviewField({
+              hasGenerateFn: true,
               titlePath: 'meta.title',
               descriptionPath: 'meta.description',
             }),

@@ -74,9 +74,6 @@ export default buildConfig({
       },
     },
   ],
-  graphQL: {
-    disable: true,
-  },
   kv: redisKVAdapter({
     keyPrefix: 'payload:',
     redisURL: process.env.REDIS_URL || '',
@@ -84,12 +81,11 @@ export default buildConfig({
   telemetry: false,
   cors: '*',
   admin: {
-    user: Users.slug,
+    user: 'users',
     importMap: {
       baseDir: path.resolve(dirname),
     },
     components: {
-      afterLogin: ['@/components/auth/SocialLoginButtons'],
       providers: ['@/components/NavBadgeProvider'],
       views: {
         dashboard: {

@@ -52,13 +52,19 @@ import { QueryPresetsGroupByCell as QueryPresetsGroupByCell_2b8867833a34864a02dd
 import { QueryPresetsGroupByField as QueryPresetsGroupByField_2b8867833a34864a02ddf429b0728a40 } from '@payloadcms/next/client'
 import { WebhookCollectionRowLabel as WebhookCollectionRowLabel_fcb2dafdf0f59a6c3a11842622e2d1b2 } from 'payload-plugin-webhooks/client'
 import { CustomNav as CustomNav_7a25bf58b9bf0789c79437d44273b9e5 } from 'payload-sidebar-plugin/rsc'
+import { LogoutButton as LogoutButton_aa8e4427b70b37c7820895ace344eb78 } from '@delmaredigital/payload-better-auth/components'
 import { SearchButton as SearchButton_3bf5d3e334c5eaf4f0d216451590d3c2 } from '@veiag/payload-cmdk/client'
-import { default as default_b23cfbc8e331570476914db1b5bf551b } from '@/components/auth/SocialLoginButtons'
+import { SecurityNavLinks as SecurityNavLinks_e3642e6c1e5dbb92bcf178f42e87e19e } from '@delmaredigital/payload-better-auth/components/management'
+import { BeforeLogin as BeforeLogin_aa8e4427b70b37c7820895ace344eb78 } from '@delmaredigital/payload-better-auth/components'
 import { default as default_e5727cf75af5a5f3715e1efb9b6b07eb } from '@/components/NavBadgeProvider'
 import { CommandMenuProvider as CommandMenuProvider_3bf5d3e334c5eaf4f0d216451590d3c2 } from '@veiag/payload-cmdk/client'
 import { S3ClientUploadHandler as S3ClientUploadHandler_f97aa6c64367fa259c5bc0567239ef24 } from '@payloadcms/storage-s3/client'
 import { Dashboard as Dashboard_b39f2d96c5778d5698b3c9e7777aa63a } from '@/components/Dashboard'
 import { default as default_41e34effe3f4ece2ddcb2839119d86bb } from '@/components/BGG'
+import { LoginViewWrapper as LoginViewWrapper_76e4fd5e0c2ccc05732c17408c72107e } from '@delmaredigital/payload-better-auth/rsc'
+import { TwoFactorView as TwoFactorView_76e4fd5e0c2ccc05732c17408c72107e } from '@delmaredigital/payload-better-auth/rsc'
+import { ApiKeysView as ApiKeysView_76e4fd5e0c2ccc05732c17408c72107e } from '@delmaredigital/payload-better-auth/rsc'
+import { PasskeysView as PasskeysView_76e4fd5e0c2ccc05732c17408c72107e } from '@delmaredigital/payload-better-auth/rsc'
 import { CollectionCards as CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1 } from '@payloadcms/next/rsc'
 
 export const importMap = {
@@ -116,12 +122,18 @@ export const importMap = {
   "@payloadcms/next/client#QueryPresetsGroupByField": QueryPresetsGroupByField_2b8867833a34864a02ddf429b0728a40,
   "payload-plugin-webhooks/client#WebhookCollectionRowLabel": WebhookCollectionRowLabel_fcb2dafdf0f59a6c3a11842622e2d1b2,
   "payload-sidebar-plugin/rsc#CustomNav": CustomNav_7a25bf58b9bf0789c79437d44273b9e5,
+  "@delmaredigital/payload-better-auth/components#LogoutButton": LogoutButton_aa8e4427b70b37c7820895ace344eb78,
   "@veiag/payload-cmdk/client#SearchButton": SearchButton_3bf5d3e334c5eaf4f0d216451590d3c2,
-  "@/components/auth/SocialLoginButtons#default": default_b23cfbc8e331570476914db1b5bf551b,
+  "@delmaredigital/payload-better-auth/components/management#SecurityNavLinks": SecurityNavLinks_e3642e6c1e5dbb92bcf178f42e87e19e,
+  "@delmaredigital/payload-better-auth/components#BeforeLogin": BeforeLogin_aa8e4427b70b37c7820895ace344eb78,
   "@/components/NavBadgeProvider#default": default_e5727cf75af5a5f3715e1efb9b6b07eb,
   "@veiag/payload-cmdk/client#CommandMenuProvider": CommandMenuProvider_3bf5d3e334c5eaf4f0d216451590d3c2,
   "@payloadcms/storage-s3/client#S3ClientUploadHandler": S3ClientUploadHandler_f97aa6c64367fa259c5bc0567239ef24,
   "@/components/Dashboard#Dashboard": Dashboard_b39f2d96c5778d5698b3c9e7777aa63a,
   "@/components/BGG#default": default_41e34effe3f4ece2ddcb2839119d86bb,
+  "@delmaredigital/payload-better-auth/rsc#LoginViewWrapper": LoginViewWrapper_76e4fd5e0c2ccc05732c17408c72107e,
+  "@delmaredigital/payload-better-auth/rsc#TwoFactorView": TwoFactorView_76e4fd5e0c2ccc05732c17408c72107e,
+  "@delmaredigital/payload-better-auth/rsc#ApiKeysView": ApiKeysView_76e4fd5e0c2ccc05732c17408c72107e,
+  "@delmaredigital/payload-better-auth/rsc#PasskeysView": PasskeysView_76e4fd5e0c2ccc05732c17408c72107e,
   "@payloadcms/next/rsc#CollectionCards": CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1
 }

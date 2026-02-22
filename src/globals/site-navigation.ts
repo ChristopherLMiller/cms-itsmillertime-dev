@@ -1,3 +1,4 @@
+import { RBAC } from '@/access/new';
 import { Groups } from '@/collections/groups';
 import { GlobalConfig } from 'payload';
 
@@ -7,8 +8,9 @@ export const SiteNavigation: GlobalConfig = {
     group: Groups.global,
   },
   access: {
-    read: () => true,
-    update: () => true,
+    read: RBAC().allowAll().result(),
+    update: RBAC().allowedRoles(['admin']).result(),
+    readVersions: RBAC().allowedRoles(['admin']).result(),
   },
   fields: [
     {

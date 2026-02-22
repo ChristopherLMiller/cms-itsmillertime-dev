@@ -1,6 +1,7 @@
 import type { CollectionConfig } from 'payload';
 import { Groups } from './groups';
-import { auth } from '@/lib/auth';
+import { betterAuthStrategy } from '@delmaredigital/payload-better-auth';
+import { RBAC } from '@/access/new';
 
 export const Users: CollectionConfig = {
   slug: 'users',
@@ -10,89 +11,46 @@ export const Users: CollectionConfig = {
     description: 'User accounts',
     defaultColumns: ['displayName', 'email', 'roles', 'showNSFW'],
   },
+  access: {
+    read: RBAC().allowAll().result(),
+    create: RBAC().allowedRoles(['admin']).result(),
+    update: RBAC().allowedRoles(['admin']).result(),
+    delete: RBAC().allowedRoles(['admin']).result(),
+    readVersions: RBAC().allowedRoles(['admin']).result(),
+    unlock: RBAC().allowedRoles(['admin']).result(),
+    admin: RBAC().allowedRoles(['admin']).result(),
+  },
   auth: {
-    strategies: [
-      {
-        name: 'better-auth',
-        authenticate: async ({ payload, headers }) => {
-          try {
-            const cookieHeader = headers.get('cookie');
-            if (!cookieHeader) return { user: null };
-
-            // Validate the Better Auth session using the session cookie
-            const session = await auth.api.getSession({
-              headers: new Headers({ cookie: cookieHeader }),
-            });
-
-            if (!session?.user?.email) return { user: null };
-
-            // Find the corresponding Payload user by email
-            const result = await payload.find({
-              collection: 'users',
-              where: {
-                email: { equals: session.user.email },
-              },
-              limit: 1,
-            });
-
-            if (result.docs[0]) {
-              return {
-                user: {
-                  ...result.docs[0],
-                  collection: 'users',
-                },
-              };
-            }
-
-            // Auto-provision user on first social login
-            const defaultRole = await payload.find({
-              collection: 'roles',
-              where: {
-                isDefault: { equals: true },
-              },
-              limit: 1,
-            });
-
-            if (!defaultRole.docs[0]) {
-              console.error('No default role found — cannot auto-provision user');
-              return { user: null };
-            }
-
-            const newUser = await payload.create({
-              collection: 'users',
-              data: {
-                email: session.user.email,
-                password: crypto.randomUUID(), // random password since they'll use social login
-                displayName: session.user.name || session.user.email,
-                roles: [defaultRole.docs[0].id],
-              },
-            });
-
-            return {
-              user: {
-                ...newUser,
-              },
-            };
-          } catch (error) {
-            console.error('Better Auth strategy error:', error);
-            return { user: null };
-          }
-        },
-      },
-    ],
+    disableLocalStrategy: true,
+    strategies: [betterAuthStrategy()],
   },
   fields: [
+    { name: 'email', type: 'email', required: true, unique: true },
+    { name: 'emailVerified', type: 'checkbox', defaultValue: false },
     {
-      type: 'relationship',
-      relationTo: 'roles',
-      name: 'roles',
-      required: true,
+      name: 'role',
+      type: 'select',
+      options: [
+        { label: 'Family', value: 'family' },
+        { label: 'Friends', value: 'friend' },
+        { label: 'Client', value: 'client' },
+        { label: 'User', value: 'user' },
+        { label: 'Admin', value: 'admin' },
+      ],
       hasMany: true,
+      defaultValue: 'user',
+      required: true,
     },
     {
       type: 'text',
       name: 'displayName',
       label: 'Display Name',
+    },
+    {
+      type: 'join',
+      name: 'apiKeys',
+      collection: 'apikeys',
+      on: 'user',
     },
     {
       type: 'checkbox',
@@ -106,17 +64,11 @@ export const Users: CollectionConfig = {
     {
       type: 'text',
       name: 'bggUsername',
+      admin: {
+        position: 'sidebar',
+      },
       required: false,
       label: 'BoardGameGeek Username',
     },
   ],
-  hooks: {
-    afterChange: [
-      async ({ req, doc, operation }) => {
-        // Only send welcome email for new users
-        if (operation === 'create') {
-        }
-      },
-    ],
-  },
 };

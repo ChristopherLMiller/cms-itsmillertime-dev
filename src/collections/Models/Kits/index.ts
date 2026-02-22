@@ -1,10 +1,18 @@
-import { RBAC } from '@/access/RBAC';
+import { RBAC } from '@/access/new';
 import { Groups } from '@/collections/groups';
 import { CollectionConfig } from 'payload';
 
 export const Kits: CollectionConfig<'kits'> = {
   slug: 'kits',
-  access: RBAC('kits'),
+  access: {
+    read: RBAC().allowAll().result(),
+    create: RBAC().allowedRoles(['admin']).result(),
+    update: RBAC().allowedRoles(['admin']).result(),
+    delete: RBAC().allowedRoles(['admin']).result(),
+    readVersions: RBAC().allowedRoles(['admin']).result(),
+    unlock: RBAC().allowedRoles(['admin']).result(),
+    admin: RBAC().allowedRoles(['admin']).result(),
+  },
   enableQueryPresets: true,
   admin: {
     useAsTitle: 'full_title',
