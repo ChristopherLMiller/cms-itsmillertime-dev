@@ -1,5 +1,3 @@
-import ExifReader from 'exifreader';
-
 import { CollectionAfterChangeHook } from 'payload';
 
 const exifSupportedMimeTypes = [

@@ -1,6 +1,5 @@
-import { RBAC } from '@/access/RBAC';
-import { nsfwFilter } from '@/access/RBAC/filters/nsfw';
-import { visibilityFilter } from '@/access/RBAC/filters/visibility';
+import { RBAC } from '@/access/new';
+import { nsfwFilter } from '@/access/new/filters/nsfwFilter';
 import { Groups } from '@/collections/groups';
 import { imageContentFields, imageTechnicalFields } from '@/collections/shared/imageFields';
 import { baseUploadConfig } from '@/collections/shared/uploadConfig';
@@ -16,6 +15,7 @@ import { type CollectionConfig } from 'payload';
 import { generateEXIF } from '@/collections/shared/generateEXIF';
 import { generateBlurHash } from '@/collections/shared/generateBlurHash';
 import { defaultAltText } from '@/collections/shared/defaultAltText';
+import { visibilityFilter } from '@/access/new/filters/visibilityFilter';
 
 export const GalleryImages: CollectionConfig<'gallery-images'> = {
   slug: 'gallery-images',
@@ -31,13 +31,13 @@ export const GalleryImages: CollectionConfig<'gallery-images'> = {
   },
   folders: false,
   access: {
-    create: RBAC('gallery-images').create,
-    read: RBAC('gallery-images').applyFilters('read', [nsfwFilter, visibilityFilter]),
-    update: RBAC('gallery-images').update,
-    delete: RBAC('gallery-images').remove,
-    readVersions: RBAC('gallery-images').readVersions,
-    unlock: RBAC('gallery-images').unlock,
-    admin: RBAC('gallery-images').admin,
+    read: RBAC().allowAll().applyFilter([nsfwFilter, visibilityFilter]).result(),
+    create: RBAC().allowedRoles(['admin']).result(),
+    update: RBAC().allowedRoles(['admin']).result(),
+    delete: RBAC().allowedRoles(['admin']).result(),
+    readVersions: RBAC().allowedRoles(['admin']).result(),
+    unlock: RBAC().allowedRoles(['admin']).result(),
+    admin: RBAC().allowedRoles(['admin']).result(),
   },
   upload: baseUploadConfig,
   fields: [

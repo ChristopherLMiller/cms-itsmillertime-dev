@@ -1,10 +1,18 @@
-import { RBAC } from '@/access/RBAC';
+import { RBAC } from '@/access/new';
 import { CollectionConfig } from 'payload';
 import { Groups } from './groups';
 
 export const MapMarkers: CollectionConfig<'map-markers'> = {
   slug: 'map-markers',
-  access: RBAC('map-markers'),
+  access: {
+    read: RBAC().allowAll().result(),
+    create: RBAC().allowedRoles(['admin']).result(),
+    update: RBAC().allowedRoles(['admin']).result(),
+    delete: RBAC().allowedRoles(['admin']).result(),
+    readVersions: RBAC().allowedRoles(['admin']).result(),
+    unlock: RBAC().allowedRoles(['admin']).result(),
+    admin: RBAC().allowedRoles(['admin']).result(),
+  },
   admin: {
     useAsTitle: 'title',
     group: Groups.misc,

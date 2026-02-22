@@ -1,7 +1,13 @@
-import { RBAC } from '@/access/RBAC';
+import { RBAC } from '@/access/new';
 import { Groups } from '@/collections/groups';
 import { slugField } from '@/fields/slug';
 import { lexicalToText } from '@/utilities/lexicalToText';
+import {
+  isAuthenticated,
+  hasRole,
+  isAdminOrSelf,
+  isAdmin,
+} from '@delmaredigital/payload-better-auth';
 import {
   MetaDescriptionField,
   MetaImageField,
@@ -14,7 +20,15 @@ import { CollectionConfig } from 'payload';
 
 export const Posts: CollectionConfig<'posts'> = {
   slug: 'posts',
-  access: RBAC('posts'),
+  access: {
+    read: RBAC().allowAll().result(),
+    create: RBAC().allowedRoles(['admin']).result(),
+    update: RBAC().allowedRoles(['admin']).result(),
+    delete: RBAC().allowedRoles(['admin']).result(),
+    readVersions: RBAC().allowedRoles(['admin']).result(),
+    unlock: RBAC().allowedRoles(['admin']).result(),
+    admin: RBAC().allowedRoles(['admin']).result(),
+  },
   labels: {
     singular: 'Article',
     plural: 'Articles',
