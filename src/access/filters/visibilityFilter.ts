@@ -41,7 +41,7 @@ export const visibilityFilter = async ({ req }: { req: PayloadRequest }): Promis
               ...(req.user.collection === 'users'
                 ? [
                     {
-                      'settings.allowedRoles.id': {
+                      'settings.Roles.id': {
                         in: req.user.role.map((role) => role),
                       },
                     },

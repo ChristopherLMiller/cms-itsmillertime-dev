@@ -2,7 +2,6 @@ import { NextRequest } from 'next/server';
 import { getPayload, KVAdapter, PayloadRequest } from 'payload';
 import config from '@payload-config';
 import { parseBGGCollection } from '@/lib/bgg/parseCollection';
-import { hasAPIAccess } from '@/access/RBAC/filters/hasAPIAccess';
 
 const CACHE_VERSION = 'v2'; // Matches the version of BGG API
 const FRESH_MS = 5 * 60 * 1000; // 5 minutes

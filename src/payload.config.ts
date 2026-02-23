@@ -25,7 +25,6 @@ import { PostsTags } from './collections/Posts/Tags';
 import { ProjectsCategories } from './collections/Projects/Categories';
 import { Projects } from './collections/Projects/Projects';
 import { ProjectsTechnologies } from './collections/Projects/Technologies';
-import { Roles } from './collections/RBAC/Roles';
 import { Users } from './collections/Users';
 import { defaultLexical } from './fields/defaultLexical';
 import { SiteMeta } from './globals/site-meta';
@@ -111,7 +110,6 @@ export default buildConfig({
     PostsCategories,
     PostsTags,
     Pages,
-    Roles,
     GalleryAlbums,
     GalleryImages,
     GalleryTags,

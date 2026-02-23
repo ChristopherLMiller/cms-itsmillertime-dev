@@ -1,4 +1,4 @@
-import { RBAC } from '@/access/new';
+import { RBAC } from '@/access';
 import { Groups } from '@/collections/groups';
 import { GlobalConfig } from 'payload';
 
@@ -95,10 +95,16 @@ export const SiteNavigation: GlobalConfig = {
               ],
             },
             {
-              type: 'relationship',
-              relationTo: 'roles',
+              type: 'select',
+              options: [
+                { label: 'Family', value: 'family' },
+                { label: 'Friends', value: 'friend' },
+                { label: 'Client', value: 'client' },
+                { label: 'User', value: 'user' },
+                { label: 'Admin', value: 'admin' },
+              ],
               hasMany: true,
-              name: 'allowedRoles',
+              name: 'permittedRoles',
               admin: {
                 condition: (siblingData) => {
                   return siblingData?.visibility === 'PRIVILEGED';
@@ -157,10 +163,16 @@ export const SiteNavigation: GlobalConfig = {
           ],
         },
         {
-          type: 'relationship',
-          relationTo: 'roles',
+          type: 'select',
+          options: [
+            { label: 'Family', value: 'family' },
+            { label: 'Friends', value: 'friend' },
+            { label: 'Client', value: 'client' },
+            { label: 'User', value: 'user' },
+            { label: 'Admin', value: 'admin' },
+          ],
           hasMany: true,
-          name: 'allowedRoles',
+          name: 'permittedRoles',
           admin: {
             condition: (siblingData) => {
               return siblingData?.visibility === 'PRIVILEGED';

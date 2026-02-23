@@ -5,7 +5,7 @@ import { baseUploadConfig } from '../shared/uploadConfig';
 import { defaultAltText } from '../shared/defaultAltText';
 import { generateBlurHash } from '../shared/generateBlurHash';
 import { generateEXIF } from '../shared/generateEXIF';
-import { RBAC } from '@/access/new';
+import { RBAC } from '@/access';
 
 export const Media: CollectionConfig = {
   slug: 'media',

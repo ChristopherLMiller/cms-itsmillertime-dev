@@ -1,6 +1,6 @@
-import { RBAC } from '@/access/new';
-import { nsfwFilter } from '@/access/new/filters/nsfwFilter';
-import { visibilityFilter } from '@/access/new/filters/visibilityFilter';
+import { RBAC } from '@/access';
+import { nsfwFilter } from '@/access/filters/nsfwFilter';
+import { visibilityFilter } from '@/access/filters/visibilityFilter';
 import { Groups } from '@/collections/groups';
 import { slugField } from '@/fields/slug';
 import {
@@ -93,10 +93,16 @@ export const GalleryAlbums: CollectionConfig<'gallery-albums'> = {
           ],
         },
         {
-          type: 'relationship',
-          relationTo: 'roles',
+          type: 'select',
           hasMany: true,
-          name: 'allowedRoles',
+          name: 'permittedRoles',
+          options: [
+            { label: 'Family', value: 'family' },
+            { label: 'Friends', value: 'friend' },
+            { label: 'Client', value: 'client' },
+            { label: 'User', value: 'user' },
+            { label: 'Admin', value: 'admin' },
+          ],
           admin: {
             position: 'sidebar',
             condition: (siblingData) => {

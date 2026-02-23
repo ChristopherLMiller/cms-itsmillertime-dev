@@ -1,13 +1,7 @@
-import { RBAC } from '@/access/new';
+import { RBAC } from '@/access';
 import { Groups } from '@/collections/groups';
 import { slugField } from '@/fields/slug';
 import { lexicalToText } from '@/utilities/lexicalToText';
-import {
-  isAuthenticated,
-  hasRole,
-  isAdminOrSelf,
-  isAdmin,
-} from '@delmaredigital/payload-better-auth';
 import {
   MetaDescriptionField,
   MetaImageField,

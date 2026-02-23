@@ -1,4 +1,4 @@
-import { RBAC } from '@/access/new';
+import { RBAC } from '@/access';
 import { slugField } from '@/fields/slug';
 import {
   MetaDescriptionField,

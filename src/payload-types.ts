@@ -75,7 +75,6 @@ export interface Config {
     'posts-categories': PostsCategory;
     'posts-tags': PostsTag;
     pages: Page;
-    roles: Role;
     'gallery-albums': GalleryAlbum;
     'gallery-images': GalleryImage;
     'gallery-tags': GalleryTag;
@@ -130,7 +129,6 @@ export interface Config {
     'posts-categories': PostsCategoriesSelect<false> | PostsCategoriesSelect<true>;
     'posts-tags': PostsTagsSelect<false> | PostsTagsSelect<true>;
     pages: PagesSelect<false> | PagesSelect<true>;
-    roles: RolesSelect<false> | RolesSelect<true>;
     'gallery-albums': GalleryAlbumsSelect<false> | GalleryAlbumsSelect<true>;
     'gallery-images': GalleryImagesSelect<false> | GalleryImagesSelect<true>;
     'gallery-tags': GalleryTagsSelect<false> | GalleryTagsSelect<true>;
@@ -269,7 +267,7 @@ export interface GalleryAlbum {
     category?: (number | null) | GalleryCategory;
     tags?: (number | GalleryTag)[] | null;
     visibility: 'ALL' | 'AUTHENTICATED' | 'PRIVILEGED';
-    allowedRoles?: (number | Role)[] | null;
+    permittedRoles?: ('family' | 'friend' | 'client' | 'user' | 'admin')[] | null;
     allowedUsers?: (number | User)[] | null;
   };
   tracking?: {
@@ -338,29 +336,6 @@ export interface GalleryTag {
   title: string;
   slug?: string | null;
   slugLock?: boolean | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * User roles and permissions
- *
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "roles".
- */
-export interface Role {
-  id: number;
-  name: string;
-  description?: string | null;
-  isDefault?: boolean | null;
-  permissions?:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -457,7 +432,7 @@ export interface GalleryImage {
     isNsfw?: boolean | null;
     'gallery-tags'?: (number | GalleryTag)[] | null;
     visibility: 'ALL' | 'AUTHENTICATED' | 'PRIVILEGED';
-    allowedRoles?: (number | Role)[] | null;
+    permittedRoles?: ('family' | 'friend' | 'client' | 'user' | 'admin')[] | null;
     allowedUsers?: (number | User)[] | null;
   };
   exif?:
@@ -794,7 +769,7 @@ export interface Page {
   slug?: string | null;
   slugLock?: boolean | null;
   visibility?: ('ALL' | 'AUTHENTICATED' | 'ANONYMOUS' | 'PRIVILEGED') | null;
-  allowedRoles?: (number | Role)[] | null;
+  permittedRoles?: ('family' | 'friend' | 'client' | 'user' | 'admin')[] | null;
   blocks?:
     | {
         block?: {
@@ -1701,10 +1676,6 @@ export interface PayloadLockedDocument {
         value: number | Page;
       } | null)
     | ({
-        relationTo: 'roles';
-        value: number | Role;
-      } | null)
-    | ({
         relationTo: 'gallery-albums';
         value: number | GalleryAlbum;
       } | null)
@@ -2093,7 +2064,7 @@ export interface PagesSelect<T extends boolean = true> {
   slug?: T;
   slugLock?: T;
   visibility?: T;
-  allowedRoles?: T;
+  permittedRoles?: T;
   blocks?:
     | T
     | {
@@ -2114,18 +2085,6 @@ export interface PagesSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "roles_select".
- */
-export interface RolesSelect<T extends boolean = true> {
-  name?: T;
-  description?: T;
-  isDefault?: T;
-  permissions?: T;
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "gallery-albums_select".
  */
 export interface GalleryAlbumsSelect<T extends boolean = true> {
@@ -2138,7 +2097,7 @@ export interface GalleryAlbumsSelect<T extends boolean = true> {
         category?: T;
         tags?: T;
         visibility?: T;
-        allowedRoles?: T;
+        permittedRoles?: T;
         allowedUsers?: T;
       };
   tracking?:
@@ -2178,7 +2137,7 @@ export interface GalleryImagesSelect<T extends boolean = true> {
         isNsfw?: T;
         'gallery-tags'?: T;
         visibility?: T;
-        allowedRoles?: T;
+        permittedRoles?: T;
         allowedUsers?: T;
       };
   exif?: T;
@@ -2904,7 +2863,7 @@ export interface SiteNavigation {
               order: number;
               icon?: (number | null) | Media;
               visibility: 'ALL' | 'AUTHENTICATED' | 'ANONYMOUS' | 'PRIVILEGED';
-              allowedRoles?: (number | Role)[] | null;
+              permittedRoles?: ('family' | 'friend' | 'client' | 'user' | 'admin')[] | null;
               allowedUsers?: (number | User)[] | null;
               id?: string | null;
             }[]
@@ -2912,7 +2871,7 @@ export interface SiteNavigation {
         order: number;
         icon?: (number | null) | Media;
         visibility: 'ALL' | 'AUTHENTICATED' | 'ANONYMOUS' | 'PRIVILEGED';
-        allowedRoles?: (number | Role)[] | null;
+        permittedRoles?: ('family' | 'friend' | 'client' | 'user' | 'admin')[] | null;
         allowedUsers?: (number | User)[] | null;
         id?: string | null;
       }[]
@@ -2943,7 +2902,6 @@ export interface Webhook {
           | 'posts-categories'
           | 'posts-tags'
           | 'pages'
-          | 'roles'
           | 'gallery-albums'
           | 'gallery-images'
           | 'gallery-tags'
@@ -3016,14 +2974,14 @@ export interface SiteNavigationSelect<T extends boolean = true> {
               order?: T;
               icon?: T;
               visibility?: T;
-              allowedRoles?: T;
+              permittedRoles?: T;
               allowedUsers?: T;
               id?: T;
             };
         order?: T;
         icon?: T;
         visibility?: T;
-        allowedRoles?: T;
+        permittedRoles?: T;
         allowedUsers?: T;
         id?: T;
       };
