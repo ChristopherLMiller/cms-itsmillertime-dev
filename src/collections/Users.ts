@@ -1,5 +1,4 @@
 import type { CollectionConfig } from 'payload';
-import { RBAC } from '@/access/RBAC';
 import { Groups } from './groups';
 import { betterAuthStrategy } from '@delmaredigital/payload-better-auth';
 import { RBAC } from '@/access';
