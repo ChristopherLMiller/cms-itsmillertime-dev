@@ -5,7 +5,6 @@ import { RBAC } from '@/access';
 
 export const Users: CollectionConfig = {
   slug: 'users',
-  access: RBAC('users'),
   admin: {
     useAsTitle: 'email',
     group: Groups.authentication,
