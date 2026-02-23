@@ -1,5 +1,5 @@
-import { RBAC } from '@/access/new';
-import { nsfwFilter } from '@/access/new/filters/nsfwFilter';
+import { RBAC } from '@/access';
+import { nsfwFilter } from '@/access/filters/nsfwFilter';
 import { Groups } from '@/collections/groups';
 import { imageContentFields, imageTechnicalFields } from '@/collections/shared/imageFields';
 import { baseUploadConfig } from '@/collections/shared/uploadConfig';
@@ -15,7 +15,7 @@ import { type CollectionConfig } from 'payload';
 import { generateEXIF } from '@/collections/shared/generateEXIF';
 import { generateBlurHash } from '@/collections/shared/generateBlurHash';
 import { defaultAltText } from '@/collections/shared/defaultAltText';
-import { visibilityFilter } from '@/access/new/filters/visibilityFilter';
+import { visibilityFilter } from '@/access/filters/visibilityFilter';
 
 export const GalleryImages: CollectionConfig<'gallery-images'> = {
   slug: 'gallery-images',
@@ -31,7 +31,7 @@ export const GalleryImages: CollectionConfig<'gallery-images'> = {
   },
   folders: false,
   access: {
-    read: RBAC().allowAll().applyFilter([nsfwFilter, visibilityFilter]).result(),
+    read: RBAC().allowAll().applyFilter([nsfwFilter]).result(),
     create: RBAC().allowedRoles(['admin']).result(),
     update: RBAC().allowedRoles(['admin']).result(),
     delete: RBAC().allowedRoles(['admin']).result(),
@@ -90,10 +90,16 @@ export const GalleryImages: CollectionConfig<'gallery-images'> = {
           ],
         },
         {
-          type: 'relationship',
-          relationTo: 'roles',
+          type: 'select',
+          options: [
+            { label: 'Family', value: 'family' },
+            { label: 'Friends', value: 'friend' },
+            { label: 'Client', value: 'client' },
+            { label: 'User', value: 'user' },
+            { label: 'Admin', value: 'admin' },
+          ],
           hasMany: true,
-          name: 'allowedRoles',
+          name: 'permittedRoles',
           admin: {
             position: 'sidebar',
             condition: (siblingData) => {

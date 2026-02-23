@@ -1,4 +1,4 @@
-import { RBAC } from '@/access/new';
+import { RBAC } from '@/access';
 import { CollectionConfig } from 'payload';
 import { Groups } from './groups';
 

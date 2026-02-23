@@ -1,4 +1,4 @@
-import { RBAC } from '@/access/new';
+import { RBAC } from '@/access';
 import { slugField } from '@/fields/slug';
 import {
   MetaDescriptionField,
@@ -88,10 +88,16 @@ export const Pages: CollectionConfig<'pages'> = {
       ],
     },
     {
-      type: 'relationship',
-      relationTo: 'roles',
+      type: 'select',
+      options: [
+        { label: 'Family', value: 'family' },
+        { label: 'Friends', value: 'friend' },
+        { label: 'Client', value: 'client' },
+        { label: 'User', value: 'user' },
+        { label: 'Admin', value: 'admin' },
+      ],
       hasMany: true,
-      name: 'allowedRoles',
+      name: 'permittedRoles',
       admin: {
         position: 'sidebar',
         condition: (siblingData) => {

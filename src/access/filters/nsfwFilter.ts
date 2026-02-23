@@ -1,4 +1,4 @@
-import { hasAdminRoles, hasAllRoles } from '@delmaredigital/payload-better-auth';
+import { hasAllRoles } from '@delmaredigital/payload-better-auth';
 import { PayloadRequest, Where } from 'payload';
 
 export const nsfwFilter = async ({ req }: { req: PayloadRequest }): Promise<Where> => {

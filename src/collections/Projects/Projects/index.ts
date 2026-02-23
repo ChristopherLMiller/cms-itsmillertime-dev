@@ -1,4 +1,4 @@
-import { RBAC } from '@/access/new';
+import { RBAC } from '@/access';
 import { Groups } from '@/collections/groups';
 import { slugField } from '@/fields/slug';
 import { lexicalEditor } from '@payloadcms/richtext-lexical';

@@ -2,7 +2,7 @@ import type { CollectionConfig } from 'payload';
 import { RBAC } from '@/access/RBAC';
 import { Groups } from './groups';
 import { betterAuthStrategy } from '@delmaredigital/payload-better-auth';
-import { RBAC } from '@/access/new';
+import { RBAC } from '@/access';
 
 export const Users: CollectionConfig = {
   slug: 'users',
