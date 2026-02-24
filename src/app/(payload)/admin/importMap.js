@@ -1,4 +1,6 @@
 import { RowLabel as RowLabel_d4655109717a6f5707cd0a6520a4fd9e } from '@/components/RowLabel'
+import { TwoFactorField as TwoFactorField_aa8e4427b70b37c7820895ace344eb78 } from '@delmaredigital/payload-better-auth/components'
+import { PasskeysField as PasskeysField_aa8e4427b70b37c7820895ace344eb78 } from '@delmaredigital/payload-better-auth/components'
 import { EXIFCell as EXIFCell_4480aec29364ed5b9b8eceaa4eff77ef } from '@/components/EXIFCell'
 import { EXIFDisplay as EXIFDisplay_6fcfec44911dfff19a45246c27579691 } from '@/components/EXIFDisplay'
 import { BlurhashField as BlurhashField_cca06512cc763e8c25c885f0d870995d } from '@/components/BlurhashField'
@@ -61,13 +63,13 @@ import { S3ClientUploadHandler as S3ClientUploadHandler_f97aa6c64367fa259c5bc056
 import { Dashboard as Dashboard_b39f2d96c5778d5698b3c9e7777aa63a } from '@/components/Dashboard'
 import { default as default_41e34effe3f4ece2ddcb2839119d86bb } from '@/components/BGG'
 import { LoginViewWrapper as LoginViewWrapper_76e4fd5e0c2ccc05732c17408c72107e } from '@delmaredigital/payload-better-auth/rsc'
-import { TwoFactorView as TwoFactorView_76e4fd5e0c2ccc05732c17408c72107e } from '@delmaredigital/payload-better-auth/rsc'
 import { ApiKeysView as ApiKeysView_76e4fd5e0c2ccc05732c17408c72107e } from '@delmaredigital/payload-better-auth/rsc'
-import { PasskeysView as PasskeysView_76e4fd5e0c2ccc05732c17408c72107e } from '@delmaredigital/payload-better-auth/rsc'
 import { CollectionCards as CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1 } from '@payloadcms/next/rsc'
 
 export const importMap = {
   "@/components/RowLabel#RowLabel": RowLabel_d4655109717a6f5707cd0a6520a4fd9e,
+  "@delmaredigital/payload-better-auth/components#TwoFactorField": TwoFactorField_aa8e4427b70b37c7820895ace344eb78,
+  "@delmaredigital/payload-better-auth/components#PasskeysField": PasskeysField_aa8e4427b70b37c7820895ace344eb78,
   "@/components/EXIFCell#EXIFCell": EXIFCell_4480aec29364ed5b9b8eceaa4eff77ef,
   "@/components/EXIFDisplay#EXIFDisplay": EXIFDisplay_6fcfec44911dfff19a45246c27579691,
   "@/components/BlurhashField#BlurhashField": BlurhashField_cca06512cc763e8c25c885f0d870995d,
@@ -130,8 +132,6 @@ export const importMap = {
   "@/components/Dashboard#Dashboard": Dashboard_b39f2d96c5778d5698b3c9e7777aa63a,
   "@/components/BGG#default": default_41e34effe3f4ece2ddcb2839119d86bb,
   "@delmaredigital/payload-better-auth/rsc#LoginViewWrapper": LoginViewWrapper_76e4fd5e0c2ccc05732c17408c72107e,
-  "@delmaredigital/payload-better-auth/rsc#TwoFactorView": TwoFactorView_76e4fd5e0c2ccc05732c17408c72107e,
   "@delmaredigital/payload-better-auth/rsc#ApiKeysView": ApiKeysView_76e4fd5e0c2ccc05732c17408c72107e,
-  "@delmaredigital/payload-better-auth/rsc#PasskeysView": PasskeysView_76e4fd5e0c2ccc05732c17408c72107e,
   "@payloadcms/next/rsc#CollectionCards": CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1
 }
