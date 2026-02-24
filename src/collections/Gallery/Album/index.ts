@@ -22,7 +22,7 @@ import { CollectionConfig } from 'payload';
 export const GalleryAlbums: CollectionConfig<'gallery-albums'> = {
   slug: 'gallery-albums',
   access: {
-    read: RBAC().allowAll().applyFilter([nsfwFilter, visibilityFilter]).result(),
+    read: RBAC().allowAll().applyFilter([nsfwFilter]).result(),
     create: RBAC().allowedRoles(['admin']).result(),
     update: RBAC().allowedRoles(['admin']).result(),
     delete: RBAC().allowedRoles(['admin']).result(),

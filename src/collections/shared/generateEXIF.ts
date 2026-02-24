@@ -10,20 +10,20 @@ const exifSupportedMimeTypes = [
 ];
 
 export const generateEXIF: CollectionAfterChangeHook = async ({ req, doc, collection }) => {
-  if (doc.mimeType && doc.mimeType.includes('image/')) {
-    console.log(
-      `Submitting ${collection.labels.singular} to queue for EXIF generation - ${doc.filename} ${doc.id}`,
-    );
-    const job = await req.payload.jobs.queue({
-      task: 'generateImageEXIF',
-      queue: 'exif',
-      input: {
-        id: doc.id,
-        collection: collection.slug,
-      },
-    });
-    req.payload.jobs.runByID({ id: job.id });
-  }
+  // if (doc.mimeType && doc.mimeType.includes('image/')) {
+  //   console.log(
+  //     `Submitting ${collection.labels.singular} to queue for EXIF generation - ${doc.filename} ${doc.id}`,
+  //   );
+  //   const job = await req.payload.jobs.queue({
+  //     task: 'generateImageEXIF',
+  //     queue: 'exif',
+  //     input: {
+  //       id: doc.id,
+  //       collection: collection.slug,
+  //     },
+  //   });
+  //   req.payload.jobs.runByID({ id: job.id });
+  // }
 
   return doc;
 };
