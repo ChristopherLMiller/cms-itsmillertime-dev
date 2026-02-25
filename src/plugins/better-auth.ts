@@ -54,6 +54,10 @@ export function betterAuthPlugin() {
             database: {
               generateId: 'serial',
             },
+            crossSubDomainCookies: {
+              enabled: true,
+              domain: '*.itsmillertime.dev',
+            },
           },
           baseURL: baseUrl,
           secret: process.env.BETTER_AUTH_SECRET,
