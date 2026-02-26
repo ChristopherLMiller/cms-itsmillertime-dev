@@ -13,6 +13,10 @@ import {
 import { CollectionSlug } from 'payload';
 
 const baseUrl = getBaseUrl();
+const trustedOrigins = [
+  baseUrl,
+  ...(process.env.TRUSTED_ORIGINS?.split(',').map((o) => o.trim()) || []),
+];
 
 export function betterAuthPlugin() {
   return [
@@ -61,9 +65,7 @@ export function betterAuthPlugin() {
           },
           baseURL: baseUrl,
           secret: process.env.BETTER_AUTH_SECRET,
-          trustedOrigins: process.env.TRUSTED_ORIGINS
-            ? process.env.TRUSTED_ORIGINS.split(',').map((o) => o.trim())
-            : [baseUrl],
+          trustedOrigins,
           user: {
             deleteUser: {
               enabled: true,
