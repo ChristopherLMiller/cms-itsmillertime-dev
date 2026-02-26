@@ -61,7 +61,9 @@ export function betterAuthPlugin() {
           },
           baseURL: baseUrl,
           secret: process.env.BETTER_AUTH_SECRET,
-          trustedOrigina: [baseUrl],
+          trustedOrigins: process.env.TRUSTED_ORIGINS
+            ? process.env.TRUSTED_ORIGINS.split(',').map((o) => o.trim())
+            : [baseUrl],
           user: {
             deleteUser: {
               enabled: true,
