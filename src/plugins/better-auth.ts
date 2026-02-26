@@ -18,6 +18,10 @@ const trustedOrigins = [
   ...(process.env.TRUSTED_ORIGINS?.split(',').map((o) => o.trim()) || []),
 ];
 
+console.log('Authorized origins:', trustedOrigins);
+console.log('Base URL:', baseUrl);
+console.log('BETTER_AUTH_URL:', process.env.BETTER_AUTH_URL);
+
 export function betterAuthPlugin() {
   return [
     // Auto-generate sessions,accounts, verification collections
@@ -58,10 +62,10 @@ export function betterAuthPlugin() {
             database: {
               generateId: 'serial',
             },
-            crossSubDomainCookies: {
+            /*crossSubDomainCookies: {
               enabled: true,
               domain: '*.itsmillertime.dev',
-            },
+            },*/
           },
           baseURL: baseUrl,
           secret: process.env.BETTER_AUTH_SECRET,
