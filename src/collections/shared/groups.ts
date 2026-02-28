@@ -6,6 +6,6 @@ export const Groups = {
   models: 'Models',
   blog: 'Blog',
   projects: 'Projects',
-  authentication: 'Authentication & Authorization',
+  authentication: 'Auth',
   global: 'Global Properties',
 };

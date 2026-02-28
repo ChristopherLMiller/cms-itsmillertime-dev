@@ -1,5 +1,5 @@
 import { RBAC } from '@/access';
-import { Groups } from '@/collections/groups';
+import { Groups } from '@/collections/shared/groups';
 import { clockifyProjectField } from '@/fields/clockifyProject';
 import { slugField } from '@/fields/slug';
 import {

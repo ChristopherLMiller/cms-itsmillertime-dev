@@ -1,5 +1,5 @@
 import type { CollectionConfig } from 'payload';
-import { Groups } from './groups';
+import { Groups } from './shared/groups';
 import { betterAuthStrategy } from '@delmaredigital/payload-better-auth';
 import { RBAC } from '@/access';
 
@@ -53,11 +53,17 @@ export const Users: CollectionConfig = {
       on: 'user',
     },
     {
-      type: 'checkbox',
-      name: 'showNSFW',
-      label: 'Show NSFW',
-      defaultValue: false,
+      type: 'select',
+      name: 'nsfwFiltering',
+      label: 'NSFW Filtering',
+      defaultValue: 'hide',
+      options: [
+        { label: 'Hide All', value: 'hide' },
+        { label: 'Blur', value: 'blur' },
+        { label: 'Show', value: 'Show' },
+      ],
       admin: {
+        description: 'Should NSFW content be hidden, blurred initially, or just shown?',
         position: 'sidebar',
       },
     },

@@ -1,7 +1,7 @@
 import { RBAC } from '@/access';
 import { nsfwFilter } from '@/access/filters/nsfwFilter';
 import { visibilityFilter } from '@/access/filters/visibilityFilter';
-import { Groups } from '@/collections/groups';
+import { Groups } from '@/collections/shared/groups';
 import { slugField } from '@/fields/slug';
 import {
   MetaDescriptionField,

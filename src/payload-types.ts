@@ -356,7 +356,10 @@ export interface User {
     hasNextPage?: boolean;
     totalDocs?: number;
   };
-  showNSFW?: boolean | null;
+  /**
+   * Should NSFW content be hidden, blurred initially, or just shown?
+   */
+  nsfwFiltering?: ('hide' | 'blur' | 'Show') | null;
   bggUsername?: string | null;
   /**
    * Auto-added by Better Auth (name)
@@ -1898,7 +1901,7 @@ export interface UsersSelect<T extends boolean = true> {
   role?: T;
   displayName?: T;
   apiKeys?: T;
-  showNSFW?: T;
+  nsfwFiltering?: T;
   bggUsername?: T;
   name?: T;
   image?: T;

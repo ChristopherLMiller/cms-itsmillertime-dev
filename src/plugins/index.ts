@@ -10,7 +10,7 @@ import * as Sentry from '@sentry/nextjs';
 import { mcpPlugin } from './mcp';
 import { payloadSidebar } from 'payload-sidebar-plugin';
 import { payloadPluginWebhooks } from 'payload-plugin-webhooks';
-import { Groups } from '@/collections/groups';
+import { Groups } from '@/collections/shared/groups';
 import { payloadCmdk } from '@veiag/payload-cmdk';
 import type { Plugin } from 'payload';
 import { betterAuthPlugin } from './better-auth';

@@ -1,6 +1,6 @@
 import { RBAC } from '@/access';
 import { nsfwFilter } from '@/access/filters/nsfwFilter';
-import { Groups } from '@/collections/groups';
+import { Groups } from '@/collections/shared/groups';
 import { imageContentFields, imageTechnicalFields } from '@/collections/shared/imageFields';
 import { baseUploadConfig } from '@/collections/shared/uploadConfig';
 import { slugField } from 'payload';

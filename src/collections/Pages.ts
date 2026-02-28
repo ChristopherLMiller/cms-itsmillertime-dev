@@ -15,7 +15,7 @@ import {
   lexicalEditor,
 } from '@payloadcms/richtext-lexical';
 import { CollectionConfig } from 'payload';
-import { Groups } from './groups';
+import { Groups } from './shared/groups';
 
 export const Pages: CollectionConfig<'pages'> = {
   slug: 'pages',
