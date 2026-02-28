@@ -1,6 +1,6 @@
 import { RBAC } from '@/access';
 import { CollectionConfig } from 'payload';
-import { Groups } from './groups';
+import { Groups } from './shared/groups';
 
 export const MapMarkers: CollectionConfig<'map-markers'> = {
   slug: 'map-markers',

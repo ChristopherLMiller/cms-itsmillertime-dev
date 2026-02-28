@@ -1,5 +1,5 @@
 import { RBAC } from '@/access';
-import { Groups } from '@/collections/groups';
+import { Groups } from '@/collections/shared/groups';
 import { CollectionConfig } from 'payload';
 
 export const Kits: CollectionConfig<'kits'> = {

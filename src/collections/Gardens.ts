@@ -9,7 +9,7 @@ import {
 } from '@payloadcms/plugin-seo/fields';
 import { lexicalEditor } from '@payloadcms/richtext-lexical';
 import { CollectionConfig } from 'payload';
-import { Groups } from './groups';
+import { Groups } from './shared/groups';
 
 export const Gardens: CollectionConfig<'gardens'> = {
   slug: 'gardens',

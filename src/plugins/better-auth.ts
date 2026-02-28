@@ -1,4 +1,4 @@
-import { betterAuthOptions } from '@/lib/auth/config';
+import { createBetterAuthOptions } from '@/lib/auth/config';
 import { getBaseUrl } from '@/lib/auth/getBaseUrl';
 import { betterAuth } from 'better-auth';
 import {
@@ -18,15 +18,11 @@ const trustedOrigins = [
   ...(process.env.TRUSTED_ORIGINS?.split(',').map((o) => o.trim()) || []),
 ];
 
-console.log('Authorized origins:', trustedOrigins);
-console.log('Base URL:', baseUrl);
-console.log('BETTER_AUTH_URL:', process.env.BETTER_AUTH_URL);
-
 export function betterAuthPlugin() {
   return [
     // Auto-generate sessions,accounts, verification collections
     betterAuthCollections({
-      betterAuthOptions,
+      betterAuthOptions: createBetterAuthOptions(),
       access: {
         read: isAuthenticated(),
         create: hasRole(['admin']),
@@ -38,7 +34,7 @@ export function betterAuthPlugin() {
     // Initialize better auth with auto-injected endspoints and admin components
     createBetterAuthPlugin({
       admin: {
-        betterAuthOptions,
+        betterAuthOptions: createBetterAuthOptions(),
         enableManagementUI: true,
         login: {
           title: 'Admin Login',
@@ -54,7 +50,7 @@ export function betterAuthPlugin() {
       autoRegisterEndpoints: true,
       createAuth: (payload) =>
         betterAuth({
-          ...betterAuthOptions,
+          ...createBetterAuthOptions(payload),
           database: payloadAdapter({
             payloadClient: payload,
           }),
@@ -62,10 +58,6 @@ export function betterAuthPlugin() {
             database: {
               generateId: 'serial',
             },
-            /*crossSubDomainCookies: {
-              enabled: true,
-              domain: '*.itsmillertime.dev',
-            },*/
           },
           baseURL: baseUrl,
           secret: process.env.BETTER_AUTH_SECRET,
@@ -73,7 +65,7 @@ export function betterAuthPlugin() {
           user: {
             deleteUser: {
               enabled: true,
-              afterDelete: async (user) => {
+              afterDelete: async (user: { id: any }) => {
                 const collections = ['sessions', 'accounts', 'apikeys', 'twoFactors', 'passkeys'];
                 for (const collection of collections) {
                   try {

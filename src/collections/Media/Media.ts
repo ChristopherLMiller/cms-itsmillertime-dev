@@ -1,5 +1,5 @@
 import { type CollectionConfig } from 'payload';
-import { Groups } from '../groups';
+import { Groups } from '../shared/groups';
 import { imageContentFields, imageTechnicalFields } from '../shared/imageFields';
 import { baseUploadConfig } from '../shared/uploadConfig';
 import { defaultAltText } from '../shared/defaultAltText';
