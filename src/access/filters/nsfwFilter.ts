@@ -2,6 +2,7 @@ import { hasAllRoles, hasAnyRole } from '@delmaredigital/payload-better-auth';
 import { PayloadRequest, Where } from 'payload';
 
 export const nsfwFilter = async ({ req }: { req: PayloadRequest }): Promise<Where> => {
+  console.log('[nsfwFilter] user:', req?.user ? { id: req.user.id, collection: req.user.collection, email: (req.user as any).email, displayName: (req.user as any).displayName } : 'none');
   // Don't show NSFW if the user isn't logged in
   if (!req?.user) {
     return {
