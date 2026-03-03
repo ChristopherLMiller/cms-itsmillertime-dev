@@ -53,6 +53,16 @@ export const Users: CollectionConfig = {
       on: 'user',
     },
     {
+      type: 'join',
+      name: 'albums',
+      collection: 'gallery-albums',
+      on: 'settings.allowedUsers',
+      hasMany: true,
+      admin: {
+        description: 'Albums this user has access to (when visibility is By User or Role)',
+      },
+    },
+    {
       type: 'select',
       name: 'nsfwFiltering',
       label: 'NSFW Filtering',

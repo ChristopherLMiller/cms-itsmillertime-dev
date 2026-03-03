@@ -78,7 +78,8 @@ export default buildConfig({
     redisURL: process.env.REDIS_URL || '',
   }),
   telemetry: false,
-  cors: '*',
+  cors: process.env.TRUSTED_ORIGINS?.split(',').map((o) => o.trim()) || [],
+  csrf: process.env.TRUSTED_ORIGINS?.split(',').map((o) => o.trim()) || [],
   admin: {
     user: 'users',
     importMap: {
