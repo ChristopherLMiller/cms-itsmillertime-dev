@@ -107,6 +107,7 @@ export interface Config {
   collectionsJoins: {
     users: {
       apiKeys: 'apikeys';
+      albums: 'gallery-albums';
     };
     media: {
       relatedPosts: 'posts';
@@ -353,6 +354,14 @@ export interface User {
   displayName?: string | null;
   apiKeys?: {
     docs?: (number | Apikey)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
+  /**
+   * Albums this user has access to (when visibility is By User or Role)
+   */
+  albums?: {
+    docs?: (number | GalleryAlbum)[];
     hasNextPage?: boolean;
     totalDocs?: number;
   };
@@ -1901,6 +1910,7 @@ export interface UsersSelect<T extends boolean = true> {
   role?: T;
   displayName?: T;
   apiKeys?: T;
+  albums?: T;
   nsfwFiltering?: T;
   bggUsername?: T;
   name?: T;
