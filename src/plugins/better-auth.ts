@@ -59,6 +59,15 @@ export function betterAuthPlugin() {
               generateId: 'serial',
             },
           },
+          cookies: {
+            sessionCookieOptions: {
+              httpOnly: true,
+              sameSite: 'none',
+              secure: true,
+              path: '/',
+              // DO NOT set domain for localhost; let the browser use the host automatically
+            },
+          },
           baseURL: baseUrl,
           secret: process.env.BETTER_AUTH_SECRET,
           trustedOrigins,
