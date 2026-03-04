@@ -1,5 +1,5 @@
 import { PayloadRequest } from 'payload';
 
-export async function allowAll({ req }: { req: PayloadRequest }) {
-  return true;
+export function allowAll() {
+  return async ({ req }: { req: PayloadRequest }) => true;
 }

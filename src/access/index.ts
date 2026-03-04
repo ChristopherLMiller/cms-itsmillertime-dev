@@ -21,7 +21,6 @@ const withFilter =
   };
 
 export function RBAC(collection?: string, method?: string) {
-  console.log(`Creating RBAC instance for ${collection || 'all'}:${method || 'all'}`);
   const api = {
     allowAll() {
       const check = async (_args: { req: PayloadRequest }) => true;
@@ -42,13 +41,11 @@ export function RBAC(collection?: string, method?: string) {
     },
 
     allowedRoles(roles: string[]) {
-      console.log('[allowedRoles] function executing');
       const check = async ({ req }: { req: PayloadRequest }) => {
         const ip =
           req?.headers?.get?.('x-forwarded-for')?.split(',')[0]?.trim() ??
           req?.headers?.get?.('x-real-ip') ??
           'unknown';
-        console.log('[allowedRoles.check] user:', req?.user?.id ?? 'anonymous', 'ip:', ip);
         if (req.user == null || req.user.collection !== 'users') return false;
         return hasAnyRole(req.user, normalizeRoles(roles));
       };
@@ -69,7 +66,6 @@ export function RBAC(collection?: string, method?: string) {
     },
 
     result() {
-      console.log('[result] function executing');
       return async (_args: { req: PayloadRequest }) => false;
     },
   };
