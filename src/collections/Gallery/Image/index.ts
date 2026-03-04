@@ -3,7 +3,7 @@ import { nsfwFilter } from '@/access/filters/nsfwFilter';
 import { Groups } from '@/collections/shared/groups';
 import { imageContentFields, imageTechnicalFields } from '@/collections/shared/imageFields';
 import { baseUploadConfig } from '@/collections/shared/uploadConfig';
-import { slugField } from 'payload';
+import { PayloadRequest, slugField } from 'payload';
 import {
   MetaDescriptionField,
   MetaImageField,
@@ -34,7 +34,10 @@ export const GalleryImages: CollectionConfig<'gallery-images'> = {
   },
   folders: false,
   access: {
-    read: RBACFunction(allowAll(), [nsfwFilter]),
+    read: async ({ req }: { req: PayloadRequest }) => {
+      const where = nsfwFilter({ req });
+      return where;
+    },
     create: RBACFunction(allowedRoles(['admin'])),
     update: RBACFunction(allowedRoles(['admin'])),
     delete: RBACFunction(allowedRoles(['admin'])),
