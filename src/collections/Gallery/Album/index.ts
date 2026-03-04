@@ -22,13 +22,13 @@ import { CollectionConfig } from 'payload';
 export const GalleryAlbums: CollectionConfig<'gallery-albums'> = {
   slug: 'gallery-albums',
   access: {
-    read: RBAC().allowAll().applyFilter([nsfwFilter]).result(),
-    create: RBAC().allowedRoles(['admin']).result(),
-    update: RBAC().allowedRoles(['admin']).result(),
-    delete: RBAC().allowedRoles(['admin']).result(),
-    readVersions: RBAC().allowedRoles(['admin']).result(),
-    unlock: RBAC().allowedRoles(['admin']).result(),
-    admin: RBAC().allowedRoles(['admin']).result(),
+    read: RBAC('gallery-albums', 'read').allowAll().applyFilter([nsfwFilter]).result(),
+    create: RBAC('gallery-albums', 'create').allowedRoles(['admin']).result(),
+    update: RBAC('gallery-albums', 'update').allowedRoles(['admin']).result(),
+    delete: RBAC('gallery-albums', 'delete').allowedRoles(['admin']).result(),
+    readVersions: RBAC('gallery-albums', 'readVersions').allowedRoles(['admin']).result(),
+    unlock: RBAC('gallery-albums', 'unlock').allowedRoles(['admin']).result(),
+    admin: RBAC('gallery-albums', 'admin').allowedRoles(['admin']).result(),
   },
   labels: {
     singular: 'Album',
