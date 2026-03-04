@@ -20,8 +20,8 @@ const withFilter =
     return { and: wheres };
   };
 
-export function RBAC() {
-  console.log('Creating RBAC instance');
+export function RBAC(collection?: string, method?: string) {
+  console.log(`Creating RBAC instance for ${collection || 'all'}:${method || 'all'}`);
   const api = {
     allowAll() {
       const check = async (_args: { req: PayloadRequest }) => true;
