@@ -11,11 +11,14 @@ import {
   OverviewField,
   PreviewField,
 } from '@payloadcms/plugin-seo/fields';
+import { RBAC as RBACFunction } from '@/access/RBAC';
 import { type CollectionConfig } from 'payload';
 import { generateEXIF } from '@/collections/shared/generateEXIF';
 import { generateBlurHash } from '@/collections/shared/generateBlurHash';
 import { defaultAltText } from '@/collections/shared/defaultAltText';
 import { visibilityFilter } from '@/access/filters/visibilityFilter';
+import { allowAll } from '@/access/methods/allowAll';
+import { allowedRoles } from '@/access/methods/allowedRoles';
 
 export const GalleryImages: CollectionConfig<'gallery-images'> = {
   slug: 'gallery-images',
@@ -31,8 +34,8 @@ export const GalleryImages: CollectionConfig<'gallery-images'> = {
   },
   folders: false,
   access: {
-    read: RBAC().allowAll().applyFilter([nsfwFilter]).result(),
-    create: RBAC().allowedRoles(['admin']).result(),
+    read: RBACFunction(allowAll(), [nsfwFilter]),
+    create: RBACFunction(allowedRoles(['admin'])),
     update: RBAC().allowedRoles(['admin']).result(),
     delete: RBAC().allowedRoles(['admin']).result(),
     readVersions: RBAC().allowedRoles(['admin']).result(),

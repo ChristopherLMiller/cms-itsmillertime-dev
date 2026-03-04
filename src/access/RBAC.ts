@@ -17,21 +17,36 @@ export function RBAC(
 
     // Step 3: If there are filters, run them
     const filterResults = await Promise.allSettled(filters.map((fn) => fn({ req })));
+    const rejected = filterResults.filter((r) => r.status === 'rejected');
+    if (rejected.length > 0) {
+      console.log(
+        '[RBAC] Rejected filters:',
+        rejected.map((r) => (r as PromiseRejectedResult).reason),
+      );
+    }
     const wheres: Where[] = filterResults
       .filter((r): r is PromiseFulfilledResult<Where> => r.status === 'fulfilled')
       .map((r) => r.value)
       .filter((w) => Object.keys(w).length > 0);
 
-    console.log('[RBAC] filterResults', filterResults);
-    console.log('[RBAC] wheres', wheres);
-
     // Step 4: If there are no wheres, just return true
     if (wheres.length === 0) return true;
 
     // Step 5: If there is one where, return it
-    if (wheres.length === 1) return wheres[0];
+    let finalWhere: Where;
+    if (wheres.length === 1) {
+      finalWhere = wheres[0];
+    } else {
+      // Step 6: If there are multiple wheres, return an and of them
+      finalWhere = { and: wheres };
+    }
 
-    // Step 6: If there are multiple wheres, return an and of them
-    return { and: wheres };
+    console.log('[RBAC] Individual filter outputs:', JSON.stringify(wheres, null, 2));
+    console.log(
+      '[RBAC] Final where clause (what Payload receives):',
+      JSON.stringify(finalWhere, null, 2),
+    );
+
+    return wheres;
   };
 }

@@ -24,7 +24,7 @@ import { allowAll } from '@/access/methods/allowAll';
 export const GalleryAlbums: CollectionConfig<'gallery-albums'> = {
   slug: 'gallery-albums',
   access: {
-    read: RBACFunction(allowAll, [nsfwFilter]),
+    read: RBACFunction(allowAll(), [nsfwFilter]),
     create: RBAC('gallery-albums', 'create').allowedRoles(['admin']).result(),
     update: RBAC('gallery-albums', 'update').allowedRoles(['admin']).result(),
     delete: RBAC('gallery-albums', 'delete').allowedRoles(['admin']).result(),
