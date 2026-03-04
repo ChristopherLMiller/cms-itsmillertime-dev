@@ -44,12 +44,12 @@ export function RBAC(
     let resultingWhere: Where;
     resultingWhere = { and: [...wheres] };
 
-    console.log('[RBAC] Individual filter outputs:', JSON.stringify(wheres, null, 2));
-    console.log(
-      '[RBAC] Final where clause (what Payload receives):',
-      JSON.stringify(resultingWhere, null, 2),
-    );
+    //console.log('[RBAC] Individual filter outputs:', JSON.stringify(wheres, null, 2));
+    //console.log(
+    //  '[RBAC] Final where clause (what Payload receives):',
+    //  JSON.stringify(resultingWhere, null, 2),
+    //);
 
-    return resultingWhere;
+    return wheres[0];
   };
 }
