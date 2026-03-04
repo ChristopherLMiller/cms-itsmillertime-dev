@@ -1,5 +1,6 @@
 import { RBAC } from '@/access';
 import { nsfwFilter } from '@/access/filters/nsfwFilter';
+import { RBAC as RBACFunction } from '@/access/RBAC';
 import { visibilityFilter } from '@/access/filters/visibilityFilter';
 import { Groups } from '@/collections/shared/groups';
 import { slugField } from '@/fields/slug';
@@ -18,11 +19,12 @@ import {
   lexicalEditor,
 } from '@payloadcms/richtext-lexical';
 import { CollectionConfig } from 'payload';
+import { allowAll } from '@/access/methods/allowAll';
 
 export const GalleryAlbums: CollectionConfig<'gallery-albums'> = {
   slug: 'gallery-albums',
   access: {
-    read: RBAC('gallery-albums', 'read').allowAll().applyFilter([nsfwFilter]).result(),
+    read: RBACFunction(allowAll, [nsfwFilter]),
     create: RBAC('gallery-albums', 'create').allowedRoles(['admin']).result(),
     update: RBAC('gallery-albums', 'update').allowedRoles(['admin']).result(),
     delete: RBAC('gallery-albums', 'delete').allowedRoles(['admin']).result(),
