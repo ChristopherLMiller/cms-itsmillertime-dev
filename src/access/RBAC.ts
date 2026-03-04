@@ -6,7 +6,7 @@ type FilterFn = (args: { req: PayloadRequest }) => Promise<Where>;
 export function RBAC(
   accessFunction: AccessCheckFn,
   filters: FilterFn[] = [],
-): (args: { req: PayloadRequest }) => Promise<boolean> {
+): (args: { req: PayloadRequest }) => Promise<boolean | Where> {
   return async ({ req }: { req: PayloadRequest }) => {
     // Step 1: Check that the user is even permitted to do this, if they aren't return false so we don't even have to run the filters
     const permitted = await accessFunction({ req });
