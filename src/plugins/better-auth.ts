@@ -59,15 +59,18 @@ export function betterAuthPlugin() {
               generateId: 'serial',
             },
           },
-          /*cookies: {
+          cookies: {
             sessionCookieOptions: {
               httpOnly: true,
               sameSite: 'none',
-              secure: true,
+              secure: false,
               path: '/',
-              // DO NOT set domain for localhost; let the browser use the host automatically
             },
-          },*/
+            crossSubDomainCookies: {
+              enabled: true,
+              domain: 'itsmillertime.dev',
+            },
+          },
           baseURL: baseUrl,
           secret: process.env.BETTER_AUTH_SECRET,
           trustedOrigins,
