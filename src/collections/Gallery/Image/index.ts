@@ -36,11 +36,11 @@ export const GalleryImages: CollectionConfig<'gallery-images'> = {
   access: {
     read: RBACFunction(allowAll(), [nsfwFilter]),
     create: RBACFunction(allowedRoles(['admin'])),
-    update: RBAC().allowedRoles(['admin']).result(),
-    delete: RBAC().allowedRoles(['admin']).result(),
-    readVersions: RBAC().allowedRoles(['admin']).result(),
-    unlock: RBAC().allowedRoles(['admin']).result(),
-    admin: RBAC().allowedRoles(['admin']).result(),
+    update: RBACFunction(allowedRoles(['admin'])),
+    delete: RBACFunction(allowedRoles(['admin'])),
+    readVersions: RBACFunction(allowedRoles(['admin'])),
+    unlock: RBACFunction(allowedRoles(['admin'])),
+    admin: RBACFunction(allowedRoles(['admin'])),
   },
   upload: baseUploadConfig,
   fields: [

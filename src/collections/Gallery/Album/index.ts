@@ -20,17 +20,18 @@ import {
 } from '@payloadcms/richtext-lexical';
 import { CollectionConfig } from 'payload';
 import { allowAll } from '@/access/methods/allowAll';
+import { allowedRoles } from '@/access/methods/allowedRoles';
 
 export const GalleryAlbums: CollectionConfig<'gallery-albums'> = {
   slug: 'gallery-albums',
   access: {
     read: RBACFunction(allowAll(), [nsfwFilter]),
-    create: RBAC('gallery-albums', 'create').allowedRoles(['admin']).result(),
-    update: RBAC('gallery-albums', 'update').allowedRoles(['admin']).result(),
-    delete: RBAC('gallery-albums', 'delete').allowedRoles(['admin']).result(),
-    readVersions: RBAC('gallery-albums', 'readVersions').allowedRoles(['admin']).result(),
-    unlock: RBAC('gallery-albums', 'unlock').allowedRoles(['admin']).result(),
-    admin: RBAC('gallery-albums', 'admin').allowedRoles(['admin']).result(),
+    create: RBACFunction(allowedRoles(['admin'])),
+    update: RBACFunction(allowedRoles(['admin'])),
+    delete: RBACFunction(allowedRoles(['admin'])),
+    readVersions: RBACFunction(allowedRoles(['admin'])),
+    unlock: RBACFunction(allowedRoles(['admin'])),
+    admin: RBACFunction(allowedRoles(['admin'])),
   },
   labels: {
     singular: 'Album',

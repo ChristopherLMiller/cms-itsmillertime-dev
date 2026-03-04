@@ -5,6 +5,14 @@ type FilterFn = (args: { req: PayloadRequest }) => Promise<Where>;
 
 export function RBAC(
   accessFunction: AccessCheckFn,
+  filters?: [],
+): (args: { req: PayloadRequest }) => Promise<boolean>;
+export function RBAC(
+  accessFunction: AccessCheckFn,
+  filters: [FilterFn, ...FilterFn[]],
+): (args: { req: PayloadRequest }) => Promise<boolean | Where>;
+export function RBAC(
+  accessFunction: AccessCheckFn,
   filters: FilterFn[] = [],
 ): (args: { req: PayloadRequest }) => Promise<boolean | Where> {
   return async ({ req }: { req: PayloadRequest }) => {
@@ -33,20 +41,15 @@ export function RBAC(
     if (wheres.length === 0) return true;
 
     // Step 5: If there is one where, return it
-    let finalWhere: Where;
-    if (wheres.length === 1) {
-      finalWhere = wheres[0];
-    } else {
-      // Step 6: If there are multiple wheres, return an and of them
-      finalWhere = { and: wheres };
-    }
+    let resultingWhere: Where;
+    resultingWhere = { and: [...wheres] };
 
     console.log('[RBAC] Individual filter outputs:', JSON.stringify(wheres, null, 2));
     console.log(
       '[RBAC] Final where clause (what Payload receives):',
-      JSON.stringify(finalWhere, null, 2),
+      JSON.stringify(resultingWhere, null, 2),
     );
 
-    return wheres;
+    return resultingWhere;
   };
 }
