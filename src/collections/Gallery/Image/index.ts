@@ -35,7 +35,7 @@ export const GalleryImages: CollectionConfig<'gallery-images'> = {
   folders: false,
   access: {
     read: async ({ req }: { req: PayloadRequest }) => {
-      const where = nsfwFilter({ req });
+      const where = await nsfwFilter({ req });
       console.log('[GalleryImages] read: where', where);
       return where;
     },
