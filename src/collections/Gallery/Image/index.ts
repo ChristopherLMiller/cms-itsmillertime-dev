@@ -36,6 +36,7 @@ export const GalleryImages: CollectionConfig<'gallery-images'> = {
   access: {
     read: async ({ req }: { req: PayloadRequest }) => {
       const where = nsfwFilter({ req });
+      console.log('[GalleryImages] read: where', where);
       return where;
     },
     create: RBACFunction(allowedRoles(['admin'])),
