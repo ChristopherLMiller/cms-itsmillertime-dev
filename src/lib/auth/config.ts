@@ -4,8 +4,14 @@ import { admin, twoFactor } from 'better-auth/plugins';
 import { passkey } from '@better-auth/passkey';
 import { apiKeyWithDefaults } from '@delmaredigital/payload-better-auth';
 import { Resend } from 'resend';
+import { getBaseUrl } from './getBaseUrl';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
+const baseUrl = getBaseUrl();
+const trustedOrigins = [
+  baseUrl,
+  ...(process.env.TRUSTED_ORIGINS?.split(',').map((o) => o.trim()) || []),
+];
 
 /**
  * Creates Better Auth options. Pass payload when available (e.g. in createAuth)
@@ -62,6 +68,13 @@ export function createBetterAuthOptions(payload?: BasePayload): Partial<BetterAu
         clientSecret: process.env.DISCORD_CLIENT_SECRET as string,
       },
     },
+    advanced: {
+      crossSubDomainCookies: {
+        enabled: true,
+        domain: 'itsmillertime.dev',
+      },
+    },
+    trustedOrigins,
     plugins: [admin(), twoFactor(), passkey(), apiKeyWithDefaults()],
   };
 }
