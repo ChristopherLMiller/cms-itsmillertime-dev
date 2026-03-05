@@ -26,7 +26,6 @@ export const nsfwFilter = async ({ req }: { req: PayloadRequest }): Promise<Wher
   if (req.user.collection === 'users') {
     // If the user is an admin, return all
     if (hasAnyRole(req.user, ['admin'])) {
-      console.log('[nsfwFilter] admin user, returning all');
       return {
         'settings.isNsfw': {
           in: [true, false, null], // all permutations
@@ -35,14 +34,12 @@ export const nsfwFilter = async ({ req }: { req: PayloadRequest }): Promise<Wher
     }
     // Now lets check the user NSFW setting, if its hide, don't send, if its blur or show, send it along
     if (req.user.nsfwFiltering === 'hide') {
-      console.log('[nsfwFilter] user is hiding NSFW, returning not equals true');
       return {
         'settings.isNsfw': {
           not_equals: true,
         },
       };
     } else {
-      console.log('[nsfwFilter] user is showing/blurring NSFW, returning all');
       return {
         'settings.isNsfw': {
           in: [true, false, null], // all permutations
@@ -51,7 +48,6 @@ export const nsfwFilter = async ({ req }: { req: PayloadRequest }): Promise<Wher
     }
   } else {
     // Must be a MCP API key, return all
-    console.log('[nsfwFilter] MCP API key, returning all');
     return {
       'settings.isNsfw': {
         in: [true, false, null], // all permutations
