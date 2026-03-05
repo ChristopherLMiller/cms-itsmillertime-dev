@@ -68,7 +68,6 @@ export function createBetterAuthOptions(payload?: BasePayload): Partial<BetterAu
         clientSecret: process.env.DISCORD_CLIENT_SECRET as string,
       },
     },
-    trustedOrigins,
     plugins: [admin(), twoFactor(), passkey(), apiKeyWithDefaults()],
   };
 }

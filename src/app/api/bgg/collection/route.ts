@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server';
-import { getPayload, KVAdapter, PayloadRequest } from 'payload';
+import { getPayload, KVAdapter } from 'payload';
 import config from '@payload-config';
 import { parseBGGCollection } from '@/lib/bgg/parseCollection';
 
@@ -15,52 +15,60 @@ type CacheEntry = {
 };
 
 export async function GET(req: NextRequest) {
-  const { searchParams } = new URL(req.url);
-  const username = searchParams.get('username');
+  try {
+    const { searchParams } = new URL(req.url);
+    const username = searchParams.get('username');
 
-  if (!username) {
-    return Response.json({ error: 'Username is required' }, { status: 400 });
+    if (!username) {
+      return Response.json({ error: 'Username is required' }, { status: 400 });
+    }
+
+    const payload = await getPayload({ config });
+    const kv = payload.kv;
+    const key = `bgg:${CACHE_VERSION}:collection:${username}`;
+    const now = Date.now();
+
+    // If the user is not authenticated get out
+    // TODO: Implement this properly with RBAC overhaul
+    /*if (await hasAPIAccess({ req })) {
+      return Response.json({ error: 'Unauthorized' }, { status: 401 });
+    }*/
+
+    const cached = (await kv.get(key)) as CacheEntry | null;
+
+    // If the cached data is considered fresh, return it
+    if (cached && now - cached.fetchedAt < FRESH_MS) {
+      return respond(cached.data, 'fresh');
+    }
+
+    // If the cached data is considered stale, return it but revalidate
+    if (cached && now - cached.fetchedAt < STALE_MS) {
+      revalidate(username, kv, key, cached, now);
+      return respond(cached.data, 'stale');
+    }
+
+    // If beyond the stale time, fetch it to update the cache
+    const updated = await fetchAndUpdate(username, kv, key, cached);
+    if (updated) {
+      return respond(updated.data, 'revalidated');
+    }
+
+    // If BGG is pending / failed, fallback to last known good
+    if (cached) {
+      return respond(cached.data, 'fallback');
+    }
+
+    return Response.json(
+      { status: 'pending', message: 'Fetching from BoardGameGeek' },
+      { status: 202 },
+    );
+  } catch (error) {
+    console.error('BGG collection route error:', error);
+    return Response.json(
+      { error: 'Failed to fetch BGG collection' },
+      { status: 500 },
+    );
   }
-
-  const payload = await getPayload({ config });
-  const kv = payload.kv;
-  const key = `bgg:${CACHE_VERSION}:collection:${username}`;
-  const now = Date.now();
-
-  // If the user is not authenticated get out
-  // TODO: Implement this properly with RBAC overhaul
-  /*if (await hasAPIAccess({ req })) {
-    return Response.json({ error: 'Unauthorized' }, { status: 401 });
-  }*/
-
-  const cached = (await kv.get(key)) as CacheEntry | null;
-
-  // If the cached data is considered fresh, return it
-  if (cached && now - cached.fetchedAt < FRESH_MS) {
-    return respond(cached.data, 'fresh');
-  }
-
-  // If the cached data is considered stale, return it but revalidate
-  if (cached && now - cached.fetchedAt < STALE_MS) {
-    revalidate(username, kv, key, cached, now);
-    return respond(cached.data, 'stale');
-  }
-
-  // If beyond the th stale time, fech it to update the cache
-  const updated = await fetchAndUpdate(username, kv, key, cached);
-  if (updated) {
-    return respond(updated.data, 'revalidated');
-  }
-
-  // If BGG is pending / failed, fallback to last known good
-  if (cached) {
-    return respond(cached.data, 'fallback');
-  }
-
-  return Response.json(
-    { status: 'pending', message: 'Fetching from BoardGameGeek' },
-    { status: 202 },
-  );
 }
 
 function respond(data: any, state: string) {
