@@ -10,8 +10,8 @@ export const visibilityFilter = async ({ req }: { req: PayloadRequest }): Promis
     };
   }
 
-  // If user the user isn't logged in, return with filter for just all only
-  if (req?.user === null) {
+  // If the user isn't logged in, return with filter for just all only
+  if (!req?.user) {
     return {
       'settings.visibility': {
         equals: 'ALL',
@@ -19,8 +19,33 @@ export const visibilityFilter = async ({ req }: { req: PayloadRequest }): Promis
     };
   }
 
-  // If the user is logged in, we can return all, authenticated, and privileged
-  // but privileged only where they are allowed via allowedRoles or allowedUsers
+  // If the user is authenticated, we can return items marked with visibility of ALL or AUTHENTICATED.
+  // In addition, we check if the user is in the permittedRoles or allowedUsers or both lists.
+  const privilegedConditions: Where[] = [
+    // User's role is in permittedRoles (only for users collection)
+    ...(req.user.collection === 'users' &&
+    Array.isArray(req.user.role) &&
+    req.user.role.length > 0
+      ? [
+          {
+            'settings.permittedRoles': {
+              in: req.user.role,
+            },
+          },
+        ]
+      : []),
+    // User's id is in allowedUsers
+    ...(req.user.id
+      ? [
+          {
+            'settings.allowedUsers': {
+              equals: req.user.id,
+            },
+          },
+        ]
+      : []),
+  ];
+
   const query: Where = {
     or: [
       {
@@ -28,36 +53,23 @@ export const visibilityFilter = async ({ req }: { req: PayloadRequest }): Promis
           in: ['ALL', 'AUTHENTICATED'],
         },
       },
-      {
-        and: [
-          {
-            'settings.visibility': {
-              equals: 'PRIVILEGED',
-            },
-          },
-          {
-            or: [
-              // Only check roles for User type, not PayloadMcpApiKey
-              ...(req.user.collection === 'users'
-                ? [
-                    {
-                      'settings.Roles.id': {
-                        in: req.user.role.map((role) => role),
-                      },
-                    },
-                  ]
-                : []),
-              {
-                'settings.allowedUsers.id': {
-                  in: [req.user.id],
+      ...(privilegedConditions.length > 0
+        ? [
+            {
+              and: [
+                {
+                  'settings.visibility': {
+                    equals: 'PRIVILEGED',
+                  },
                 },
-              },
-            ],
-          },
-        ],
-      },
+                {
+                  or: privilegedConditions,
+                },
+              ],
+            },
+          ]
+        : []),
     ],
   };
-
   return query;
 };
