@@ -1,0 +1,10 @@
+read: async ({ req }: { req: PayloadRequest }) => {
+      const isPermitted = await allowAll();
+      console.log('[GalleryAlbums] read: isPermitted', isPermitted);
+      if (!isPermitted) return false;
+      const nsfwWhere = await nsfwFilter({ req });
+      const visibilityWhere = await visibilityFilter({ req });
+      console.log('[GalleryAlbums] read: where', nsfwWhere, visibilityWhere);
+      const where = { and: [nsfwWhere, visibilityWhere] };
+      return where;
+    },
