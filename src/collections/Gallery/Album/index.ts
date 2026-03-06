@@ -18,14 +18,23 @@ import {
   InlineToolbarFeature,
   lexicalEditor,
 } from '@payloadcms/richtext-lexical';
-import { CollectionConfig } from 'payload';
+import { CollectionConfig, PayloadRequest } from 'payload';
 import { allowAll } from '@/access/methods/allowAll';
 import { allowedRoles } from '@/access/methods/allowedRoles';
 
 export const GalleryAlbums: CollectionConfig<'gallery-albums'> = {
   slug: 'gallery-albums',
   access: {
-    read: RBACFunction(allowAll(), [nsfwFilter]),
+    read: async ({ req }: { req: PayloadRequest }) => {
+      const isPermitted = await allowAll();
+      console.log(`[GalleryAlbums] read: ${isPermitted}`);
+      if (!isPermitted) return false;
+      const nsfwWhere = await nsfwFilter({ req });
+      const visibilityWhere = await visibilityFilter({ req });
+      console.log('[GalleryAlbums] read: where', nsfwWhere, visibilityWhere);
+      const where = { and: [nsfwWhere, visibilityWhere] };
+      return where;
+    },
     create: RBACFunction(allowedRoles(['admin'])),
     update: RBACFunction(allowedRoles(['admin'])),
     delete: RBACFunction(allowedRoles(['admin'])),
