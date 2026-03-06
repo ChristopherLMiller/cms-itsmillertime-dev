@@ -33,6 +33,7 @@ export const GalleryAlbums: CollectionConfig<'gallery-albums'> = {
       const visibilityWhere = await visibilityFilter({ req });
       console.log('[GalleryAlbums] read: where', nsfwWhere, visibilityWhere);
       const where = { and: [nsfwWhere, visibilityWhere] };
+      console.log('[GalleryAlbums] read: where being returned', where);
       return where;
     },
     create: RBACFunction(allowedRoles(['admin'])),
