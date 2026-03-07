@@ -1,4 +1,3 @@
-import { RBAC } from '@/access';
 import { nsfwFilter } from '@/access/filters/nsfwFilter';
 import { Groups } from '@/collections/shared/groups';
 import { imageContentFields, imageTechnicalFields } from '@/collections/shared/imageFields';
@@ -11,7 +10,7 @@ import {
   OverviewField,
   PreviewField,
 } from '@payloadcms/plugin-seo/fields';
-import { RBAC as RBACFunction } from '@/access/RBAC';
+import { RBAC } from '@/access/RBAC';
 import { type CollectionConfig } from 'payload';
 import { generateEXIF } from '@/collections/shared/generateEXIF';
 import { generateBlurHash } from '@/collections/shared/generateBlurHash';
@@ -44,12 +43,12 @@ export const GalleryImages: CollectionConfig<'gallery-images'> = {
       const where = { and: [nsfwWhere, visibilityWhere] };
       return where;
     },
-    create: RBACFunction(allowedRoles(['admin'])),
-    update: RBACFunction(allowedRoles(['admin'])),
-    delete: RBACFunction(allowedRoles(['admin'])),
-    readVersions: RBACFunction(allowedRoles(['admin'])),
-    unlock: RBACFunction(allowedRoles(['admin'])),
-    admin: RBACFunction(allowedRoles(['admin'])),
+    create: RBAC(allowedRoles(['admin']), [], 'gallery-images', 'create'),
+    update: RBAC(allowedRoles(['admin']), [], 'gallery-images', 'update'),
+    delete: RBAC(allowedRoles(['admin']), [], 'gallery-images', 'delete'),
+    readVersions: RBAC(allowedRoles(['admin']), [], 'gallery-images', 'readVersions'),
+    unlock: RBAC(allowedRoles(['admin']), [], 'gallery-images', 'unlock'),
+    admin: RBAC(allowedRoles(['admin']), [], 'gallery-images', 'admin'),
   },
   upload: baseUploadConfig,
   fields: [

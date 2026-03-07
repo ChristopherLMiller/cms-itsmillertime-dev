@@ -70,7 +70,7 @@ export const Users: CollectionConfig = {
       options: [
         { label: 'Hide All', value: 'hide' },
         { label: 'Blur', value: 'blur' },
-        { label: 'Show', value: 'Show' },
+        { label: 'Show', value: 'show' },
       ],
       admin: {
         description: 'Should NSFW content be hidden, blurred initially, or just shown?',
