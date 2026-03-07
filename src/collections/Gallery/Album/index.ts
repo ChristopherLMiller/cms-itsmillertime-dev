@@ -1,6 +1,5 @@
-import { RBAC } from '@/access';
 import { nsfwFilter } from '@/access/filters/nsfwFilter';
-import { RBAC as RBACFunction } from '@/access/RBAC';
+import { RBAC } from '@/access/RBAC';
 import { visibilityFilter } from '@/access/filters/visibilityFilter';
 import { Groups } from '@/collections/shared/groups';
 import { slugField } from '@/fields/slug';
@@ -25,23 +24,13 @@ import { allowedRoles } from '@/access/methods/allowedRoles';
 export const GalleryAlbums: CollectionConfig<'gallery-albums'> = {
   slug: 'gallery-albums',
   access: {
-    read: async ({ req }: { req: PayloadRequest }) => {
-      const isPermitted = await allowAll();
-      console.log(`[GalleryAlbums] read: ${isPermitted}`);
-      if (!isPermitted) return false;
-      const nsfwWhere = await nsfwFilter({ req });
-      const visibilityWhere = await visibilityFilter({ req });
-      console.log('[GalleryAlbums] read: where', nsfwWhere, visibilityWhere);
-      const where = { and: [nsfwWhere, visibilityWhere] };
-      console.log('[GalleryAlbums] read: where being returned', where);
-      return where;
-    },
-    create: RBACFunction(allowedRoles(['admin'])),
-    update: RBACFunction(allowedRoles(['admin'])),
-    delete: RBACFunction(allowedRoles(['admin'])),
-    readVersions: RBACFunction(allowedRoles(['admin'])),
-    unlock: RBACFunction(allowedRoles(['admin'])),
-    admin: RBACFunction(allowedRoles(['admin'])),
+    read: RBAC(allowAll(), [nsfwFilter, visibilityFilter], 'gallery-albums', 'read'),
+    create: RBAC(allowedRoles(['admin']), [], 'gallery-albums', 'create'),
+    update: RBAC(allowedRoles(['admin']), [], 'gallery-albums', 'update'),
+    delete: RBAC(allowedRoles(['admin']), [], 'gallery-albums', 'delete'),
+    readVersions: RBAC(allowedRoles(['admin']), [], 'gallery-albums', 'readVersions'),
+    unlock: RBAC(allowedRoles(['admin']), [], 'gallery-albums', 'unlock'),
+    admin: RBAC(allowedRoles(['admin']), [], 'gallery-albums', 'admin'),
   },
   labels: {
     singular: 'Album',
