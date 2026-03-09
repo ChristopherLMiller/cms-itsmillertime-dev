@@ -1,4 +1,6 @@
-import { RBAC } from '@/access';
+import { RBAC } from '@/access/RBAC';
+import { allowAll } from '@/access/methods/allowAll';
+import { allowedRoles } from '@/access/methods/allowedRoles';
 import { Groups } from '@/collections/shared/groups';
 import { slugField } from '@/fields/slug';
 import { lexicalEditor } from '@payloadcms/richtext-lexical';
@@ -7,13 +9,13 @@ import { CollectionConfig } from 'payload';
 export const Projects: CollectionConfig<'projects'> = {
   slug: 'projects',
   access: {
-    read: RBAC().allowAll().result(),
-    create: RBAC().allowedRoles(['admin']).result(),
-    update: RBAC().allowedRoles(['admin']).result(),
-    delete: RBAC().allowedRoles(['admin']).result(),
-    readVersions: RBAC().allowedRoles(['admin']).result(),
-    unlock: RBAC().allowedRoles(['admin']).result(),
-    admin: RBAC().allowedRoles(['admin']).result(),
+    read: RBAC(allowAll(), [], 'projects', 'read'),
+    create: RBAC(allowedRoles(['admin']), [], 'projects', 'create'),
+    update: RBAC(allowedRoles(['admin']), [], 'projects', 'update'),
+    delete: RBAC(allowedRoles(['admin']), [], 'projects', 'delete'),
+    readVersions: RBAC(allowedRoles(['admin']), [], 'projects', 'readVersions'),
+    unlock: RBAC(allowedRoles(['admin']), [], 'projects', 'unlock'),
+    admin: RBAC(allowedRoles(['admin']), [], 'projects', 'admin'),
   },
   labels: {
     singular: 'Project',

@@ -1,4 +1,6 @@
-import { RBAC } from '@/access';
+import { RBAC } from '@/access/RBAC';
+import { allowAll } from '@/access/methods/allowAll';
+import { allowedRoles } from '@/access/methods/allowedRoles';
 import { Groups } from '@/collections/shared/groups';
 import { slugField } from '@/fields/slug';
 import { CollectionConfig } from 'payload';
@@ -6,13 +8,13 @@ import { CollectionConfig } from 'payload';
 export const Scales: CollectionConfig<'scales'> = {
   slug: 'scales',
   access: {
-    read: RBAC().allowAll().result(),
-    create: RBAC().allowedRoles(['admin']).result(),
-    update: RBAC().allowedRoles(['admin']).result(),
-    delete: RBAC().allowedRoles(['admin']).result(),
-    readVersions: RBAC().allowedRoles(['admin']).result(),
-    unlock: RBAC().allowedRoles(['admin']).result(),
-    admin: RBAC().allowedRoles(['admin']).result(),
+    read: RBAC(allowAll(), [], 'scales', 'read'),
+    create: RBAC(allowedRoles(['admin']), [], 'scales', 'create'),
+    update: RBAC(allowedRoles(['admin']), [], 'scales', 'update'),
+    delete: RBAC(allowedRoles(['admin']), [], 'scales', 'delete'),
+    readVersions: RBAC(allowedRoles(['admin']), [], 'scales', 'readVersions'),
+    unlock: RBAC(allowedRoles(['admin']), [], 'scales', 'unlock'),
+    admin: RBAC(allowedRoles(['admin']), [], 'scales', 'admin'),
   },
   admin: {
     useAsTitle: 'title',

@@ -1,7 +1,9 @@
 import type { CollectionConfig } from 'payload';
 import { Groups } from './shared/groups';
 import { betterAuthStrategy } from '@delmaredigital/payload-better-auth';
-import { RBAC } from '@/access';
+import { RBAC } from '@/access/RBAC';
+import { allowAll } from '@/access/methods/allowAll';
+import { allowedRoles } from '@/access/methods/allowedRoles';
 
 export const Users: CollectionConfig = {
   slug: 'users',
@@ -12,13 +14,13 @@ export const Users: CollectionConfig = {
     defaultColumns: ['displayName', 'email', 'roles', 'showNSFW'],
   },
   access: {
-    read: RBAC().allowAll().result(),
-    create: RBAC().allowedRoles(['admin']).result(),
-    update: RBAC().allowedRoles(['admin']).result(),
-    delete: RBAC().allowedRoles(['admin']).result(),
-    readVersions: RBAC().allowedRoles(['admin']).result(),
-    unlock: RBAC().allowedRoles(['admin']).result(),
-    admin: RBAC().allowedRoles(['admin']).result(),
+    read: RBAC(allowAll(), [], 'users', 'read'),
+    create: RBAC(allowedRoles(['admin']), [], 'users', 'create'),
+    update: RBAC(allowedRoles(['admin']), [], 'users', 'update'),
+    delete: RBAC(allowedRoles(['admin']), [], 'users', 'delete'),
+    readVersions: RBAC(allowedRoles(['admin']), [], 'users', 'readVersions'),
+    unlock: RBAC(allowedRoles(['admin']), [], 'users', 'unlock'),
+    admin: RBAC(allowedRoles(['admin']), [], 'users', 'admin'),
   },
   auth: {
     disableLocalStrategy: true,

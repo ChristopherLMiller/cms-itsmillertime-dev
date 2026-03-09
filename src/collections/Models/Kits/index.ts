@@ -1,17 +1,19 @@
-import { RBAC } from '@/access';
+import { RBAC } from '@/access/RBAC';
+import { allowAll } from '@/access/methods/allowAll';
+import { allowedRoles } from '@/access/methods/allowedRoles';
 import { Groups } from '@/collections/shared/groups';
 import { CollectionConfig } from 'payload';
 
 export const Kits: CollectionConfig<'kits'> = {
   slug: 'kits',
   access: {
-    read: RBAC().allowAll().result(),
-    create: RBAC().allowedRoles(['admin']).result(),
-    update: RBAC().allowedRoles(['admin']).result(),
-    delete: RBAC().allowedRoles(['admin']).result(),
-    readVersions: RBAC().allowedRoles(['admin']).result(),
-    unlock: RBAC().allowedRoles(['admin']).result(),
-    admin: RBAC().allowedRoles(['admin']).result(),
+    read: RBAC(allowAll(), [], 'kits', 'read'),
+    create: RBAC(allowedRoles(['admin']), [], 'kits', 'create'),
+    update: RBAC(allowedRoles(['admin']), [], 'kits', 'update'),
+    delete: RBAC(allowedRoles(['admin']), [], 'kits', 'delete'),
+    readVersions: RBAC(allowedRoles(['admin']), [], 'kits', 'readVersions'),
+    unlock: RBAC(allowedRoles(['admin']), [], 'kits', 'unlock'),
+    admin: RBAC(allowedRoles(['admin']), [], 'kits', 'admin'),
   },
   enableQueryPresets: true,
   admin: {
