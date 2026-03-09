@@ -33,16 +33,7 @@ export const GalleryImages: CollectionConfig<'gallery-images'> = {
   },
   folders: false,
   access: {
-    read: async ({ req }: { req: PayloadRequest }) => {
-      const isPermitted = await allowAll();
-      console.log('[GalleryImages] read: isPermitted', isPermitted);
-      if (!isPermitted) return false;
-      const nsfwWhere = await nsfwFilter({ req });
-      const visibilityWhere = await visibilityFilter({ req });
-      console.log('[GalleryImages] read: where', nsfwWhere, visibilityWhere);
-      const where = { and: [nsfwWhere, visibilityWhere] };
-      return where;
-    },
+    read: RBAC(allowedRoles(['admin']), [], 'gallery-images', 'read'),
     create: RBAC(allowedRoles(['admin']), [], 'gallery-images', 'create'),
     update: RBAC(allowedRoles(['admin']), [], 'gallery-images', 'update'),
     delete: RBAC(allowedRoles(['admin']), [], 'gallery-images', 'delete'),

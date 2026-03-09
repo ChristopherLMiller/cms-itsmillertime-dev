@@ -1,4 +1,6 @@
-import { RBAC } from '@/access';
+import { RBAC } from '@/access/RBAC';
+import { allowAll } from '@/access/methods/allowAll';
+import { allowedRoles } from '@/access/methods/allowedRoles';
 import { Groups } from '@/collections/shared/groups';
 import { slugField } from '@/fields/slug';
 import { CollectionConfig } from 'payload';
@@ -6,13 +8,13 @@ import { CollectionConfig } from 'payload';
 export const ProjectsTechnologies: CollectionConfig<'projects-technologies'> = {
   slug: 'projects-technologies',
   access: {
-    read: RBAC().allowAll().result(),
-    create: RBAC().allowedRoles(['admin']).result(),
-    update: RBAC().allowedRoles(['admin']).result(),
-    delete: RBAC().allowedRoles(['admin']).result(),
-    readVersions: RBAC().allowedRoles(['admin']).result(),
-    unlock: RBAC().allowedRoles(['admin']).result(),
-    admin: RBAC().allowedRoles(['admin']).result(),
+    read: RBAC(allowAll(), [], 'projects-technologies', 'read'),
+    create: RBAC(allowedRoles(['admin']), [], 'projects-technologies', 'create'),
+    update: RBAC(allowedRoles(['admin']), [], 'projects-technologies', 'update'),
+    delete: RBAC(allowedRoles(['admin']), [], 'projects-technologies', 'delete'),
+    readVersions: RBAC(allowedRoles(['admin']), [], 'projects-technologies', 'readVersions'),
+    unlock: RBAC(allowedRoles(['admin']), [], 'projects-technologies', 'unlock'),
+    admin: RBAC(allowedRoles(['admin']), [], 'projects-technologies', 'admin'),
   },
   labels: {
     plural: 'Technologies',

@@ -181,6 +181,7 @@ export interface Config {
   jobs: {
     tasks: {
       generateImageEXIF: TaskGenerateImageEXIF;
+      sendResetPasswordEmail: TaskSendResetPasswordEmail;
       schedulePublish: TaskSchedulePublish;
       inline: {
         input: unknown;
@@ -371,7 +372,7 @@ export interface User {
   /**
    * Should NSFW content be hidden, blurred initially, or just shown?
    */
-  nsfwFiltering?: ('hide' | 'blur' | 'Show') | null;
+  nsfwFiltering?: ('hide' | 'blur' | 'show') | null;
   bggUsername?: string | null;
   /**
    * Auto-added by Better Auth (name)
@@ -1615,7 +1616,7 @@ export interface PayloadJob {
     | {
         executedAt: string;
         completedAt: string;
-        taskSlug: 'inline' | 'generateImageEXIF' | 'schedulePublish';
+        taskSlug: 'inline' | 'generateImageEXIF' | 'sendResetPasswordEmail' | 'schedulePublish';
         taskID: string;
         input?:
           | {
@@ -1648,7 +1649,7 @@ export interface PayloadJob {
         id?: string | null;
       }[]
     | null;
-  taskSlug?: ('inline' | 'generateImageEXIF' | 'schedulePublish') | null;
+  taskSlug?: ('inline' | 'generateImageEXIF' | 'sendResetPasswordEmail' | 'schedulePublish') | null;
   queue?: string | null;
   waitUntil?: string | null;
   processing?: boolean | null;
@@ -3047,6 +3048,18 @@ export interface TaskGenerateImageEXIF {
   input: {
     id: number;
     collection: string;
+  };
+  output?: unknown;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TaskSendResetPasswordEmail".
+ */
+export interface TaskSendResetPasswordEmail {
+  input: {
+    to: string;
+    subject: string;
+    html: string;
   };
   output?: unknown;
 }

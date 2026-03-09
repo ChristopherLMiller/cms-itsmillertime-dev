@@ -1,17 +1,19 @@
-import { RBAC } from '@/access';
+import { RBAC } from '@/access/RBAC';
+import { allowAll } from '@/access/methods/allowAll';
+import { allowedRoles } from '@/access/methods/allowedRoles';
 import { CollectionConfig } from 'payload';
 import { Groups } from './shared/groups';
 
 export const MapMarkers: CollectionConfig<'map-markers'> = {
   slug: 'map-markers',
   access: {
-    read: RBAC().allowAll().result(),
-    create: RBAC().allowedRoles(['admin']).result(),
-    update: RBAC().allowedRoles(['admin']).result(),
-    delete: RBAC().allowedRoles(['admin']).result(),
-    readVersions: RBAC().allowedRoles(['admin']).result(),
-    unlock: RBAC().allowedRoles(['admin']).result(),
-    admin: RBAC().allowedRoles(['admin']).result(),
+    read: RBAC(allowAll(), [], 'map-markers', 'read'),
+    create: RBAC(allowedRoles(['admin']), [], 'map-markers', 'create'),
+    update: RBAC(allowedRoles(['admin']), [], 'map-markers', 'update'),
+    delete: RBAC(allowedRoles(['admin']), [], 'map-markers', 'delete'),
+    readVersions: RBAC(allowedRoles(['admin']), [], 'map-markers', 'readVersions'),
+    unlock: RBAC(allowedRoles(['admin']), [], 'map-markers', 'unlock'),
+    admin: RBAC(allowedRoles(['admin']), [], 'map-markers', 'admin'),
   },
   admin: {
     useAsTitle: 'title',

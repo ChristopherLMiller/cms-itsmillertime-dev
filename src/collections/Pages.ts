@@ -1,4 +1,6 @@
-import { RBAC } from '@/access';
+import { RBAC } from '@/access/RBAC';
+import { allowAll } from '@/access/methods/allowAll';
+import { allowedRoles } from '@/access/methods/allowedRoles';
 import { slugField } from '@/fields/slug';
 import {
   MetaDescriptionField,
@@ -20,13 +22,13 @@ import { Groups } from './shared/groups';
 export const Pages: CollectionConfig<'pages'> = {
   slug: 'pages',
   access: {
-    read: RBAC().allowAll().result(),
-    create: RBAC().allowedRoles(['admin']).result(),
-    update: RBAC().allowedRoles(['admin']).result(),
-    delete: RBAC().allowedRoles(['admin']).result(),
-    readVersions: RBAC().allowedRoles(['admin']).result(),
-    unlock: RBAC().allowedRoles(['admin']).result(),
-    admin: RBAC().allowedRoles(['admin']).result(),
+    read: RBAC(allowAll(), [], 'pages', 'read'),
+    create: RBAC(allowedRoles(['admin']), [], 'pages', 'create'),
+    update: RBAC(allowedRoles(['admin']), [], 'pages', 'update'),
+    delete: RBAC(allowedRoles(['admin']), [], 'pages', 'delete'),
+    readVersions: RBAC(allowedRoles(['admin']), [], 'pages', 'readVersions'),
+    unlock: RBAC(allowedRoles(['admin']), [], 'pages', 'unlock'),
+    admin: RBAC(allowedRoles(['admin']), [], 'pages', 'admin'),
   },
   labels: {
     singular: 'Page',

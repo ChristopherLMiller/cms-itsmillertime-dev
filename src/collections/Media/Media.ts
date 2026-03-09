@@ -5,7 +5,9 @@ import { baseUploadConfig } from '../shared/uploadConfig';
 import { defaultAltText } from '../shared/defaultAltText';
 import { generateBlurHash } from '../shared/generateBlurHash';
 import { generateEXIF } from '../shared/generateEXIF';
-import { RBAC } from '@/access';
+import { RBAC } from '@/access/RBAC';
+import { allowAll } from '@/access/methods/allowAll';
+import { allowedRoles } from '@/access/methods/allowedRoles';
 
 export const Media: CollectionConfig = {
   slug: 'media',
@@ -19,13 +21,13 @@ export const Media: CollectionConfig = {
   },
   folders: true,
   access: {
-    read: RBAC().allowAll().result(),
-    create: RBAC().allowedRoles(['admin']).result(),
-    update: RBAC().allowedRoles(['admin']).result(),
-    delete: RBAC().allowedRoles(['admin']).result(),
-    readVersions: RBAC().allowedRoles(['admin']).result(),
-    unlock: RBAC().allowedRoles(['admin']).result(),
-    admin: RBAC().allowedRoles(['admin']).result(),
+    read: RBAC(allowAll(), [], 'media', 'read'),
+    create: RBAC(allowedRoles(['admin']), [], 'media', 'create'),
+    update: RBAC(allowedRoles(['admin']), [], 'media', 'update'),
+    delete: RBAC(allowedRoles(['admin']), [], 'media', 'delete'),
+    readVersions: RBAC(allowedRoles(['admin']), [], 'media', 'readVersions'),
+    unlock: RBAC(allowedRoles(['admin']), [], 'media', 'unlock'),
+    admin: RBAC(allowedRoles(['admin']), [], 'media', 'admin'),
   },
   fields: [
     ...imageTechnicalFields,

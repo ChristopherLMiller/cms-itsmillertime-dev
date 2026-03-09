@@ -255,15 +255,36 @@ export default buildConfig({
           };
         },
       },
+      {
+        slug: 'sendResetPasswordEmail',
+        retries: 3,
+        inputSchema: [
+          { name: 'to', type: 'text', required: true },
+          { name: 'subject', type: 'text', required: true },
+          { name: 'html', type: 'text', required: true },
+        ],
+        handler: async ({ input, req }) => {
+          await req.payload.email.sendEmail({
+            to: input.to,
+            subject: input.subject,
+            html: input.html,
+          });
+          return { output: { sent: true } };
+        },
+      },
     ],
     autoRun: [
       {
-        cron: '* * * * * *',
+        cron: '* * * * * *', // Every minute
         queue: 'default',
       },
       {
+        cron: '* 0 * * * *', // Every hour
         queue: 'exif',
-        cron: '* * * * * *',
+      },
+      {
+        cron: '* * * * * *', // Every minute
+        queue: 'email',
       },
     ],
   },

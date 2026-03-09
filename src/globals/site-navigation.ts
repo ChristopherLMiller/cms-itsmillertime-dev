@@ -1,4 +1,6 @@
-import { RBAC } from '@/access';
+import { RBAC } from '@/access/RBAC';
+import { allowAll } from '@/access/methods/allowAll';
+import { allowedRoles } from '@/access/methods/allowedRoles';
 import { Groups } from '@/collections/shared/groups';
 import { GlobalConfig } from 'payload';
 
@@ -8,9 +10,9 @@ export const SiteNavigation: GlobalConfig = {
     group: Groups.global,
   },
   access: {
-    read: RBAC().allowAll().result(),
-    update: RBAC().allowedRoles(['admin']).result(),
-    readVersions: RBAC().allowedRoles(['admin']).result(),
+    read: RBAC(allowAll(), [], 'site-navigation', 'read'),
+    update: RBAC(allowedRoles(['admin']), [], 'site-navigation', 'update'),
+    readVersions: RBAC(allowedRoles(['admin']), [], 'site-navigation', 'readVersions'),
   },
   fields: [
     {
