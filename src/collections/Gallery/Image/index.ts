@@ -33,7 +33,7 @@ export const GalleryImages: CollectionConfig<'gallery-images'> = {
   },
   folders: false,
   access: {
-    read: RBAC(allowedRoles(['admin']), [], 'gallery-images', 'read'),
+    read: RBAC(allowAll(), [nsfwFilter, visibilityFilter], 'gallery-images', 'read'),
     create: RBAC(allowedRoles(['admin']), [], 'gallery-images', 'create'),
     update: RBAC(allowedRoles(['admin']), [], 'gallery-images', 'update'),
     delete: RBAC(allowedRoles(['admin']), [], 'gallery-images', 'delete'),
