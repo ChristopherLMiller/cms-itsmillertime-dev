@@ -167,11 +167,13 @@ export interface Config {
     'site-meta': SiteMeta;
     'site-navigation': SiteNavigation;
     webhooks: Webhook;
+    'payload-jobs-stats': PayloadJobsStat;
   };
   globalsSelect: {
     'site-meta': SiteMetaSelect<false> | SiteMetaSelect<true>;
     'site-navigation': SiteNavigationSelect<false> | SiteNavigationSelect<true>;
     webhooks: WebhooksSelect<false> | WebhooksSelect<true>;
+    'payload-jobs-stats': PayloadJobsStatsSelect<false> | PayloadJobsStatsSelect<true>;
   };
   locale: null;
   widgets: {
@@ -181,6 +183,7 @@ export interface Config {
   jobs: {
     tasks: {
       generateImageEXIF: TaskGenerateImageEXIF;
+      queueMissingEXIF: TaskQueueMissingEXIF;
       sendResetPasswordEmail: TaskSendResetPasswordEmail;
       sendVerificationEmail: TaskSendVerificationEmail;
       schedulePublish: TaskSchedulePublish;
@@ -1620,6 +1623,7 @@ export interface PayloadJob {
         taskSlug:
           | 'inline'
           | 'generateImageEXIF'
+          | 'queueMissingEXIF'
           | 'sendResetPasswordEmail'
           | 'sendVerificationEmail'
           | 'schedulePublish';
@@ -1656,11 +1660,27 @@ export interface PayloadJob {
       }[]
     | null;
   taskSlug?:
-    | ('inline' | 'generateImageEXIF' | 'sendResetPasswordEmail' | 'sendVerificationEmail' | 'schedulePublish')
+    | (
+        | 'inline'
+        | 'generateImageEXIF'
+        | 'queueMissingEXIF'
+        | 'sendResetPasswordEmail'
+        | 'sendVerificationEmail'
+        | 'schedulePublish'
+      )
     | null;
   queue?: string | null;
   waitUntil?: string | null;
   processing?: boolean | null;
+  meta?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -2770,6 +2790,7 @@ export interface PayloadJobsSelect<T extends boolean = true> {
   queue?: T;
   waitUntil?: T;
   processing?: T;
+  meta?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -2966,6 +2987,24 @@ export interface Webhook {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-jobs-stats".
+ */
+export interface PayloadJobsStat {
+  id: number;
+  stats?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "site-meta_select".
  */
 export interface SiteMetaSelect<T extends boolean = true> {
@@ -3040,6 +3079,16 @@ export interface WebhooksSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-jobs-stats_select".
+ */
+export interface PayloadJobsStatsSelect<T extends boolean = true> {
+  stats?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "collections_widget".
  */
 export interface CollectionsWidget {
@@ -3057,6 +3106,14 @@ export interface TaskGenerateImageEXIF {
     id: number;
     collection: string;
   };
+  output?: unknown;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TaskQueueMissingEXIF".
+ */
+export interface TaskQueueMissingEXIF {
+  input?: unknown;
   output?: unknown;
 }
 /**

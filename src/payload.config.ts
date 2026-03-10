@@ -30,6 +30,7 @@ import { defaultLexical } from './fields/defaultLexical';
 import { SiteMeta } from './globals/site-meta';
 import { SiteNavigation } from './globals/site-navigation';
 import { plugins } from './plugins';
+import { GetObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import ExifReader from 'exifreader';
 import { render } from '@react-email/render';
 import React from 'react';
@@ -191,6 +192,20 @@ export default buildConfig({
             };
           }
 
+          // Skip SVG and other non-EXIF formats (SVG has no EXIF data)
+          const isSvg =
+            image.mimeType === 'image/svg+xml' ||
+            image.filename?.toLowerCase().endsWith('.svg');
+          if (isSvg) {
+            await req.payload.update({
+              collection: input.collection,
+              id: image.id,
+              data: { exif: { _skipped: 'svg' } },
+              overrideAccess: true,
+            });
+            return { output: { exifGenerated: false, skipped: 'svg' } };
+          }
+
           // Now get the image file from payload storage so we can use that
           if (!image.filename) {
             console.log(`Image ${image.id} filename not found`);
@@ -202,40 +217,74 @@ export default buildConfig({
             };
           }
 
-          // Access storage through req.payload (storage may not be in TypeScript types but is available at runtime)
-          const storage = (req.payload as any).storage;
           let fileBuffer: Buffer;
 
-          if (storage) {
-            // Use payload.storage to read the file
-            fileBuffer = await storage.read({
-              collection: input.collection,
-              filename: image.filename,
-            });
+          // Try fetch first (works when Next.js server is running)
+          if (image.url && process.env.NEXT_PUBLIC_SERVER_URL) {
+            try {
+              const fetchUrl = `${process.env.NEXT_PUBLIC_SERVER_URL}${image.url}`;
+              const response = await fetch(fetchUrl);
+              if (response.ok) {
+                fileBuffer = Buffer.from(await response.arrayBuffer());
+              } else {
+                throw new Error(`fetch ${response.status}`);
+              }
+            } catch (fetchErr) {
+              // Fallback to S3/R2 when fetch fails (e.g. jobs:run without server)
+              try {
+                const prefix = (image as { prefix?: string }).prefix ?? '';
+                const key = path.posix.join(prefix, image.filename).replace(/^\//, '');
+                const s3 = new S3Client({
+                  endpoint: process.env.CLOUDFLARE_ENDPOINT,
+                  region: process.env.CLOUDFLARE_REGION ?? 'auto',
+                  credentials: {
+                    accessKeyId: process.env.CLOUDFLARE_ACCESS_KEY ?? '',
+                    secretAccessKey: process.env.CLOUDFLARE_SECRET_KEY ?? '',
+                  },
+                });
+                const obj = await s3.send(
+                  new GetObjectCommand({
+                    Bucket: process.env.CLOUDFLARE_BUCKET,
+                    Key: key,
+                  }),
+                );
+                const chunks: Uint8Array[] = [];
+                if (obj.Body) {
+                  for await (const chunk of obj.Body as AsyncIterable<Uint8Array>) {
+                    chunks.push(chunk);
+                  }
+                }
+                fileBuffer = Buffer.concat(chunks);
+              } catch (s3Err) {
+                console.error('S3 fallback failed:', s3Err);
+                throw fetchErr;
+              }
+            }
           } else {
-            // Fallback to fetching from URL if storage is not available
-            if (!image.url) {
-              console.log(`Image ${image.id} URL not found`);
-              return {
-                output: {
-                  exifGenerated: false,
-                  error: 'Storage not available and image URL not found',
-                },
-              };
+            // No URL - use S3 directly
+            const prefix = (image as { prefix?: string }).prefix ?? '';
+            const key = path.posix.join(prefix, image.filename).replace(/^\//, '');
+            const s3 = new S3Client({
+              endpoint: process.env.CLOUDFLARE_ENDPOINT,
+              region: process.env.CLOUDFLARE_REGION ?? 'auto',
+              credentials: {
+                accessKeyId: process.env.CLOUDFLARE_ACCESS_KEY ?? '',
+                secretAccessKey: process.env.CLOUDFLARE_SECRET_KEY ?? '',
+              },
+            });
+            const obj = await s3.send(
+              new GetObjectCommand({
+                Bucket: process.env.CLOUDFLARE_BUCKET,
+                Key: key,
+              }),
+            );
+            const chunks: Uint8Array[] = [];
+            if (obj.Body) {
+              for await (const chunk of obj.Body as AsyncIterable<Uint8Array>) {
+                chunks.push(chunk);
+              }
             }
-            console.log(`Fetching image from ${process.env.NEXT_PUBLIC_SERVER_URL}${image.url}`);
-            const response = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}${image.url}`);
-            if (!response.ok) {
-              console.log(`Failed to fetch image: ${response.statusText}`);
-              return {
-                output: {
-                  exifGenerated: false,
-                  error: `Failed to fetch image: ${response.statusText}`,
-                },
-              };
-            }
-            console.log('Image fetched, creating buffer from respose');
-            fileBuffer = Buffer.from(await response.arrayBuffer());
+            fileBuffer = Buffer.concat(chunks);
           }
 
           // Now get the EXIF
