@@ -1,6 +1,6 @@
 {
   "name": "cms-itsmillertime-dev",
-  "version": "3.12.1",
+  "version": "3.13.0",
   "description": "A blank template to get started with Payload 3.0",
   "license": "MIT",
   "type": "module",
@@ -18,7 +18,8 @@
     "payload": "cross-env NODE_OPTIONS=--no-deprecation payload",
     "release": "pnpm build && changeset publish",
     "start": "cross-env NODE_OPTIONS=--no-deprecation next start",
-    "version": "changeset version"
+    "version": "changeset version",
+    "email:dev": "email dev --port 3001"
   },
   "dependencies": {
     "@better-auth/passkey": "^1.4.19",
@@ -37,6 +38,8 @@
     "@payloadcms/richtext-lexical": "3.79.0",
     "@payloadcms/storage-s3": "3.79.0",
     "@payloadcms/ui": "3.79.0",
+    "@react-email/components": "1.0.8",
+    "@react-email/render": "2.0.4",
     "@sentry/nextjs": "10.39.0",
     "@veiag/payload-cmdk": "^1.0.6",
     "better-auth": "^1.4.19",
@@ -62,6 +65,7 @@
   "devDependencies": {
     "@changesets/cli": "^2.29.8",
     "@eslint/eslintrc": "^3.3.4",
+    "@react-email/preview-server": "5.2.9",
     "@types/node": "^25.3.0",
     "@types/pg": "^8.16.0",
     "@types/react": "19.2.14",
@@ -69,7 +73,8 @@
     "@typescript/native-preview": "^7.0.0-dev.20260223.1",
     "eslint": "^10.0.2",
     "eslint-config-next": "16.1.6",
-    "prettier": "^3.8.1"
+    "prettier": "^3.8.1",
+    "react-email": "5.2.9"
   },
   "pnpm": {
     "onlyBuiltDependencies": [

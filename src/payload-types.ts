@@ -182,6 +182,7 @@ export interface Config {
     tasks: {
       generateImageEXIF: TaskGenerateImageEXIF;
       sendResetPasswordEmail: TaskSendResetPasswordEmail;
+      sendVerificationEmail: TaskSendVerificationEmail;
       schedulePublish: TaskSchedulePublish;
       inline: {
         input: unknown;
@@ -1616,7 +1617,12 @@ export interface PayloadJob {
     | {
         executedAt: string;
         completedAt: string;
-        taskSlug: 'inline' | 'generateImageEXIF' | 'sendResetPasswordEmail' | 'schedulePublish';
+        taskSlug:
+          | 'inline'
+          | 'generateImageEXIF'
+          | 'sendResetPasswordEmail'
+          | 'sendVerificationEmail'
+          | 'schedulePublish';
         taskID: string;
         input?:
           | {
@@ -1649,7 +1655,9 @@ export interface PayloadJob {
         id?: string | null;
       }[]
     | null;
-  taskSlug?: ('inline' | 'generateImageEXIF' | 'sendResetPasswordEmail' | 'schedulePublish') | null;
+  taskSlug?:
+    | ('inline' | 'generateImageEXIF' | 'sendResetPasswordEmail' | 'sendVerificationEmail' | 'schedulePublish')
+    | null;
   queue?: string | null;
   waitUntil?: string | null;
   processing?: boolean | null;
@@ -3057,9 +3065,35 @@ export interface TaskGenerateImageEXIF {
  */
 export interface TaskSendResetPasswordEmail {
   input: {
-    to: string;
-    subject: string;
-    html: string;
+    user:
+      | {
+          [k: string]: unknown;
+        }
+      | unknown[]
+      | string
+      | number
+      | boolean
+      | null;
+    url: string;
+  };
+  output?: unknown;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TaskSendVerificationEmail".
+ */
+export interface TaskSendVerificationEmail {
+  input: {
+    user:
+      | {
+          [k: string]: unknown;
+        }
+      | unknown[]
+      | string
+      | number
+      | boolean
+      | null;
+    url: string;
   };
   output?: unknown;
 }
