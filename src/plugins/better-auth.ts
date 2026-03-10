@@ -1,4 +1,4 @@
-import { createBetterAuthOptions, setAuthPayload } from '@/lib/auth/config';
+import { createBetterAuthOptions } from '@/lib/auth/config';
 import { getBaseUrl } from '@/lib/auth/getBaseUrl';
 import { betterAuth } from 'better-auth';
 import {
@@ -49,7 +49,6 @@ export function betterAuthPlugin() {
       autoInjectAdminComponents: true,
       autoRegisterEndpoints: true,
       createAuth: (payload) => {
-        setAuthPayload(payload);
         return betterAuth({
           ...createBetterAuthOptions(payload),
           database: payloadAdapter({

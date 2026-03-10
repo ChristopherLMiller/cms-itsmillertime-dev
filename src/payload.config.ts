@@ -2,7 +2,7 @@
 import { postgresAdapter } from '@payloadcms/db-postgres';
 import { redisKVAdapter } from '@payloadcms/kv-redis';
 import path from 'path';
-import { buildConfig, PayloadRequest } from 'payload';
+import { buildConfig, PayloadRequest, Where } from 'payload';
 import sharp from 'sharp';
 import { fileURLToPath } from 'url';
 import { resendAdapter } from '@payloadcms/email-resend';
@@ -31,6 +31,10 @@ import { SiteMeta } from './globals/site-meta';
 import { SiteNavigation } from './globals/site-navigation';
 import { plugins } from './plugins';
 import ExifReader from 'exifreader';
+import { render } from '@react-email/render';
+import React from 'react';
+import { ResetPasswordEmail } from '../emails/reset-password';
+import { VerifyAccountEmail } from '../emails/verify-account';
 
 const filename = fileURLToPath(import.meta.url);
 const dirname = path.dirname(filename);
@@ -256,18 +260,98 @@ export default buildConfig({
         },
       },
       {
+        slug: 'queueMissingEXIF',
+        retries: 1,
+        inputSchema: [],
+        schedule: [
+          {
+            cron: '0 0 * * * *', // Every hour
+            queue: 'exif',
+          },
+        ],
+        handler: async ({ req }) => {
+          const collections = ['media', 'gallery-images'] as const;
+          let queued = 0;
+
+          for (const collection of collections) {
+            const where: Where =
+              collection === 'media'
+                ? { exif: { equals: null }, mimeType: { like: 'image%' } }
+                : { exif: { equals: null } };
+
+            let page = 1;
+            const limit = 50;
+            let hasMore = true;
+
+            while (hasMore) {
+              const result = await req.payload.find({
+                collection,
+                where,
+                limit,
+                page,
+                depth: 0,
+                overrideAccess: true,
+              });
+
+              for (const doc of result.docs) {
+                await req.payload.jobs.queue({
+                  task: 'generateImageEXIF',
+                  input: { id: doc.id, collection },
+                  queue: 'exif',
+                });
+                queued++;
+              }
+
+              hasMore = result.hasNextPage;
+              page++;
+            }
+          }
+
+          return { output: { queued } };
+        },
+      },
+      {
         slug: 'sendResetPasswordEmail',
         retries: 3,
         inputSchema: [
-          { name: 'to', type: 'text', required: true },
-          { name: 'subject', type: 'text', required: true },
-          { name: 'html', type: 'text', required: true },
+          { name: 'user', type: 'json', required: true },
+          { name: 'url', type: 'text', required: true },
         ],
         handler: async ({ input, req }) => {
+          const user = input.user as { email: string; name?: string };
+          const html = await render(
+            React.createElement(ResetPasswordEmail, {
+              url: input.url,
+              userName: user.name,
+            }),
+          );
           await req.payload.email.sendEmail({
-            to: input.to,
-            subject: input.subject,
-            html: input.html,
+            to: user.email,
+            subject: 'Reset your password',
+            html,
+          });
+          return { output: { sent: true } };
+        },
+      },
+      {
+        slug: 'sendVerificationEmail',
+        retries: 3,
+        inputSchema: [
+          { name: 'user', type: 'json', required: true },
+          { name: 'url', type: 'text', required: true },
+        ],
+        handler: async ({ input, req }) => {
+          const user = input.user as { email: string; name?: string };
+          const html = await render(
+            React.createElement(VerifyAccountEmail, {
+              url: input.url,
+              userName: user.name,
+            }),
+          );
+          await req.payload.email.sendEmail({
+            to: user.email,
+            subject: 'Verify your email',
+            html,
           });
           return { output: { sent: true } };
         },
