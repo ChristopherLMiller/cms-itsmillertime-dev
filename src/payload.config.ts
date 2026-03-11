@@ -241,7 +241,13 @@ export default buildConfig({
 
             // Now get the EXIF
             console.log('Loading EXIF from buffer');
-            const exif = (await ExifReader.load(fileBuffer, { async: true, expanded: true })) as any;
+            const rawExif = (await ExifReader.load(fileBuffer, { async: true, expanded: true })) as any;
+
+            // Sanitize: PostgreSQL JSON does not allow \u0000 (null). XMP packets often end with <?xpacket end="w"?>\u0000
+            const exif =
+              rawExif == null
+                ? null
+                : JSON.parse(JSON.stringify(rawExif).replace(/\\u0000/g, ''));
 
             // Update the image with the EXIF data
             console.log('Updating image with EXIF data');
@@ -249,7 +255,7 @@ export default buildConfig({
               collection: input.collection,
               id: image.id,
               data: {
-                exif: exif || null,
+                exif,
               },
             });
 
