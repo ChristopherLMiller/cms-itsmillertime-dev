@@ -30,7 +30,6 @@ import { defaultLexical } from './fields/defaultLexical';
 import { SiteMeta } from './globals/site-meta';
 import { SiteNavigation } from './globals/site-navigation';
 import { plugins } from './plugins';
-import { GetObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import ExifReader from 'exifreader';
 import { render } from '@react-email/render';
 import React from 'react';
@@ -174,138 +173,96 @@ export default buildConfig({
           },
         ],
         handler: async ({ input, req }) => {
-          console.log(`Start of EXIF generation task for ${input.collection} - ${input.id}`);
+          try {
+            console.log(`Start of EXIF generation task for ${input.collection} - ${input.id}`);
 
-          const image = await req.payload.findByID({
-            collection: input.collection,
-            id: input.id,
-          });
+            const image = await req.payload.findByID({
+              collection: input.collection,
+              id: input.id,
+            });
 
-          // If the field isn't empty its already been generated, no need to proceed
-          if (image.exif && image.exif !== null && image.exif !== undefined) {
-            console.log('EXIF already generated');
-            return {
-              output: {
-                exifGenerated: false,
-                error: 'EXIF already generated',
-              },
-            };
-          }
+            // If the field isn't empty its already been generated, no need to proceed
+            if (image.exif && image.exif !== null && image.exif !== undefined) {
+              console.log('EXIF already generated');
+              return {
+                output: {
+                  exifGenerated: false,
+                  error: 'EXIF already generated',
+                },
+              };
+            }
 
-          // Skip SVG and other non-EXIF formats (SVG has no EXIF data)
-          const isSvg =
-            image.mimeType === 'image/svg+xml' ||
-            image.filename?.toLowerCase().endsWith('.svg');
-          if (isSvg) {
+            // Now get the image file from payload storage so we can use that
+            if (!image.filename) {
+              console.log(`Image ${image.id} filename not found`);
+              return {
+                output: {
+                  exifGenerated: false,
+                  error: 'Image filename not found',
+                },
+              };
+            }
+
+            // Access storage through req.payload (storage may not be in TypeScript types but is available at runtime)
+            const storage = (req.payload as any).storage;
+            let fileBuffer: Buffer;
+
+            if (storage) {
+              // Use payload.storage to read the file
+              fileBuffer = await storage.read({
+                collection: input.collection,
+                filename: image.filename,
+              });
+            } else {
+              // Fallback to fetching from URL if storage is not available
+              if (!image.url) {
+                console.log(`Image ${image.id} URL not found`);
+                return {
+                  output: {
+                    exifGenerated: false,
+                    error: 'Storage not available and image URL not found',
+                  },
+                };
+              }
+              console.log(`Fetching image from ${process.env.NEXT_PUBLIC_SERVER_URL}${image.url}`);
+              const response = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}${image.url}`);
+              if (!response.ok) {
+                console.log(`Failed to fetch image: ${response.statusText}`);
+                return {
+                  output: {
+                    exifGenerated: false,
+                    error: `Failed to fetch image: ${response.statusText}`,
+                  },
+                };
+              }
+              console.log('Image fetched, creating buffer from response');
+              fileBuffer = Buffer.from(await response.arrayBuffer());
+            }
+
+            // Now get the EXIF
+            console.log('Loading EXIF from buffer');
+            const exif = (await ExifReader.load(fileBuffer, { async: true, expanded: true })) as any;
+
+            // Update the image with the EXIF data
+            console.log('Updating image with EXIF data');
             await req.payload.update({
               collection: input.collection,
               id: image.id,
-              data: { exif: { _skipped: 'svg' } },
-              overrideAccess: true,
+              data: {
+                exif: exif || null,
+              },
             });
-            return { output: { exifGenerated: false, skipped: 'svg' } };
-          }
 
-          // Now get the image file from payload storage so we can use that
-          if (!image.filename) {
-            console.log(`Image ${image.id} filename not found`);
             return {
               output: {
-                exifGenerated: false,
-                error: 'Image filename not found',
+                exifGenerated: true,
               },
             };
+          } catch (err) {
+            const message = err instanceof Error ? err.message : String(err ?? 'Unknown error');
+            console.error('[generateImageEXIF]', message, err);
+            throw new Error(`generateImageEXIF failed: ${message}`);
           }
-
-          let fileBuffer: Buffer;
-
-          // Try fetch first (works when Next.js server is running)
-          if (image.url && process.env.NEXT_PUBLIC_SERVER_URL) {
-            try {
-              const fetchUrl = `${process.env.NEXT_PUBLIC_SERVER_URL}${image.url}`;
-              const response = await fetch(fetchUrl);
-              if (response.ok) {
-                fileBuffer = Buffer.from(await response.arrayBuffer());
-              } else {
-                throw new Error(`fetch ${response.status}`);
-              }
-            } catch (fetchErr) {
-              // Fallback to S3/R2 when fetch fails (e.g. jobs:run without server)
-              try {
-                const prefix = (image as { prefix?: string }).prefix ?? '';
-                const key = path.posix.join(prefix, image.filename).replace(/^\//, '');
-                const s3 = new S3Client({
-                  endpoint: process.env.CLOUDFLARE_ENDPOINT,
-                  region: process.env.CLOUDFLARE_REGION ?? 'auto',
-                  credentials: {
-                    accessKeyId: process.env.CLOUDFLARE_ACCESS_KEY ?? '',
-                    secretAccessKey: process.env.CLOUDFLARE_SECRET_KEY ?? '',
-                  },
-                });
-                const obj = await s3.send(
-                  new GetObjectCommand({
-                    Bucket: process.env.CLOUDFLARE_BUCKET,
-                    Key: key,
-                  }),
-                );
-                const chunks: Uint8Array[] = [];
-                if (obj.Body) {
-                  for await (const chunk of obj.Body as AsyncIterable<Uint8Array>) {
-                    chunks.push(chunk);
-                  }
-                }
-                fileBuffer = Buffer.concat(chunks);
-              } catch (s3Err) {
-                console.error('S3 fallback failed:', s3Err);
-                throw fetchErr;
-              }
-            }
-          } else {
-            // No URL - use S3 directly
-            const prefix = (image as { prefix?: string }).prefix ?? '';
-            const key = path.posix.join(prefix, image.filename).replace(/^\//, '');
-            const s3 = new S3Client({
-              endpoint: process.env.CLOUDFLARE_ENDPOINT,
-              region: process.env.CLOUDFLARE_REGION ?? 'auto',
-              credentials: {
-                accessKeyId: process.env.CLOUDFLARE_ACCESS_KEY ?? '',
-                secretAccessKey: process.env.CLOUDFLARE_SECRET_KEY ?? '',
-              },
-            });
-            const obj = await s3.send(
-              new GetObjectCommand({
-                Bucket: process.env.CLOUDFLARE_BUCKET,
-                Key: key,
-              }),
-            );
-            const chunks: Uint8Array[] = [];
-            if (obj.Body) {
-              for await (const chunk of obj.Body as AsyncIterable<Uint8Array>) {
-                chunks.push(chunk);
-              }
-            }
-            fileBuffer = Buffer.concat(chunks);
-          }
-
-          // Now get the EXIF
-          console.log('Loading EXIF from buffer');
-          const exif = (await ExifReader.load(fileBuffer, { async: true, expanded: true })) as any;
-
-          // updat the image with the EXIF data
-          console.log('Updating image with EXIF data');
-          await req.payload.update({
-            collection: input.collection,
-            id: image.id,
-            data: {
-              exif: exif || null,
-            },
-          });
-
-          return {
-            output: {
-              exifGenerated: true,
-            },
-          };
         },
       },
       {
@@ -319,44 +276,50 @@ export default buildConfig({
           },
         ],
         handler: async ({ req }) => {
-          const collections = ['media', 'gallery-images'] as const;
-          let queued = 0;
+          try {
+            const collections = ['media', 'gallery-images'] as const;
+            let queued = 0;
 
-          for (const collection of collections) {
-            const where: Where =
-              collection === 'media'
-                ? { exif: { equals: null }, mimeType: { like: 'image%' } }
-                : { exif: { equals: null } };
+            for (const collection of collections) {
+              const where: Where =
+                collection === 'media'
+                  ? { exif: { equals: null }, mimeType: { like: 'image%' } }
+                  : { exif: { equals: null } };
 
-            let page = 1;
-            const limit = 50;
-            let hasMore = true;
+              let page = 1;
+              const limit = 50;
+              let hasMore = true;
 
-            while (hasMore) {
-              const result = await req.payload.find({
-                collection,
-                where,
-                limit,
-                page,
-                depth: 0,
-                overrideAccess: true,
-              });
-
-              for (const doc of result.docs) {
-                await req.payload.jobs.queue({
-                  task: 'generateImageEXIF',
-                  input: { id: doc.id, collection },
-                  queue: 'exif',
+              while (hasMore) {
+                const result = await req.payload.find({
+                  collection,
+                  where,
+                  limit,
+                  page,
+                  depth: 0,
+                  overrideAccess: true,
                 });
-                queued++;
+
+                for (const doc of result.docs) {
+                  await req.payload.jobs.queue({
+                    task: 'generateImageEXIF',
+                    input: { id: doc.id, collection },
+                    queue: 'exif',
+                  });
+                  queued++;
+                }
+
+                hasMore = result.hasNextPage;
+                page++;
               }
-
-              hasMore = result.hasNextPage;
-              page++;
             }
-          }
 
-          return { output: { queued } };
+            return { output: { queued } };
+          } catch (err) {
+            const message = err instanceof Error ? err.message : String(err ?? 'Unknown error');
+            console.error('[queueMissingEXIF]', message, err);
+            throw new Error(`queueMissingEXIF failed: ${message}`);
+          }
         },
       },
       {
@@ -367,19 +330,35 @@ export default buildConfig({
           { name: 'url', type: 'text', required: true },
         ],
         handler: async ({ input, req }) => {
-          const user = input.user as { email: string; name?: string };
-          const html = await render(
-            React.createElement(ResetPasswordEmail, {
-              url: input.url,
-              userName: user.name,
-            }),
-          );
-          await req.payload.email.sendEmail({
-            to: user.email,
-            subject: 'Reset your password',
-            html,
-          });
-          return { output: { sent: true } };
+          try {
+            if (!process.env.RESEND_API_KEY) {
+              throw new Error('RESEND_API_KEY environment variable is not set');
+            }
+            const user = input.user as { email?: string; name?: string };
+            if (!user?.email) {
+              throw new Error('sendResetPasswordEmail: user.email is required');
+            }
+            const emailAdapter = req.payload?.email;
+            if (!emailAdapter?.sendEmail) {
+              throw new Error('sendResetPasswordEmail: email adapter not available');
+            }
+            const html = await render(
+              React.createElement(ResetPasswordEmail, {
+                url: input.url,
+                userName: user.name,
+              }),
+            );
+            await emailAdapter.sendEmail({
+              to: user.email,
+              subject: 'Reset your password',
+              html,
+            });
+            return { output: { sent: true } };
+          } catch (err) {
+            const message = err instanceof Error ? err.message : String(err ?? 'Unknown error');
+            console.error('[sendResetPasswordEmail]', message, err);
+            throw new Error(`sendResetPasswordEmail failed: ${message}`);
+          }
         },
       },
       {
@@ -390,19 +369,35 @@ export default buildConfig({
           { name: 'url', type: 'text', required: true },
         ],
         handler: async ({ input, req }) => {
-          const user = input.user as { email: string; name?: string };
-          const html = await render(
-            React.createElement(VerifyAccountEmail, {
-              url: input.url,
-              userName: user.name,
-            }),
-          );
-          await req.payload.email.sendEmail({
-            to: user.email,
-            subject: 'Verify your email',
-            html,
-          });
-          return { output: { sent: true } };
+          try {
+            if (!process.env.RESEND_API_KEY) {
+              throw new Error('RESEND_API_KEY environment variable is not set');
+            }
+            const user = input.user as { email?: string; name?: string };
+            if (!user?.email) {
+              throw new Error('sendVerificationEmail: user.email is required');
+            }
+            const emailAdapter = req.payload?.email;
+            if (!emailAdapter?.sendEmail) {
+              throw new Error('sendVerificationEmail: email adapter not available');
+            }
+            const html = await render(
+              React.createElement(VerifyAccountEmail, {
+                url: input.url,
+                userName: user.name,
+              }),
+            );
+            await emailAdapter.sendEmail({
+              to: user.email,
+              subject: 'Verify your email',
+              html,
+            });
+            return { output: { sent: true } };
+          } catch (err) {
+            const message = err instanceof Error ? err.message : String(err ?? 'Unknown error');
+            console.error('[sendVerificationEmail]', message, err);
+            throw new Error(`sendVerificationEmail failed: ${message}`);
+          }
         },
       },
     ],
