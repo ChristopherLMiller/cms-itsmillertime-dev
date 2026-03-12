@@ -9,7 +9,7 @@ export function NavBadgeProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const fetchActiveJobs = async () => {
       try {
-        const response = await fetch('/api/nav/jobs');
+        const response = await fetch('/api/nav/jobs', { credentials: 'include' });
         if (response.ok) {
           const data = await response.json();
           setActiveJobsCount(data.count || 0);
