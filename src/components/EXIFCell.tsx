@@ -18,6 +18,11 @@ const isFullEXIF = (exifData: unknown): boolean => {
 
   const data = exifData as Record<string, unknown>;
 
+  // _skipped means no EXIF (format not supported)
+  if ('_skipped' in data && data._skipped) {
+    return false;
+  }
+
   // Check for presence of xmp section (strong indicator of full EXIF)
   if (!data.xmp || typeof data.xmp !== 'object') {
     return false;
@@ -50,6 +55,15 @@ export const EXIFCell: React.FC<EXIFCellProps> = (props) => {
   // Check if it's an empty object
   if (typeof exifData === 'object' && Object.keys(exifData).length === 0) {
     return <span>No</span>;
+  }
+
+  // Check if EXIF was skipped (SVG, invalid format, etc.)
+  const skipped = typeof exifData === 'object' && exifData !== null && '_skipped' in exifData
+    ? (exifData as Record<string, unknown>)._skipped
+    : null;
+  if (skipped) {
+    const label = skipped === 'svg' ? 'Skipped (SVG)' : 'Skipped (invalid format)';
+    return <span>{label}</span>;
   }
 
   // Check if it's full or reduced EXIF

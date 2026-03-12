@@ -203,6 +203,27 @@ export default buildConfig({
               };
             }
 
+            // Skip SVG - no EXIF in vector graphics
+            const mimeType = (image as { mimeType?: string }).mimeType ?? '';
+            const filename = image.filename ?? '';
+            if (
+              mimeType === 'image/svg+xml' ||
+              filename.toLowerCase().endsWith('.svg')
+            ) {
+              await req.payload.update({
+                collection: input.collection,
+                id: image.id,
+                data: { exif: { _skipped: 'svg' } },
+              });
+              return {
+                output: {
+                  exifGenerated: false,
+                  error: 'SVG has no EXIF',
+                  skipped: true,
+                },
+              };
+            }
+
             // Access storage through req.payload (storage may not be in TypeScript types but is available at runtime)
             const storage = (req.payload as any).storage;
             let fileBuffer: Buffer;
@@ -241,7 +262,31 @@ export default buildConfig({
 
             // Now get the EXIF
             console.log('Loading EXIF from buffer');
-            const rawExif = (await ExifReader.load(fileBuffer, { async: true, expanded: true })) as any;
+            let rawExif: any;
+            try {
+              rawExif = (await ExifReader.load(fileBuffer, { async: true, expanded: true })) as any;
+            } catch (err) {
+              const msg = err instanceof Error ? err.message : String(err);
+              const isInvalidFormat =
+                msg.includes('Invalid image format') ||
+                msg.toLowerCase().includes('invalid') ||
+                msg.toLowerCase().includes('unsupported');
+              if (isInvalidFormat) {
+                await req.payload.update({
+                  collection: input.collection,
+                  id: image.id,
+                  data: { exif: { _skipped: 'invalid_format' } },
+                });
+                return {
+                  output: {
+                    exifGenerated: false,
+                    error: msg,
+                    skipped: true,
+                  },
+                };
+              }
+              throw err;
+            }
 
             // Sanitize: PostgreSQL JSON does not allow \u0000 (null). XMP packets often end with <?xpacket end="w"?>\u0000
             const exif =
@@ -278,7 +323,7 @@ export default buildConfig({
         schedule: [
           {
             cron: '0 0 * * * *', // Every hour
-            queue: 'exif',
+            queue: 'default',
           },
         ],
         handler: async ({ req }) => {

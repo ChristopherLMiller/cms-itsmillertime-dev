@@ -62,6 +62,20 @@ export const EXIFDisplay: React.FC<JSONFieldClientProps> = () => {
     return Object.keys(exifData).length === 0;
   }, [exifData]);
 
+  // Check if EXIF was skipped (SVG, invalid format, etc.)
+  const isSkipped = useMemo(() => {
+    if (!exifData || exifData === null || typeof exifData !== 'object') {
+      return false;
+    }
+    return '_skipped' in exifData && !!(exifData as Record<string, unknown>)._skipped;
+  }, [exifData]);
+
+  const skippedReason = useMemo(() => {
+    if (!isSkipped || !exifData || typeof exifData !== 'object') return null;
+    const reason = (exifData as Record<string, unknown>)._skipped;
+    return reason === 'svg' ? 'SVG' : reason === 'invalid_format' ? 'invalid format' : String(reason);
+  }, [isSkipped, exifData]);
+
   // Check if EXIF data is undefined or null
   const isUndefinedOrNull = exifData === undefined || exifData === null;
 
@@ -72,6 +86,11 @@ export const EXIFDisplay: React.FC<JSONFieldClientProps> = () => {
     }
 
     const data = exifData as Record<string, unknown>;
+
+    // _skipped means no EXIF (format not supported)
+    if ('_skipped' in data && data._skipped) {
+      return false;
+    }
 
     // Check for presence of xmp section (strong indicator of full EXIF)
     if (!data.xmp || typeof data.xmp !== 'object') {
@@ -405,6 +424,21 @@ export const EXIFDisplay: React.FC<JSONFieldClientProps> = () => {
         );
       }
 
+      // If EXIF was skipped (SVG, invalid format), show message
+      if (isSkipped && skippedReason) {
+        return (
+          <div
+            style={{
+              marginTop: '0.75rem',
+              color: 'var(--theme-elevation-600)',
+              fontSize: '1rem',
+            }}
+          >
+            EXIF skipped for this image ({skippedReason}).
+          </div>
+        );
+      }
+
       // If reduced EXIF data, show warning message but still allow viewing raw data
       if (!isFullEXIF) {
         return (
@@ -556,7 +590,7 @@ export const EXIFDisplay: React.FC<JSONFieldClientProps> = () => {
             <h3 className="field-group__title" style={{ margin: 0 }}>
               EXIF Data
             </h3>
-            {!isUndefinedOrNull && !isEmptyObject && (
+            {!isUndefinedOrNull && !isEmptyObject && !isSkipped && (
               <DrawerToggler slug={drawerSlug}>View Raw Data</DrawerToggler>
             )}
           </div>
