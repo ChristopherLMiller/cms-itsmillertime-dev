@@ -1,4 +1,6 @@
 // storage-adapter-import-placeholder
+import { GetObjectCommand } from '@aws-sdk/client-s3';
+import { S3Client } from '@aws-sdk/client-s3';
 import { postgresAdapter } from '@payloadcms/db-postgres';
 import { redisKVAdapter } from '@payloadcms/kv-redis';
 import path from 'path';
@@ -179,6 +181,7 @@ export default buildConfig({
             const image = await req.payload.findByID({
               collection: input.collection,
               id: input.id,
+              overrideAccess: true,
             });
 
             // If the field isn't empty its already been generated, no need to proceed
@@ -214,6 +217,7 @@ export default buildConfig({
                 collection: input.collection,
                 id: image.id,
                 data: { exif: { _skipped: 'svg' } },
+                overrideAccess: true,
               });
               return {
                 output: {
@@ -226,7 +230,7 @@ export default buildConfig({
 
             // Access storage through req.payload (storage may not be in TypeScript types but is available at runtime)
             const storage = (req.payload as any).storage;
-            let fileBuffer: Buffer;
+            let fileBuffer: Buffer | null = null;
 
             if (storage) {
               // Use payload.storage to read the file
@@ -235,29 +239,67 @@ export default buildConfig({
                 filename: image.filename,
               });
             } else {
-              // Fallback to fetching from URL if storage is not available
-              if (!image.url) {
-                console.log(`Image ${image.id} URL not found`);
-                return {
-                  output: {
-                    exifGenerated: false,
-                    error: 'Storage not available and image URL not found',
-                  },
-                };
+              // Fallback: try URL fetch first, then S3 direct read (bypasses access control for NSFW etc.)
+              if (image.url) {
+                console.log(`Fetching image from ${process.env.NEXT_PUBLIC_SERVER_URL}${image.url}`);
+                const response = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}${image.url}`);
+                if (response.ok) {
+                  fileBuffer = Buffer.from(await response.arrayBuffer());
+                  console.log('Image fetched from URL');
+                } else {
+                  console.log(`URL fetch failed: ${response.statusText}, trying S3 direct read`);
+                }
               }
-              console.log(`Fetching image from ${process.env.NEXT_PUBLIC_SERVER_URL}${image.url}`);
-              const response = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}${image.url}`);
-              if (!response.ok) {
-                console.log(`Failed to fetch image: ${response.statusText}`);
-                return {
-                  output: {
-                    exifGenerated: false,
-                    error: `Failed to fetch image: ${response.statusText}`,
-                  },
-                };
+              if (!fileBuffer) {
+                // Read directly from S3/R2 - bypasses HTTP access control (e.g. NSFW)
+                const bucket = process.env.CLOUDFLARE_BUCKET;
+                const endpoint = process.env.CLOUDFLARE_ENDPOINT;
+                const accessKey = process.env.CLOUDFLARE_ACCESS_KEY;
+                const secretKey = process.env.CLOUDFLARE_SECRET_KEY;
+                const region = process.env.CLOUDFLARE_REGION;
+                if (!bucket || !endpoint || !accessKey || !secretKey || !region) {
+                  return {
+                    output: {
+                      exifGenerated: false,
+                      error: 'Storage not available, URL fetch failed, and S3 env vars missing',
+                    },
+                  };
+                }
+                const prefix = (image as { prefix?: string }).prefix ?? '';
+                const key = path.posix.join(prefix, filename);
+                const s3 = new S3Client({
+                  endpoint,
+                  region,
+                  credentials: { accessKeyId: accessKey, secretAccessKey: secretKey },
+                });
+                const obj = await s3.send(
+                  new GetObjectCommand({ Bucket: bucket, Key: key }),
+                );
+                const chunks: Uint8Array[] = [];
+                if (obj.Body) {
+                  for await (const chunk of obj.Body as AsyncIterable<Uint8Array>) {
+                    chunks.push(chunk);
+                  }
+                  fileBuffer = Buffer.concat(chunks);
+                  console.log('Image read from S3');
+                } else {
+                  return {
+                    output: {
+                      exifGenerated: false,
+                      error: 'S3 object has no body',
+                    },
+                  };
+                }
               }
-              console.log('Image fetched, creating buffer from response');
-              fileBuffer = Buffer.from(await response.arrayBuffer());
+            }
+
+            if (!fileBuffer) {
+              return {
+                output: {
+                  exifGenerated: false,
+                  error: 'Could not read image file',
+                },
+              };
             }
 
             // Now get the EXIF
@@ -276,6 +318,7 @@ export default buildConfig({
                   collection: input.collection,
                   id: image.id,
                   data: { exif: { _skipped: 'invalid_format' } },
+                  overrideAccess: true,
                 });
                 return {
                   output: {
@@ -302,6 +345,7 @@ export default buildConfig({
               data: {
                 exif,
               },
+              overrideAccess: true,
             });
 
             return {
