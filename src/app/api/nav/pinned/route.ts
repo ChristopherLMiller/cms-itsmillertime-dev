@@ -1,7 +1,6 @@
 import { headers } from 'next/headers';
 import config from '@payload-config';
 import { getPayload } from 'payload';
-import { NextResponse } from 'next/server';
 
 export interface PinnedItem {
   slug: string;
@@ -9,14 +8,24 @@ export interface PinnedItem {
   order: number;
 }
 
-export async function GET() {
+export async function GET(): Promise<Response> {
   try {
     const payload = await getPayload({ config });
     const headersList = await headers();
-    const { user } = await payload.auth({ headers: headersList });
+
+    // Pass JWT from cookie as Authorization header for auth in production
+    const cookieHeader = headersList.get('cookie');
+    const payloadTokenMatch = cookieHeader?.match(/payload-token=([^;]+)/);
+    const payloadToken = payloadTokenMatch ? payloadTokenMatch[1] : null;
+    const authHeaders = new Headers(headersList);
+    if (payloadToken) {
+      authHeaders.set('Authorization', `JWT ${payloadToken}`);
+    }
+
+    const { user } = await payload.auth({ headers: authHeaders });
 
     if (!user) {
-      return NextResponse.json({ pinnedItems: [] });
+      return Response.json({ pinnedItems: [] });
     }
 
     const prefs = await payload.find({
@@ -33,10 +42,10 @@ export async function GET() {
       depth: 0,
     });
 
-    const pinnedItems = (prefs.docs[0]?.value as { pinnedItems?: PinnedItem[] })?.pinnedItems || [];
-    return NextResponse.json({ pinnedItems });
+    const pinnedItems = (prefs.docs[0]?.value as { pinnedItems?: PinnedItem[] })?.pinnedItems ?? [];
+    return Response.json({ pinnedItems });
   } catch (error) {
     console.error('Error fetching pinned items:', error);
-    return NextResponse.json({ pinnedItems: [] });
+    return Response.json({ pinnedItems: [] });
   }
 }
