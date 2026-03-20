@@ -54,6 +54,7 @@ The headless CMS powering [itsmillertime.dev](https://www.itsmillertime.dev), bu
 - **Word Count** -- automatic word count tracking on posts
 - **Slug Field** -- auto-generated URL slugs from titles
 - **Health Endpoint** -- `GET /api/health` returns service and database status
+- **Contact Form** -- `POST /api/contact-form` queues submissions on the `email` job queue; `sendContactFormEmail` renders `emails/contact-form.tsx` via React Email and sends with Resend (requires `CONTACT_EMAIL` and `RESEND_API_KEY`)
 - **Custom Dashboard** -- analytics dashboard with Plausible integration
 - **BGG Integration** -- Board Game Geek collection viewer in the admin panel
 - **Clockify Integration** -- project time tracking via Clockify API
@@ -91,6 +92,8 @@ CLOUDFLARE_REGION=auto
 
 # Email
 RESEND_API_KEY=your-resend-key
+# Inbound address for www contact form (see docs on the frontend repo)
+CONTACT_EMAIL=you@example.com
 
 # Sentry
 SENTRY_ORG=your-org
@@ -167,6 +170,7 @@ src/
   collections/     # Payload collection definitions
   components/      # Custom admin UI components
   fields/          # Reusable field configurations
+  endpoints/       # Custom Payload API routes (e.g. contact form)
   globals/         # Payload global definitions
   lib/             # Utility libraries (BGG, Clockify, Plausible)
   plugins/         # Payload plugin configuration

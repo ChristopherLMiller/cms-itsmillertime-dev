@@ -186,6 +186,7 @@ export interface Config {
       queueMissingEXIF: TaskQueueMissingEXIF;
       sendResetPasswordEmail: TaskSendResetPasswordEmail;
       sendVerificationEmail: TaskSendVerificationEmail;
+      sendContactFormEmail: TaskSendContactFormEmail;
       schedulePublish: TaskSchedulePublish;
       inline: {
         input: unknown;
@@ -1626,6 +1627,7 @@ export interface PayloadJob {
           | 'queueMissingEXIF'
           | 'sendResetPasswordEmail'
           | 'sendVerificationEmail'
+          | 'sendContactFormEmail'
           | 'schedulePublish';
         taskID: string;
         input?:
@@ -1666,6 +1668,7 @@ export interface PayloadJob {
         | 'queueMissingEXIF'
         | 'sendResetPasswordEmail'
         | 'sendVerificationEmail'
+        | 'sendContactFormEmail'
         | 'schedulePublish'
       )
     | null;
@@ -3151,6 +3154,18 @@ export interface TaskSendVerificationEmail {
       | boolean
       | null;
     url: string;
+  };
+  output?: unknown;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TaskSendContactFormEmail".
+ */
+export interface TaskSendContactFormEmail {
+  input: {
+    name: string;
+    email: string;
+    message: string;
   };
   output?: unknown;
 }
