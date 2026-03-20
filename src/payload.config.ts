@@ -35,8 +35,10 @@ import { plugins } from './plugins';
 import ExifReader from 'exifreader';
 import { render } from '@react-email/render';
 import React from 'react';
+import { ContactFormEmail } from '../emails/contact-form';
 import { ResetPasswordEmail } from '../emails/reset-password';
 import { VerifyAccountEmail } from '../emails/verify-account';
+import { contactFormHandler } from './endpoints/contact-form';
 
 const filename = fileURLToPath(import.meta.url);
 const dirname = path.dirname(filename);
@@ -77,6 +79,11 @@ export default buildConfig({
           return Response.json(response, { status: 500 });
         }
       },
+    },
+    {
+      path: '/contact-form',
+      method: 'post',
+      handler: contactFormHandler,
     },
   ],
   kv: redisKVAdapter({
@@ -492,6 +499,54 @@ export default buildConfig({
             const message = err instanceof Error ? err.message : String(err ?? 'Unknown error');
             console.error('[sendVerificationEmail]', message, err);
             throw new Error(`sendVerificationEmail failed: ${message}`);
+          }
+        },
+      },
+      {
+        slug: 'sendContactFormEmail',
+        retries: 3,
+        inputSchema: [
+          { name: 'name', type: 'text', required: true },
+          { name: 'email', type: 'text', required: true },
+          { name: 'message', type: 'text', required: true },
+        ],
+        handler: async ({ input, req }) => {
+          try {
+            if (!process.env.RESEND_API_KEY) {
+              throw new Error('RESEND_API_KEY environment variable is not set');
+            }
+            const toEmail = process.env.CONTACT_EMAIL;
+            if (!toEmail) {
+              throw new Error('CONTACT_EMAIL environment variable is not set');
+            }
+            const name = (input.name as string)?.trim();
+            const email = (input.email as string)?.trim();
+            const message = (input.message as string)?.trim();
+            if (!name || !email || !message) {
+              throw new Error('sendContactFormEmail: name, email, and message are required');
+            }
+            const emailAdapter = req.payload?.email;
+            if (!emailAdapter?.sendEmail) {
+              throw new Error('sendContactFormEmail: email adapter not available');
+            }
+            const html = await render(
+              React.createElement(ContactFormEmail, {
+                name,
+                email,
+                message,
+              }),
+            );
+            await emailAdapter.sendEmail({
+              to: toEmail,
+              replyTo: email,
+              subject: `Contact form: ${name}`,
+              html,
+            });
+            return { output: { sent: true } };
+          } catch (err) {
+            const message = err instanceof Error ? err.message : String(err ?? 'Unknown error');
+            console.error('[sendContactFormEmail]', message, err);
+            throw new Error(`sendContactFormEmail failed: ${message}`);
           }
         },
       },
