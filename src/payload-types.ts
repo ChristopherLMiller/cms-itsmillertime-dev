@@ -3163,8 +3163,8 @@ export interface TaskSendVerificationEmail {
  */
 export interface TaskSendContactFormEmail {
   input: {
-    name: string;
-    email: string;
+    senderName: string;
+    senderEmail: string;
     message: string;
   };
   output?: unknown;

@@ -36,6 +36,7 @@ import ExifReader from 'exifreader';
 import { render } from '@react-email/render';
 import React from 'react';
 import { ContactFormEmail } from '../emails/contact-form';
+import { safeEmailSubjectLine } from './utilities/sanitizeContactForm';
 import { ResetPasswordEmail } from '../emails/reset-password';
 import { VerifyAccountEmail } from '../emails/verify-account';
 import { contactFormHandler } from './endpoints/contact-form';
@@ -506,9 +507,24 @@ export default buildConfig({
         slug: 'sendContactFormEmail',
         retries: 3,
         inputSchema: [
-          { name: 'name', type: 'text', required: true },
-          { name: 'email', type: 'text', required: true },
-          { name: 'message', type: 'text', required: true },
+          {
+            name: 'senderName',
+            type: 'text',
+            required: true,
+            maxLength: 200,
+          },
+          {
+            name: 'senderEmail',
+            type: 'text',
+            required: true,
+            maxLength: 320,
+          },
+          {
+            name: 'message',
+            type: 'text',
+            required: true,
+            maxLength: 20000,
+          },
         ],
         handler: async ({ input, req }) => {
           try {
@@ -519,11 +535,13 @@ export default buildConfig({
             if (!toEmail) {
               throw new Error('CONTACT_EMAIL environment variable is not set');
             }
-            const name = (input.name as string)?.trim();
-            const email = (input.email as string)?.trim();
-            const message = (input.message as string)?.trim();
-            if (!name || !email || !message) {
-              throw new Error('sendContactFormEmail: name, email, and message are required');
+            const senderName = String(input.senderName ?? '').trim();
+            const senderEmail = String(input.senderEmail ?? '').trim();
+            const message = String(input.message ?? '').trim();
+            if (!senderName || !senderEmail || !message) {
+              throw new Error(
+                'sendContactFormEmail: senderName, senderEmail, and message are required',
+              );
             }
             const emailAdapter = req.payload?.email;
             if (!emailAdapter?.sendEmail) {
@@ -531,15 +549,15 @@ export default buildConfig({
             }
             const html = await render(
               React.createElement(ContactFormEmail, {
-                name,
-                email,
+                senderName,
+                senderEmail,
                 message,
               }),
             );
             await emailAdapter.sendEmail({
               to: toEmail,
-              replyTo: email,
-              subject: `Contact form: ${name}`,
+              replyTo: senderEmail,
+              subject: safeEmailSubjectLine(senderName),
               html,
             });
             return { output: { sent: true } };
