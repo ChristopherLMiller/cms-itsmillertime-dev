@@ -177,6 +177,8 @@ export interface Config {
   };
   locale: null;
   widgets: {
+    'site-analytics': SiteAnalyticsWidget;
+    'recent-content': RecentContentWidget;
     collections: CollectionsWidget;
   };
   user: User | PayloadMcpApiKey;
@@ -3089,6 +3091,28 @@ export interface PayloadJobsStatsSelect<T extends boolean = true> {
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "site-analytics_widget".
+ */
+export interface SiteAnalyticsWidget {
+  data?: {
+    [k: string]: unknown;
+  };
+  width: 'medium' | 'large' | 'x-large' | 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "recent-content_widget".
+ */
+export interface RecentContentWidget {
+  data?: {
+    title: string;
+    collection: 'posts' | 'models' | 'gallery-albums' | 'media';
+    icon: string;
+  };
+  width: 'small' | 'medium';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

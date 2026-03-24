@@ -5,6 +5,17 @@ export interface PlausibleStats {
   visit_duration?: number;
 }
 
+export interface PlausibleBreakdownRow {
+  name: string;
+  visitors: number;
+  pageviews: number;
+}
+
+type PlausibleQueryResult = {
+  dimensions?: string[];
+  metrics?: number[];
+};
+
 export class Plausible {
   private apiKey: string;
   private siteId: string;
@@ -22,24 +33,11 @@ export class Plausible {
 
   public async getStats(dateRange: string = '30d'): Promise<PlausibleStats> {
     try {
-      const response = await fetch(this.baseURL, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${this.apiKey}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          site_id: this.siteId,
-          metrics: ['visitors', 'pageviews', 'bounce_rate', 'visit_duration'],
-          date_range: dateRange,
-        }),
+      const data = await this.query({
+        metrics: ['visitors', 'pageviews', 'bounce_rate', 'visit_duration'],
+        date_range: dateRange,
       });
 
-      if (!response.ok) {
-        throw new Error(`Plausible API error: ${response.status} ${response.statusText}`);
-      }
-
-      const data = await response.json();
       return {
         visitors: data.results[0]?.metrics?.[0] || 0,
         pageviews: data.results[0]?.metrics?.[1] || 0,
@@ -50,5 +48,86 @@ export class Plausible {
       console.error(`Error fetching Plausible stats: ${error}`);
       throw error;
     }
+  }
+
+  public async getTopPages(
+    dateRange: string = '30d',
+    limit: number = 5,
+  ): Promise<PlausibleBreakdownRow[]> {
+    return this.getBreakdownWithFallbacks(['event:page', 'visit:entry_page'], dateRange, limit);
+  }
+
+  public async getTopReferrers(
+    dateRange: string = '30d',
+    limit: number = 5,
+  ): Promise<PlausibleBreakdownRow[]> {
+    return this.getBreakdownWithFallbacks(['visit:referrer', 'visit:source'], dateRange, limit);
+  }
+
+  public async getTopCountries(
+    dateRange: string = '30d',
+    limit: number = 5,
+  ): Promise<PlausibleBreakdownRow[]> {
+    return this.getBreakdownWithFallbacks(['visit:country_name', 'visit:country'], dateRange, limit);
+  }
+
+  private async getBreakdownWithFallbacks(
+    dimensions: string[],
+    dateRange: string,
+    limit: number,
+  ): Promise<PlausibleBreakdownRow[]> {
+    for (const dimension of dimensions) {
+      const rows = await this.getBreakdown(dimension, dateRange, limit).catch(() => []);
+      if (rows.length > 0) {
+        return rows;
+      }
+    }
+
+    return [];
+  }
+
+  private async getBreakdown(
+    dimension: string,
+    dateRange: string,
+    limit: number,
+  ): Promise<PlausibleBreakdownRow[]> {
+    const data = await this.query({
+      metrics: ['visitors', 'pageviews'],
+      dimensions: [dimension],
+      date_range: dateRange,
+      filters: [['is_not', dimension, ['']]],
+      order_by: [['visitors', 'desc']],
+      include: { imports: true },
+      pagination: {
+        limit,
+        offset: 0,
+      },
+    });
+
+    return (data.results as PlausibleQueryResult[]).map((row) => ({
+      name: row.dimensions?.[0] || '(direct)',
+      visitors: row.metrics?.[0] || 0,
+      pageviews: row.metrics?.[1] || 0,
+    }));
+  }
+
+  private async query(body: Record<string, unknown>) {
+    const response = await fetch(this.baseURL, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${this.apiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        site_id: this.siteId,
+        ...body,
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Plausible API error: ${response.status} ${response.statusText}`);
+    }
+
+    return response.json();
   }
 }

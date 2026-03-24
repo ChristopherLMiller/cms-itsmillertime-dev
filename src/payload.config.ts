@@ -99,12 +99,88 @@ export default buildConfig({
     importMap: {
       baseDir: path.resolve(dirname),
     },
+    dashboard: {
+      widgets: [
+        {
+          slug: 'site-analytics',
+          Component: '@/components/Dashboard/widgets/AnalyticsWidget',
+          minWidth: 'medium',
+          maxWidth: 'full',
+        },
+        {
+          slug: 'recent-content',
+          Component: '@/components/Dashboard/widgets/RecentContentWidget',
+          minWidth: 'small',
+          maxWidth: 'medium',
+          fields: [
+            {
+              name: 'title',
+              type: 'text',
+              required: true,
+            },
+            {
+              name: 'collection',
+              type: 'select',
+              required: true,
+              options: [
+                { label: 'Posts', value: 'posts' },
+                { label: 'Models', value: 'models' },
+                { label: 'Gallery Albums', value: 'gallery-albums' },
+                { label: 'Media', value: 'media' },
+              ],
+            },
+            {
+              name: 'icon',
+              type: 'text',
+              required: true,
+            },
+          ],
+        },
+      ],
+      defaultLayout: () => [
+        { widgetSlug: 'collections', width: 'full' },
+        { widgetSlug: 'site-analytics', width: 'full' },
+        {
+          widgetSlug: 'recent-content',
+          width: 'small',
+          data: {
+            title: 'Recent Posts',
+            collection: 'posts',
+            icon: 'file-text',
+          },
+        },
+        {
+          widgetSlug: 'recent-content',
+          width: 'small',
+          data: {
+            title: 'Recent Models',
+            collection: 'models',
+            icon: 'plane',
+          },
+        },
+        {
+          widgetSlug: 'recent-content',
+          width: 'small',
+          data: {
+            title: 'Recent Albums',
+            collection: 'gallery-albums',
+            icon: 'images',
+          },
+        },
+        {
+          widgetSlug: 'recent-content',
+          width: 'small',
+          data: {
+            title: 'Recent Media',
+            collection: 'media',
+            icon: 'image',
+          },
+        },
+      ],
+    },
     components: {
       providers: ['@/components/NavBadgeProvider'],
       views: {
-        dashboard: {
-          Component: '@/components/Dashboard#Dashboard',
-        },
         bgg: {
           Component: '@/components/BGG',
           path: '/bgg',
