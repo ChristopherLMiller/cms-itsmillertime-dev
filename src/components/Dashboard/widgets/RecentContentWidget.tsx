@@ -64,20 +64,24 @@ const getItemImage = (item: Record<string, unknown>): string | null => {
   return null;
 };
 
+type IconProps = { size?: number; className?: string };
+
+function lucideIconFromKebab(kebab: string): React.ComponentType<IconProps> {
+  const pascal = kebab
+    .split('-')
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join('');
+  const byName = LucideIcons as unknown as Record<string, React.ComponentType<IconProps>>;
+  return byName[pascal] ?? LucideIcons.FileText;
+}
+
 export default async function RecentContentWidget({ req, widgetData }: WidgetServerProps) {
   const configData = {
     ...DEFAULT_DATA,
     ...(widgetData as RecentWidgetData),
   };
 
-  const iconName = configData.icon
-    .split('-')
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-    .join('');
-  const IconComponent =
-    (LucideIcons as Record<string, React.ComponentType<{ size?: number; className?: string }>>)[
-      iconName
-    ] || LucideIcons.FileText;
+  const IconComponent = lucideIconFromKebab(configData.icon);
 
   let items: Record<string, unknown>[] = [];
 
