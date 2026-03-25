@@ -36,6 +36,7 @@ import ExifReader from 'exifreader';
 import { render } from '@react-email/render';
 import React from 'react';
 import { ContactFormEmail } from '../emails/contact-form';
+import { safeEmailSubjectLine } from './utilities/sanitizeContactForm';
 import { ResetPasswordEmail } from '../emails/reset-password';
 import { VerifyAccountEmail } from '../emails/verify-account';
 import { contactFormHandler } from './endpoints/contact-form';
@@ -98,12 +99,88 @@ export default buildConfig({
     importMap: {
       baseDir: path.resolve(dirname),
     },
+    dashboard: {
+      widgets: [
+        {
+          slug: 'site-analytics',
+          Component: '@/components/Dashboard/widgets/AnalyticsWidget',
+          minWidth: 'medium',
+          maxWidth: 'full',
+        },
+        {
+          slug: 'recent-content',
+          Component: '@/components/Dashboard/widgets/RecentContentWidget',
+          minWidth: 'small',
+          maxWidth: 'medium',
+          fields: [
+            {
+              name: 'title',
+              type: 'text',
+              required: true,
+            },
+            {
+              name: 'collection',
+              type: 'select',
+              required: true,
+              options: [
+                { label: 'Posts', value: 'posts' },
+                { label: 'Models', value: 'models' },
+                { label: 'Gallery Albums', value: 'gallery-albums' },
+                { label: 'Media', value: 'media' },
+              ],
+            },
+            {
+              name: 'icon',
+              type: 'text',
+              required: true,
+            },
+          ],
+        },
+      ],
+      defaultLayout: () => [
+        { widgetSlug: 'collections', width: 'full' },
+        { widgetSlug: 'site-analytics', width: 'full' },
+        {
+          widgetSlug: 'recent-content',
+          width: 'small',
+          data: {
+            title: 'Recent Posts',
+            collection: 'posts',
+            icon: 'file-text',
+          },
+        },
+        {
+          widgetSlug: 'recent-content',
+          width: 'small',
+          data: {
+            title: 'Recent Models',
+            collection: 'models',
+            icon: 'plane',
+          },
+        },
+        {
+          widgetSlug: 'recent-content',
+          width: 'small',
+          data: {
+            title: 'Recent Albums',
+            collection: 'gallery-albums',
+            icon: 'images',
+          },
+        },
+        {
+          widgetSlug: 'recent-content',
+          width: 'small',
+          data: {
+            title: 'Recent Media',
+            collection: 'media',
+            icon: 'image',
+          },
+        },
+      ],
+    },
     components: {
       providers: ['@/components/NavBadgeProvider'],
       views: {
-        dashboard: {
-          Component: '@/components/Dashboard#Dashboard',
-        },
         bgg: {
           Component: '@/components/BGG',
           path: '/bgg',
@@ -506,9 +583,24 @@ export default buildConfig({
         slug: 'sendContactFormEmail',
         retries: 3,
         inputSchema: [
-          { name: 'name', type: 'text', required: true },
-          { name: 'email', type: 'text', required: true },
-          { name: 'message', type: 'text', required: true },
+          {
+            name: 'senderName',
+            type: 'text',
+            required: true,
+            maxLength: 200,
+          },
+          {
+            name: 'senderEmail',
+            type: 'text',
+            required: true,
+            maxLength: 320,
+          },
+          {
+            name: 'message',
+            type: 'text',
+            required: true,
+            maxLength: 20000,
+          },
         ],
         handler: async ({ input, req }) => {
           try {
@@ -519,11 +611,13 @@ export default buildConfig({
             if (!toEmail) {
               throw new Error('CONTACT_EMAIL environment variable is not set');
             }
-            const name = (input.name as string)?.trim();
-            const email = (input.email as string)?.trim();
-            const message = (input.message as string)?.trim();
-            if (!name || !email || !message) {
-              throw new Error('sendContactFormEmail: name, email, and message are required');
+            const senderName = String(input.senderName ?? '').trim();
+            const senderEmail = String(input.senderEmail ?? '').trim();
+            const message = String(input.message ?? '').trim();
+            if (!senderName || !senderEmail || !message) {
+              throw new Error(
+                'sendContactFormEmail: senderName, senderEmail, and message are required',
+              );
             }
             const emailAdapter = req.payload?.email;
             if (!emailAdapter?.sendEmail) {
@@ -531,15 +625,15 @@ export default buildConfig({
             }
             const html = await render(
               React.createElement(ContactFormEmail, {
-                name,
-                email,
+                senderName,
+                senderEmail,
                 message,
               }),
             );
             await emailAdapter.sendEmail({
               to: toEmail,
-              replyTo: email,
-              subject: `Contact form: ${name}`,
+              replyTo: senderEmail,
+              subject: safeEmailSubjectLine(senderName),
               html,
             });
             return { output: { sent: true } };

@@ -1,4 +1,5 @@
 import type { PayloadRequest } from 'payload';
+import { parseContactFormBody } from '../utilities/sanitizeContactForm';
 
 export async function contactFormHandler(req: PayloadRequest): Promise<Response> {
   if (req.method !== 'POST') {
@@ -10,27 +11,25 @@ export async function contactFormHandler(req: PayloadRequest): Promise<Response>
     return Response.json({ error: 'Invalid JSON body' }, { status: 400 });
   }
 
-  let body: { name?: string; email?: string; message?: string };
+  let body: unknown;
   try {
-    body = (await parseJson.call(req)) as {
-      name?: string;
-      email?: string;
-      message?: string;
-    };
+    body = await parseJson.call(req);
   } catch {
     return Response.json({ error: 'Invalid JSON body' }, { status: 400 });
   }
 
-  const name = body.name?.trim();
-  const email = body.email?.trim();
-  const message = body.message?.trim();
-
-  if (!name || !email || !message) {
-    return Response.json(
-      { error: 'Name, email, and message are required' },
-      { status: 400 },
-    );
+  if (!body || typeof body !== 'object' || Array.isArray(body)) {
+    return Response.json({ error: 'Invalid JSON body' }, { status: 400 });
   }
+
+  const { name, email, message } = body as Record<string, unknown>;
+
+  const parsed = parseContactFormBody({ name, email, message });
+  if (!parsed.success) {
+    return Response.json({ error: parsed.error }, { status: 400 });
+  }
+
+  const { senderName, senderEmail, message: messageText } = parsed.data;
 
   if (!process.env.CONTACT_EMAIL) {
     return Response.json(
@@ -42,7 +41,11 @@ export async function contactFormHandler(req: PayloadRequest): Promise<Response>
   try {
     await req.payload.jobs.queue({
       task: 'sendContactFormEmail',
-      input: { name, email, message },
+      input: {
+        senderName,
+        senderEmail,
+        message: messageText,
+      },
       queue: 'email',
     });
   } catch (err) {

@@ -2,17 +2,21 @@ import { Text } from '@react-email/components';
 import { EmailLayout, emailStyles } from './layout';
 
 export interface ContactFormEmailProps {
-  name: string;
-  email: string;
+  senderName: string;
+  senderEmail: string;
   message: string;
 }
 
-export function ContactFormEmail({ name, email, message }: ContactFormEmailProps) {
+export function ContactFormEmail({
+  senderName,
+  senderEmail,
+  message,
+}: ContactFormEmailProps) {
   return (
     <EmailLayout>
       <Text style={emailStyles.heading}>New contact form message</Text>
       <Text style={emailStyles.paragraph}>
-        <strong>From:</strong> {name} &lt;{email}&gt;
+        <strong>From:</strong> {senderName} &lt;{senderEmail}&gt;
       </Text>
       <Text style={{ ...emailStyles.paragraph, marginBottom: '8px' }}>
         <strong>Message</strong>
@@ -35,8 +39,8 @@ export function ContactFormEmail({ name, email, message }: ContactFormEmailProps
 }
 
 ContactFormEmail.PreviewProps = {
-  name: 'Alex Example',
-  email: 'alex@example.com',
+  senderName: 'Alex Example',
+  senderEmail: 'alex@example.com',
   message:
     'Hello,\n\nI wanted to reach out about your site. Thanks for reading!\n\n— Alex',
 } satisfies ContactFormEmailProps;

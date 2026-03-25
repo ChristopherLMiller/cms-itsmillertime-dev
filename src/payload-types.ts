@@ -177,6 +177,8 @@ export interface Config {
   };
   locale: null;
   widgets: {
+    'site-analytics': SiteAnalyticsWidget;
+    'recent-content': RecentContentWidget;
     collections: CollectionsWidget;
   };
   user: User | PayloadMcpApiKey;
@@ -444,11 +446,6 @@ export interface Apikey {
  */
 export interface GalleryImage {
   id: number;
-  /**
-   * When enabled, the slug will auto-generate from the title field on save and autosave.
-   */
-  generateSlug?: boolean | null;
-  slug: string;
   settings: {
     isNsfw?: boolean | null;
     'gallery-tags'?: (number | GalleryTag)[] | null;
@@ -2177,8 +2174,6 @@ export interface GalleryAlbumsSelect<T extends boolean = true> {
  * via the `definition` "gallery-images_select".
  */
 export interface GalleryImagesSelect<T extends boolean = true> {
-  generateSlug?: T;
-  slug?: T;
   settings?:
     | T
     | {
@@ -3092,6 +3087,28 @@ export interface PayloadJobsStatsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "site-analytics_widget".
+ */
+export interface SiteAnalyticsWidget {
+  data?: {
+    [k: string]: unknown;
+  };
+  width: 'medium' | 'large' | 'x-large' | 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "recent-content_widget".
+ */
+export interface RecentContentWidget {
+  data?: {
+    title: string;
+    collection: 'posts' | 'models' | 'gallery-albums' | 'media';
+    icon: string;
+  };
+  width: 'small' | 'medium';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "collections_widget".
  */
 export interface CollectionsWidget {
@@ -3163,8 +3180,8 @@ export interface TaskSendVerificationEmail {
  */
 export interface TaskSendContactFormEmail {
   input: {
-    name: string;
-    email: string;
+    senderName: string;
+    senderEmail: string;
     message: string;
   };
   output?: unknown;

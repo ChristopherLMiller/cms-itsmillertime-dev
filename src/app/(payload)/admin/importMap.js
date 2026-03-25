@@ -26,6 +26,7 @@ import { ChecklistFeatureClient as ChecklistFeatureClient_e70f5e05f09f93e00b997e
 import { LinkFeatureClient as LinkFeatureClient_e70f5e05f09f93e00b997edb1ef0c864 } from '@payloadcms/richtext-lexical/client'
 import { RelationshipFeatureClient as RelationshipFeatureClient_e70f5e05f09f93e00b997edb1ef0c864 } from '@payloadcms/richtext-lexical/client'
 import { BlockquoteFeatureClient as BlockquoteFeatureClient_e70f5e05f09f93e00b997edb1ef0c864 } from '@payloadcms/richtext-lexical/client'
+import { TableFeatureClient as TableFeatureClient_e70f5e05f09f93e00b997edb1ef0c864 } from '@payloadcms/richtext-lexical/client'
 import { UploadFeatureClient as UploadFeatureClient_e70f5e05f09f93e00b997edb1ef0c864 } from '@payloadcms/richtext-lexical/client'
 import { HorizontalRuleFeatureClient as HorizontalRuleFeatureClient_e70f5e05f09f93e00b997edb1ef0c864 } from '@payloadcms/richtext-lexical/client'
 import { FolderTableCell as FolderTableCell_f9c02e79a4aed9a3924487c0cd4cafb1 } from '@payloadcms/next/rsc'
@@ -37,7 +38,6 @@ import { MetaDescriptionComponent as MetaDescriptionComponent_a8a977ebc872c5d5ea
 import { PreviewComponent as PreviewComponent_a8a977ebc872c5d5ea7ee689724c0860 } from '@payloadcms/plugin-seo/client'
 import { PreviewButton as PreviewButton_79203ba44a9a04c09693f7622ccf249a } from '@/components/PreviewButton'
 import { MetaImageComponent as MetaImageComponent_a8a977ebc872c5d5ea7ee689724c0860 } from '@payloadcms/plugin-seo/client'
-import { SlugField as SlugField_2b8867833a34864a02ddf429b0728a40 } from '@payloadcms/next/client'
 import { ClockifyProjectSelect as ClockifyProjectSelect_b8bb1889944a5b33eae5b7c527a1ff0a } from '@/components/ClockifyProjectSelect'
 import { LinkToDoc as LinkToDoc_aead06e4cbf6b2620c5c51c9ab283634 } from '@payloadcms/plugin-search/client'
 import { ReindexButton as ReindexButton_aead06e4cbf6b2620c5c51c9ab283634 } from '@payloadcms/plugin-search/client'
@@ -60,10 +60,11 @@ import { BeforeLogin as BeforeLogin_aa8e4427b70b37c7820895ace344eb78 } from '@de
 import { default as default_e5727cf75af5a5f3715e1efb9b6b07eb } from '@/components/NavBadgeProvider'
 import { CommandMenuProvider as CommandMenuProvider_3bf5d3e334c5eaf4f0d216451590d3c2 } from '@veiag/payload-cmdk/client'
 import { S3ClientUploadHandler as S3ClientUploadHandler_f97aa6c64367fa259c5bc0567239ef24 } from '@payloadcms/storage-s3/client'
-import { Dashboard as Dashboard_b39f2d96c5778d5698b3c9e7777aa63a } from '@/components/Dashboard'
 import { default as default_41e34effe3f4ece2ddcb2839119d86bb } from '@/components/BGG'
 import { LoginViewWrapper as LoginViewWrapper_76e4fd5e0c2ccc05732c17408c72107e } from '@delmaredigital/payload-better-auth/rsc'
 import { ApiKeysView as ApiKeysView_76e4fd5e0c2ccc05732c17408c72107e } from '@delmaredigital/payload-better-auth/rsc'
+import { default as default_838fb0a30eb441ddfea0c8d82d1e35c3 } from '@/components/Dashboard/widgets/AnalyticsWidget'
+import { default as default_f295ca6a3d97191f9cda7f6e79f83657 } from '@/components/Dashboard/widgets/RecentContentWidget'
 import { CollectionCards as CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1 } from '@payloadcms/next/rsc'
 
 export const importMap = {
@@ -95,6 +96,7 @@ export const importMap = {
   "@payloadcms/richtext-lexical/client#LinkFeatureClient": LinkFeatureClient_e70f5e05f09f93e00b997edb1ef0c864,
   "@payloadcms/richtext-lexical/client#RelationshipFeatureClient": RelationshipFeatureClient_e70f5e05f09f93e00b997edb1ef0c864,
   "@payloadcms/richtext-lexical/client#BlockquoteFeatureClient": BlockquoteFeatureClient_e70f5e05f09f93e00b997edb1ef0c864,
+  "@payloadcms/richtext-lexical/client#TableFeatureClient": TableFeatureClient_e70f5e05f09f93e00b997edb1ef0c864,
   "@payloadcms/richtext-lexical/client#UploadFeatureClient": UploadFeatureClient_e70f5e05f09f93e00b997edb1ef0c864,
   "@payloadcms/richtext-lexical/client#HorizontalRuleFeatureClient": HorizontalRuleFeatureClient_e70f5e05f09f93e00b997edb1ef0c864,
   "@payloadcms/next/rsc#FolderTableCell": FolderTableCell_f9c02e79a4aed9a3924487c0cd4cafb1,
@@ -106,7 +108,6 @@ export const importMap = {
   "@payloadcms/plugin-seo/client#PreviewComponent": PreviewComponent_a8a977ebc872c5d5ea7ee689724c0860,
   "@/components/PreviewButton#PreviewButton": PreviewButton_79203ba44a9a04c09693f7622ccf249a,
   "@payloadcms/plugin-seo/client#MetaImageComponent": MetaImageComponent_a8a977ebc872c5d5ea7ee689724c0860,
-  "@payloadcms/next/client#SlugField": SlugField_2b8867833a34864a02ddf429b0728a40,
   "@/components/ClockifyProjectSelect#ClockifyProjectSelect": ClockifyProjectSelect_b8bb1889944a5b33eae5b7c527a1ff0a,
   "@payloadcms/plugin-search/client#LinkToDoc": LinkToDoc_aead06e4cbf6b2620c5c51c9ab283634,
   "@payloadcms/plugin-search/client#ReindexButton": ReindexButton_aead06e4cbf6b2620c5c51c9ab283634,
@@ -129,9 +130,10 @@ export const importMap = {
   "@/components/NavBadgeProvider#default": default_e5727cf75af5a5f3715e1efb9b6b07eb,
   "@veiag/payload-cmdk/client#CommandMenuProvider": CommandMenuProvider_3bf5d3e334c5eaf4f0d216451590d3c2,
   "@payloadcms/storage-s3/client#S3ClientUploadHandler": S3ClientUploadHandler_f97aa6c64367fa259c5bc0567239ef24,
-  "@/components/Dashboard#Dashboard": Dashboard_b39f2d96c5778d5698b3c9e7777aa63a,
   "@/components/BGG#default": default_41e34effe3f4ece2ddcb2839119d86bb,
   "@delmaredigital/payload-better-auth/rsc#LoginViewWrapper": LoginViewWrapper_76e4fd5e0c2ccc05732c17408c72107e,
   "@delmaredigital/payload-better-auth/rsc#ApiKeysView": ApiKeysView_76e4fd5e0c2ccc05732c17408c72107e,
+  "@/components/Dashboard/widgets/AnalyticsWidget#default": default_838fb0a30eb441ddfea0c8d82d1e35c3,
+  "@/components/Dashboard/widgets/RecentContentWidget#default": default_f295ca6a3d97191f9cda7f6e79f83657,
   "@payloadcms/next/rsc#CollectionCards": CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1
 }

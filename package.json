@@ -1,6 +1,6 @@
 {
   "name": "cms-itsmillertime-dev",
-  "version": "3.13.1",
+  "version": "3.14.0",
   "description": "A blank template to get started with Payload 3.0",
   "license": "MIT",
   "type": "module",
@@ -22,6 +22,7 @@
     "email:dev": "email dev --port 3001"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.1002.0",
     "@better-auth/passkey": "^1.4.19",
     "@delmaredigital/payload-better-auth": "^0.4.3",
     "@payloadcms/db-postgres": "3.79.1",
@@ -36,7 +37,6 @@
     "@payloadcms/plugin-sentry": "3.79.1",
     "@payloadcms/plugin-seo": "3.79.1",
     "@payloadcms/richtext-lexical": "3.79.1",
-    "@aws-sdk/client-s3": "^3.1002.0",
     "@payloadcms/storage-s3": "3.79.1",
     "@payloadcms/ui": "3.79.1",
     "@react-email/components": "1.0.10",
@@ -59,9 +59,11 @@
     "react": "19.2.4",
     "react-dom": "19.2.4",
     "resend": "^6.9.4",
+    "sanitize-html": "^2.17.2",
     "sharp": "0.34.5",
     "slugify": "^1.6.8",
-    "word-counting": "^1.1.4"
+    "word-counting": "^1.1.4",
+    "zod": "^4.3.6"
   },
   "devDependencies": {
     "@changesets/cli": "^2.30.0",
@@ -71,6 +73,7 @@
     "@types/pg": "^8.18.0",
     "@types/react": "19.2.14",
     "@types/react-dom": "19.2.3",
+    "@types/sanitize-html": "^2.16.1",
     "@typescript/native-preview": "^7.0.0-dev.20260319.1",
     "eslint": "^10.0.3",
     "eslint-config-next": "16.2.0",

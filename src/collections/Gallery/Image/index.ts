@@ -43,10 +43,6 @@ export const GalleryImages: CollectionConfig<'gallery-images'> = {
   },
   upload: baseUploadConfig,
   fields: [
-    slugField({
-      useAsSlug: 'alt',
-      position: 'sidebar',
-    }),
     {
       type: 'group',
       name: 'settings',
