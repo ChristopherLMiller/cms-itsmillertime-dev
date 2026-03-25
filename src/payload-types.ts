@@ -446,11 +446,6 @@ export interface Apikey {
  */
 export interface GalleryImage {
   id: number;
-  /**
-   * When enabled, the slug will auto-generate from the title field on save and autosave.
-   */
-  generateSlug?: boolean | null;
-  slug: string;
   settings: {
     isNsfw?: boolean | null;
     'gallery-tags'?: (number | GalleryTag)[] | null;
@@ -2179,8 +2174,6 @@ export interface GalleryAlbumsSelect<T extends boolean = true> {
  * via the `definition` "gallery-images_select".
  */
 export interface GalleryImagesSelect<T extends boolean = true> {
-  generateSlug?: T;
-  slug?: T;
   settings?:
     | T
     | {
