@@ -3,7 +3,7 @@ import { getPayload, KVAdapter } from 'payload';
 import config from '@payload-config';
 import { parseBGGCollection } from '@/lib/bgg/parseCollection';
 
-const CACHE_VERSION = 'v2'; // Matches the version of BGG API
+const CACHE_VERSION = 'v3'; // stats query param + cache key segment
 const FRESH_MS = 5 * 60 * 1000; // 5 minutes
 const STALE_MS = 30 * 60 * 1000; // 30 minutes
 const RETRY_BACKOFF_MS = 60 * 1000; // 1 minute
@@ -14,6 +14,14 @@ type CacheEntry = {
   lastAttemptedAt?: number;
 };
 
+function parseStatsParam(searchParams: URLSearchParams): 0 | 1 | Response {
+  const raw = searchParams.get('stats');
+  if (raw === null || raw === '') return 0;
+  if (raw === '0') return 0;
+  if (raw === '1') return 1;
+  return Response.json({ error: 'stats must be 0 or 1' }, { status: 400 });
+}
+
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
@@ -23,9 +31,14 @@ export async function GET(req: NextRequest) {
       return Response.json({ error: 'Username is required' }, { status: 400 });
     }
 
+    const stats = parseStatsParam(searchParams);
+    if (stats instanceof Response) {
+      return stats;
+    }
+
     const payload = await getPayload({ config });
     const kv = payload.kv;
-    const key = `bgg:${CACHE_VERSION}:collection:${username}`;
+    const key = `bgg:${CACHE_VERSION}:collection:${username}:stats:${stats}`;
     const now = Date.now();
 
     // If the user is not authenticated get out
@@ -43,12 +56,12 @@ export async function GET(req: NextRequest) {
 
     // If the cached data is considered stale, return it but revalidate
     if (cached && now - cached.fetchedAt < STALE_MS) {
-      revalidate(username, kv, key, cached, now);
+      revalidate(username, kv, key, cached, now, stats);
       return respond(cached.data, 'stale');
     }
 
     // If beyond the stale time, fetch it to update the cache
-    const updated = await fetchAndUpdate(username, kv, key, cached);
+    const updated = await fetchAndUpdate(username, kv, key, cached, stats);
     if (updated) {
       return respond(updated.data, 'revalidated');
     }
@@ -77,23 +90,31 @@ function respond(data: any, state: string) {
   });
 }
 
-function revalidate(username: string, kv: KVAdapter, key: string, cached: CacheEntry, now: number) {
+function revalidate(
+  username: string,
+  kv: KVAdapter,
+  key: string,
+  cached: CacheEntry,
+  now: number,
+  stats: 0 | 1,
+) {
   // Respect backoff so admin refresh spam doesn't hammer BGG
   if (cached.lastAttemptedAt && now - cached.lastAttemptedAt < RETRY_BACKOFF_MS) {
     return;
   }
 
-  fetchAndUpdate(username, kv, key, cached);
+  fetchAndUpdate(username, kv, key, cached, stats);
 }
 
 async function fetchAndUpdate(
   username: string,
   kv: KVAdapter,
   key: string,
-  cached?: CacheEntry | null,
+  cached: CacheEntry | null | undefined,
+  stats: 0 | 1,
 ): Promise<CacheEntry | null> {
   const res = await fetch(
-    `https://boardgamegeek.com/xmlapi2/collection?username=${username}&subtype=boardgame&own=1&excludesubtype=boardgameexpansion&stats=1`,
+    `https://boardgamegeek.com/xmlapi2/collection?username=${encodeURIComponent(username)}&subtype=boardgame&own=1&excludesubtype=boardgameexpansion&stats=${stats}`,
     {
       headers: {
         Authorization: `Bearer ${process.env.BGG_API_KEY}`,
@@ -115,7 +136,7 @@ async function fetchAndUpdate(
     return null;
   }
 
-  const data = parseBGGCollection(xml);
+  const data = parseBGGCollection(xml, { includeStats: stats === 1 });
   const entry: CacheEntry = {
     data,
     fetchedAt: Date.now(),
