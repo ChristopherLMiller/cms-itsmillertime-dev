@@ -93,7 +93,7 @@ export default buildConfig({
     redisURL: process.env.REDIS_URL || '',
   }),
   telemetry: false,
-  cors: '*',
+  cors: trustedOriginsArray,
   csrf: trustedOriginsArray,
   admin: {
     user: 'users',
