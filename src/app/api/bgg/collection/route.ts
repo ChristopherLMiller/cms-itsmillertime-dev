@@ -64,10 +64,7 @@ export async function GET(req: NextRequest) {
     );
   } catch (error) {
     console.error('BGG collection route error:', error);
-    return Response.json(
-      { error: 'Failed to fetch BGG collection' },
-      { status: 500 },
-    );
+    return Response.json({ error: 'Failed to fetch BGG collection' }, { status: 500 });
   }
 }
 
@@ -96,7 +93,7 @@ async function fetchAndUpdate(
   cached?: CacheEntry | null,
 ): Promise<CacheEntry | null> {
   const res = await fetch(
-    `https://boardgamegeek.com/xmlapi2/collection?username=${username}&subtype=boardgame&own=1&excludesubtype=boardgameexpansion`,
+    `https://boardgamegeek.com/xmlapi2/collection?username=${username}&subtype=boardgame&own=1&excludesubtype=boardgameexpansion&stats=1`,
     {
       headers: {
         Authorization: `Bearer ${process.env.BGG_API_KEY}`,
