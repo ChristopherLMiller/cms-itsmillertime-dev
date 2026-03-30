@@ -40,7 +40,7 @@ import { safeEmailSubjectLine } from './utilities/sanitizeContactForm';
 import { ResetPasswordEmail } from '../emails/reset-password';
 import { VerifyAccountEmail } from '../emails/verify-account';
 import { contactFormHandler } from './endpoints/contact-form';
-import { isTrustedOrigin, trustedOriginsArray } from './lib/auth/trustedOrigins';
+import { trustedOriginsArray } from './lib/auth/trustedOrigins';
 
 const filename = fileURLToPath(import.meta.url);
 const dirname = path.dirname(filename);
