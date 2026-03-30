@@ -4,6 +4,7 @@ import { admin, twoFactor } from 'better-auth/plugins';
 import { passkey } from '@better-auth/passkey';
 import { apiKeyWithDefaults } from '@delmaredigital/payload-better-auth';
 import { getBaseUrl } from './getBaseUrl';
+import { getTrustedOrigins } from './trustedOrigins';
 
 /**
  * Creates Better Auth options. Pass payload when available (e.g. in createAuth)
@@ -12,6 +13,7 @@ import { getBaseUrl } from './getBaseUrl';
  */
 export function createBetterAuthOptions(payload?: BasePayload): Partial<BetterAuthOptions> {
   return {
+    trustedOrigins: getTrustedOrigins,
     user: {
       additionalFields: {
         role: {
@@ -54,9 +56,9 @@ export function createBetterAuthOptions(payload?: BasePayload): Partial<BetterAu
               const payloadPart = parts[1];
               if (payloadPart) {
                 const base64 = payloadPart.replace(/-/g, '+').replace(/_/g, '/');
-                const decoded = JSON.parse(
-                  Buffer.from(base64, 'base64').toString(),
-                ) as { email?: string };
+                const decoded = JSON.parse(Buffer.from(base64, 'base64').toString()) as {
+                  email?: string;
+                };
                 if (decoded.email) {
                   const result = await payload?.find({
                     collection: 'users',

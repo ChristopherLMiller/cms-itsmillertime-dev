@@ -40,6 +40,7 @@ import { safeEmailSubjectLine } from './utilities/sanitizeContactForm';
 import { ResetPasswordEmail } from '../emails/reset-password';
 import { VerifyAccountEmail } from '../emails/verify-account';
 import { contactFormHandler } from './endpoints/contact-form';
+import { isTrustedOrigin, trustedOriginsArray } from './lib/auth/trustedOrigins';
 
 const filename = fileURLToPath(import.meta.url);
 const dirname = path.dirname(filename);
@@ -92,8 +93,8 @@ export default buildConfig({
     redisURL: process.env.REDIS_URL || '',
   }),
   telemetry: false,
-  cors: process.env.TRUSTED_ORIGINS?.split(',').map((o) => o.trim()) || [],
-  csrf: process.env.TRUSTED_ORIGINS?.split(',').map((o) => o.trim()) || [],
+  cors: '*',
+  csrf: trustedOriginsArray,
   admin: {
     user: 'users',
     importMap: {
@@ -293,10 +294,7 @@ export default buildConfig({
             // Skip SVG - no EXIF in vector graphics
             const mimeType = (image as { mimeType?: string }).mimeType ?? '';
             const filename = image.filename ?? '';
-            if (
-              mimeType === 'image/svg+xml' ||
-              filename.toLowerCase().endsWith('.svg')
-            ) {
+            if (mimeType === 'image/svg+xml' || filename.toLowerCase().endsWith('.svg')) {
               await req.payload.update({
                 collection: input.collection,
                 id: image.id,
@@ -325,7 +323,9 @@ export default buildConfig({
             } else {
               // Fallback: try URL fetch first, then S3 direct read (bypasses access control for NSFW etc.)
               if (image.url) {
-                console.log(`Fetching image from ${process.env.NEXT_PUBLIC_SERVER_URL}${image.url}`);
+                console.log(
+                  `Fetching image from ${process.env.NEXT_PUBLIC_SERVER_URL}${image.url}`,
+                );
                 const response = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}${image.url}`);
                 if (response.ok) {
                   fileBuffer = Buffer.from(await response.arrayBuffer());
@@ -356,9 +356,7 @@ export default buildConfig({
                   region,
                   credentials: { accessKeyId: accessKey, secretAccessKey: secretKey },
                 });
-                const obj = await s3.send(
-                  new GetObjectCommand({ Bucket: bucket, Key: key }),
-                );
+                const obj = await s3.send(new GetObjectCommand({ Bucket: bucket, Key: key }));
                 const chunks: Uint8Array[] = [];
                 if (obj.Body) {
                   for await (const chunk of obj.Body as AsyncIterable<Uint8Array>) {
@@ -417,9 +415,7 @@ export default buildConfig({
 
             // Sanitize: PostgreSQL JSON does not allow \u0000 (null). XMP packets often end with <?xpacket end="w"?>\u0000
             const exif =
-              rawExif == null
-                ? null
-                : JSON.parse(JSON.stringify(rawExif).replace(/\\u0000/g, ''));
+              rawExif == null ? null : JSON.parse(JSON.stringify(rawExif).replace(/\\u0000/g, ''));
 
             // Update the image with the EXIF data
             console.log('Updating image with EXIF data');
