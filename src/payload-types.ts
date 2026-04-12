@@ -695,6 +695,7 @@ export interface Post {
   tags?: (number | PostsTag)[] | null;
   relatedPosts?: (number | Post)[] | null;
   title: string;
+  subheading?: string | null;
   featuredImage?: (number | null) | Media;
   content?: {
     root: {
@@ -2064,6 +2065,7 @@ export interface PostsSelect<T extends boolean = true> {
   tags?: T;
   relatedPosts?: T;
   title?: T;
+  subheading?: T;
   featuredImage?: T;
   content?: T;
   meta?:

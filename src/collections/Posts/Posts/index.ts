@@ -141,6 +141,11 @@ export const Posts: CollectionConfig<'posts'> = {
               required: true,
             },
             {
+              name: 'subheading',
+              type: 'text',
+              required: false,
+            },
+            {
               name: 'featuredImage',
               type: 'upload',
               relationTo: 'media',
