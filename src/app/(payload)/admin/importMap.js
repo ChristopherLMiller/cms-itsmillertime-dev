@@ -67,6 +67,7 @@ import { default as default_838fb0a30eb441ddfea0c8d82d1e35c3 } from '@/component
 import { default as default_f295ca6a3d97191f9cda7f6e79f83657 } from '@/components/Dashboard/widgets/RecentContentWidget'
 import { CollectionCards as CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1 } from '@payloadcms/next/rsc'
 
+/** @type import('payload').ImportMap */
 export const importMap = {
   "@/components/RowLabel#RowLabel": RowLabel_d4655109717a6f5707cd0a6520a4fd9e,
   "@delmaredigital/payload-better-auth/components#TwoFactorField": TwoFactorField_aa8e4427b70b37c7820895ace344eb78,
