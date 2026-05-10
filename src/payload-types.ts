@@ -94,9 +94,9 @@ export interface Config {
     twoFactors: TwoFactor;
     passkeys: Passkey;
     apikeys: Apikey;
-    'payload-mcp-api-keys': PayloadMcpApiKey;
     search: Search;
     'api-keys': ApiKey;
+    'payload-mcp-api-keys': PayloadMcpApiKey;
     'payload-jobs': PayloadJob;
     'payload-folders': FolderInterface;
     'payload-locked-documents': PayloadLockedDocument;
@@ -149,9 +149,9 @@ export interface Config {
     twoFactors: TwoFactorsSelect<false> | TwoFactorsSelect<true>;
     passkeys: PasskeysSelect<false> | PasskeysSelect<true>;
     apikeys: ApikeysSelect<false> | ApikeysSelect<true>;
-    'payload-mcp-api-keys': PayloadMcpApiKeysSelect<false> | PayloadMcpApiKeysSelect<true>;
     search: SearchSelect<false> | SearchSelect<true>;
     'api-keys': ApiKeysSelect<false> | ApiKeysSelect<true>;
+    'payload-mcp-api-keys': PayloadMcpApiKeysSelect<false> | PayloadMcpApiKeysSelect<true>;
     'payload-jobs': PayloadJobsSelect<false> | PayloadJobsSelect<true>;
     'payload-folders': PayloadFoldersSelect<false> | PayloadFoldersSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
@@ -1196,6 +1196,63 @@ export interface Passkey {
   createdAt: string;
 }
 /**
+ * This is a collection of automatically created search results. These results are used by the global site search and will be updated automatically as documents in the CMS are created or updated.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "search".
+ */
+export interface Search {
+  id: number;
+  title?: string | null;
+  priority?: number | null;
+  doc:
+    | {
+        relationTo: 'posts';
+        value: number | Post;
+      }
+    | {
+        relationTo: 'pages';
+        value: number | Page;
+      }
+    | {
+        relationTo: 'models';
+        value: number | Model;
+      }
+    | {
+        relationTo: 'gardens';
+        value: number | Garden;
+      };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Manage API keys for webhook stream authentication.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "api-keys".
+ */
+export interface ApiKey {
+  id: number;
+  /**
+   * The user this API key belongs to
+   */
+  user: number | User;
+  /**
+   * The API key value. Keep this secret!
+   */
+  key: string;
+  /**
+   * Disable this to temporarily deactivate the API key without deleting it
+   */
+  active?: boolean | null;
+  /**
+   * Last time this API key was used
+   */
+  lastUsed?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
  * API keys control which collections, resources, tools, and prompts MCP clients can access
  *
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1511,63 +1568,6 @@ export interface PayloadMcpApiKey {
   collection: 'payload-mcp-api-keys';
 }
 /**
- * This is a collection of automatically created search results. These results are used by the global site search and will be updated automatically as documents in the CMS are created or updated.
- *
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "search".
- */
-export interface Search {
-  id: number;
-  title?: string | null;
-  priority?: number | null;
-  doc:
-    | {
-        relationTo: 'posts';
-        value: number | Post;
-      }
-    | {
-        relationTo: 'pages';
-        value: number | Page;
-      }
-    | {
-        relationTo: 'models';
-        value: number | Model;
-      }
-    | {
-        relationTo: 'gardens';
-        value: number | Garden;
-      };
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * Manage API keys for webhook stream authentication.
- *
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "api-keys".
- */
-export interface ApiKey {
-  id: number;
-  /**
-   * The user this API key belongs to
-   */
-  user: number | User;
-  /**
-   * The API key value. Keep this secret!
-   */
-  key: string;
-  /**
-   * Disable this to temporarily deactivate the API key without deleting it
-   */
-  active?: boolean | null;
-  /**
-   * Last time this API key was used
-   */
-  lastUsed?: string | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-jobs".
  */
@@ -1797,16 +1797,16 @@ export interface PayloadLockedDocument {
         value: number | Apikey;
       } | null)
     | ({
-        relationTo: 'payload-mcp-api-keys';
-        value: number | PayloadMcpApiKey;
-      } | null)
-    | ({
         relationTo: 'search';
         value: number | Search;
       } | null)
     | ({
         relationTo: 'api-keys';
         value: number | ApiKey;
+      } | null)
+    | ({
+        relationTo: 'payload-mcp-api-keys';
+        value: number | PayloadMcpApiKey;
       } | null)
     | ({
         relationTo: 'payload-folders';
@@ -2599,6 +2599,29 @@ export interface ApikeysSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "search_select".
+ */
+export interface SearchSelect<T extends boolean = true> {
+  title?: T;
+  priority?: T;
+  doc?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "api-keys_select".
+ */
+export interface ApiKeysSelect<T extends boolean = true> {
+  user?: T;
+  key?: T;
+  active?: T;
+  lastUsed?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-mcp-api-keys_select".
  */
 export interface PayloadMcpApiKeysSelect<T extends boolean = true> {
@@ -2738,29 +2761,6 @@ export interface PayloadMcpApiKeysSelect<T extends boolean = true> {
   enableAPIKey?: T;
   apiKey?: T;
   apiKeyIndex?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "search_select".
- */
-export interface SearchSelect<T extends boolean = true> {
-  title?: T;
-  priority?: T;
-  doc?: T;
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "api-keys_select".
- */
-export interface ApiKeysSelect<T extends boolean = true> {
-  user?: T;
-  key?: T;
-  active?: T;
-  lastUsed?: T;
-  updatedAt?: T;
-  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -2967,7 +2967,6 @@ export interface Webhook {
           | 'twoFactors'
           | 'passkeys'
           | 'apikeys'
-          | 'payload-mcp-api-keys'
           | 'search';
         enabled?: boolean | null;
         /**
