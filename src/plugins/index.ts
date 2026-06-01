@@ -14,6 +14,7 @@ import { Groups } from '@/collections/shared/groups';
 import { payloadCmdk } from '@veiag/payload-cmdk';
 import type { Plugin } from 'payload';
 import { betterAuthPlugin } from './better-auth';
+import { payloadPluginAndroidUpload } from 'payload-plugin-android-upload';
 
 export const plugins: Plugin[] = [
   ...betterAuthPlugin(),
@@ -33,6 +34,10 @@ export const plugins: Plugin[] = [
   sentryPlugin({
     enabled: process.env.NODE_ENV === 'production',
     Sentry,
+  }),
+  payloadPluginAndroidUpload({
+    disabled: false,
+    basePath: '/mobile-upload',
   }),
   payloadCmdk({}),
   payloadPluginWebhooks({
