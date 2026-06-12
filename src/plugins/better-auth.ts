@@ -13,9 +13,13 @@ import {
 import { CollectionSlug } from 'payload';
 
 const baseUrl = getBaseUrl();
-const trustedOrigins = [
-  baseUrl,
-  ...(process.env.TRUSTED_ORIGINS?.split(',').map((o) => o.trim()) || []),
+
+const userLinkedCollections: { collection: CollectionSlug; field: string }[] = [
+  { collection: 'sessions', field: 'user' },
+  { collection: 'accounts', field: 'user' },
+  { collection: 'apikeys', field: 'referenceId' },
+  { collection: 'twoFactors', field: 'user' },
+  { collection: 'passkeys', field: 'user' },
 ];
 
 export function betterAuthPlugin() {
@@ -65,12 +69,11 @@ export function betterAuthPlugin() {
             deleteUser: {
               enabled: true,
               afterDelete: async (user: { id: any }) => {
-                const collections = ['sessions', 'accounts', 'apikeys', 'twoFactors', 'passkeys'];
-                for (const collection of collections) {
+                for (const { collection, field } of userLinkedCollections) {
                   try {
                     await payload.delete({
-                      collection: collection as CollectionSlug,
-                      where: { user: { equals: user.id } },
+                      collection,
+                      where: { [field]: { equals: user.id } },
                     });
                   } catch (error) {
                     console.error(

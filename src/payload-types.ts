@@ -106,7 +106,6 @@ export interface Config {
   };
   collectionsJoins: {
     users: {
-      apiKeys: 'apikeys';
       albums: 'gallery-albums';
     };
     media: {
@@ -363,11 +362,6 @@ export interface User {
   emailVerified?: boolean | null;
   role: ('family' | 'friend' | 'client' | 'user' | 'admin')[];
   displayName?: string | null;
-  apiKeys?: {
-    docs?: (number | Apikey)[];
-    hasNextPage?: boolean;
-    totalDocs?: number;
-  };
   /**
    * Albums this user has access to (when visibility is By User or Role)
    */
@@ -408,35 +402,6 @@ export interface User {
   updatedAt: string;
   createdAt: string;
   collection: 'users';
-}
-/**
- * Auto-generated from Better Auth schema (apikey)
- *
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "apikeys".
- */
-export interface Apikey {
-  id: number;
-  name?: string | null;
-  start?: string | null;
-  prefix?: string | null;
-  key: string;
-  user: number | User;
-  refillInterval?: number | null;
-  refillAmount?: number | null;
-  lastRefillAt?: string | null;
-  enabled?: boolean | null;
-  rateLimitEnabled?: boolean | null;
-  rateLimitTimeWindow?: number | null;
-  rateLimitMax?: number | null;
-  requestCount?: number | null;
-  remaining?: number | null;
-  lastRequest?: string | null;
-  expiresAt?: string | null;
-  permissions?: string | null;
-  metadata?: string | null;
-  updatedAt: string;
-  createdAt: string;
 }
 /**
  * Image
@@ -1172,6 +1137,7 @@ export interface TwoFactor {
   secret: string;
   backupCodes: string;
   user: number | User;
+  verified?: boolean | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1192,6 +1158,36 @@ export interface Passkey {
   backedUp: boolean;
   transports?: string | null;
   aaguid?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Auto-generated from Better Auth schema (apikey)
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "apikeys".
+ */
+export interface Apikey {
+  id: number;
+  configId: string;
+  name?: string | null;
+  start?: string | null;
+  referenceId: string;
+  prefix?: string | null;
+  key: string;
+  refillInterval?: number | null;
+  refillAmount?: number | null;
+  lastRefillAt?: string | null;
+  enabled?: boolean | null;
+  rateLimitEnabled?: boolean | null;
+  rateLimitTimeWindow?: number | null;
+  rateLimitMax?: number | null;
+  requestCount?: number | null;
+  remaining?: number | null;
+  lastRequest?: string | null;
+  expiresAt?: string | null;
+  permissions?: string | null;
+  metadata?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1942,7 +1938,6 @@ export interface UsersSelect<T extends boolean = true> {
   emailVerified?: T;
   role?: T;
   displayName?: T;
-  apiKeys?: T;
   albums?: T;
   nsfwFiltering?: T;
   bggUsername?: T;
@@ -2551,6 +2546,7 @@ export interface TwoFactorsSelect<T extends boolean = true> {
   secret?: T;
   backupCodes?: T;
   user?: T;
+  verified?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -2576,11 +2572,12 @@ export interface PasskeysSelect<T extends boolean = true> {
  * via the `definition` "apikeys_select".
  */
 export interface ApikeysSelect<T extends boolean = true> {
+  configId?: T;
   name?: T;
   start?: T;
+  referenceId?: T;
   prefix?: T;
   key?: T;
-  user?: T;
   refillInterval?: T;
   refillAmount?: T;
   lastRefillAt?: T;
