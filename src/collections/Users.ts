@@ -50,12 +50,6 @@ export const Users: CollectionConfig = {
     },
     {
       type: 'join',
-      name: 'apiKeys',
-      collection: 'apikeys',
-      on: 'user',
-    },
-    {
-      type: 'join',
       name: 'albums',
       collection: 'gallery-albums',
       on: 'settings.allowedUsers',

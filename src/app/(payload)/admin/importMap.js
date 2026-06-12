@@ -1,6 +1,6 @@
 import { RowLabel as RowLabel_d4655109717a6f5707cd0a6520a4fd9e } from '@/components/RowLabel'
 import { TwoFactorField as TwoFactorField_aa8e4427b70b37c7820895ace344eb78 } from '@delmaredigital/payload-better-auth/components'
-import { PasskeysField as PasskeysField_aa8e4427b70b37c7820895ace344eb78 } from '@delmaredigital/payload-better-auth/components'
+import { PasskeysField as PasskeysField_b43647e48ab3e028b782c335a88830d2 } from '@delmaredigital/payload-better-auth/components/passkey'
 import { EXIFCell as EXIFCell_4480aec29364ed5b9b8eceaa4eff77ef } from '@/components/EXIFCell'
 import { EXIFDisplay as EXIFDisplay_6fcfec44911dfff19a45246c27579691 } from '@/components/EXIFDisplay'
 import { BlurhashField as BlurhashField_cca06512cc763e8c25c885f0d870995d } from '@/components/BlurhashField'
@@ -62,7 +62,7 @@ import { CommandMenuProvider as CommandMenuProvider_3bf5d3e334c5eaf4f0d216451590
 import { S3ClientUploadHandler as S3ClientUploadHandler_f97aa6c64367fa259c5bc0567239ef24 } from '@payloadcms/storage-s3/client'
 import { default as default_41e34effe3f4ece2ddcb2839119d86bb } from '@/components/BGG'
 import { LoginViewWrapper as LoginViewWrapper_76e4fd5e0c2ccc05732c17408c72107e } from '@delmaredigital/payload-better-auth/rsc'
-import { ApiKeysView as ApiKeysView_76e4fd5e0c2ccc05732c17408c72107e } from '@delmaredigital/payload-better-auth/rsc'
+import { ApiKeysView as ApiKeysView_6234f869b6abd89bf631f5883bc67bd5 } from '@delmaredigital/payload-better-auth/rsc/api-key'
 import { default as default_838fb0a30eb441ddfea0c8d82d1e35c3 } from '@/components/Dashboard/widgets/AnalyticsWidget'
 import { default as default_f295ca6a3d97191f9cda7f6e79f83657 } from '@/components/Dashboard/widgets/RecentContentWidget'
 import { CollectionCards as CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1 } from '@payloadcms/next/rsc'
@@ -71,7 +71,7 @@ import { CollectionCards as CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1 } f
 export const importMap = {
   "@/components/RowLabel#RowLabel": RowLabel_d4655109717a6f5707cd0a6520a4fd9e,
   "@delmaredigital/payload-better-auth/components#TwoFactorField": TwoFactorField_aa8e4427b70b37c7820895ace344eb78,
-  "@delmaredigital/payload-better-auth/components#PasskeysField": PasskeysField_aa8e4427b70b37c7820895ace344eb78,
+  "@delmaredigital/payload-better-auth/components/passkey#PasskeysField": PasskeysField_b43647e48ab3e028b782c335a88830d2,
   "@/components/EXIFCell#EXIFCell": EXIFCell_4480aec29364ed5b9b8eceaa4eff77ef,
   "@/components/EXIFDisplay#EXIFDisplay": EXIFDisplay_6fcfec44911dfff19a45246c27579691,
   "@/components/BlurhashField#BlurhashField": BlurhashField_cca06512cc763e8c25c885f0d870995d,
@@ -133,7 +133,7 @@ export const importMap = {
   "@payloadcms/storage-s3/client#S3ClientUploadHandler": S3ClientUploadHandler_f97aa6c64367fa259c5bc0567239ef24,
   "@/components/BGG#default": default_41e34effe3f4ece2ddcb2839119d86bb,
   "@delmaredigital/payload-better-auth/rsc#LoginViewWrapper": LoginViewWrapper_76e4fd5e0c2ccc05732c17408c72107e,
-  "@delmaredigital/payload-better-auth/rsc#ApiKeysView": ApiKeysView_76e4fd5e0c2ccc05732c17408c72107e,
+  "@delmaredigital/payload-better-auth/rsc/api-key#ApiKeysView": ApiKeysView_6234f869b6abd89bf631f5883bc67bd5,
   "@/components/Dashboard/widgets/AnalyticsWidget#default": default_838fb0a30eb441ddfea0c8d82d1e35c3,
   "@/components/Dashboard/widgets/RecentContentWidget#default": default_f295ca6a3d97191f9cda7f6e79f83657,
   "@payloadcms/next/rsc#CollectionCards": CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1

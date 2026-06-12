@@ -1,8 +1,8 @@
 import type { BasePayload } from 'payload';
 import { BetterAuthOptions } from 'better-auth';
 import { admin, twoFactor } from 'better-auth/plugins';
+import { apiKey } from '@better-auth/api-key';
 import { passkey } from '@better-auth/passkey';
-import { apiKeyWithDefaults } from '@delmaredigital/payload-better-auth';
 import { getBaseUrl } from './getBaseUrl';
 import { getTrustedOrigins } from './trustedOrigins';
 
@@ -115,6 +115,6 @@ export function createBetterAuthOptions(payload?: BasePayload): Partial<BetterAu
         clientSecret: process.env.DISCORD_CLIENT_SECRET as string,
       },
     },
-    plugins: [admin(), twoFactor(), passkey(), apiKeyWithDefaults()],
+    plugins: [admin(), twoFactor(), passkey(), apiKey({ enableMetadata: true })],
   };
 }
