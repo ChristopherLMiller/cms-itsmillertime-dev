@@ -186,6 +186,7 @@ export default buildConfig({
       ],
     },
     components: {
+      afterNavLinks: ['@/components/DeployVersion'],
       providers: ['@/components/NavBadgeProvider'],
       views: {
         bgg: {
