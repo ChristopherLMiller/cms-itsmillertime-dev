@@ -40,6 +40,7 @@ import { safeEmailSubjectLine } from './utilities/sanitizeContactForm';
 import { ResetPasswordEmail } from '../emails/reset-password';
 import { VerifyAccountEmail } from '../emails/verify-account';
 import { contactFormHandler } from './endpoints/contact-form';
+import { galleryImageTrackingHandler } from './endpoints/gallery-image-tracking';
 import { trustedOriginsArray } from './lib/auth/trustedOrigins';
 
 const filename = fileURLToPath(import.meta.url);
@@ -86,6 +87,11 @@ export default buildConfig({
       path: '/contact-form',
       method: 'post',
       handler: contactFormHandler,
+    },
+    {
+      path: '/gallery-image-tracking',
+      method: 'post',
+      handler: galleryImageTrackingHandler,
     },
   ],
   kv: redisKVAdapter({
@@ -180,6 +186,7 @@ export default buildConfig({
       ],
     },
     components: {
+      afterNavLinks: ['@/components/DeployVersion'],
       providers: ['@/components/NavBadgeProvider'],
       views: {
         bgg: {

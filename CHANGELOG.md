@@ -1,5 +1,12 @@
 # cms-itsmillertime-dev
 
+## 3.18.0
+
+### Minor Changes
+
+- Add gallery image tracking endpoint for anonymous lightbox engagement updates
+- Show deployed CMS version in the admin sidebar
+
 ## 3.10.0
 
 ### Minor Changes
