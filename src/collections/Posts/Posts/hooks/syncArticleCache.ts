@@ -1,39 +1,21 @@
-import { removeArticleCache, setArticleCache } from '@/lib/cache/articleCache';
+import { cacheDel, cacheKeys } from '@/lib/cache';
 import type { CollectionAfterChangeHook, CollectionAfterDeleteHook } from 'payload';
 
 /**
- * When an article is published (or re-published), write the full document to
- * Upstash at `payload:article:{id}` for the www frontend article loader.
+ * Invalidate the Upstash article cache on publish/unpublish/delete so the next
+ * www request misses and repopulates fresh from the CMS.
  */
-export const syncArticleCache: CollectionAfterChangeHook = async ({ doc, previousDoc, req }) => {
-  const articleId = doc.id;
-  if (articleId == null) return doc;
+export const syncArticleCache: CollectionAfterChangeHook = async ({ doc, previousDoc }) => {
+  if (doc.id == null) return doc;
 
-  if (doc._status === 'published') {
+  const wasPublished = previousDoc?._status === 'published';
+  const isPublished = doc._status === 'published';
+
+  if (isPublished || wasPublished) {
     try {
-      const article = await req.payload.findByID({
-        collection: 'posts',
-        id: articleId,
-        depth: 2,
-        draft: false,
-        overrideAccess: true,
-      });
-
-      if (article) {
-        await setArticleCache(articleId, article);
-      }
+      await cacheDel(cacheKeys.article(doc.id));
     } catch (err) {
-      console.error(`[article-cache] Failed to sync published article ${articleId}:`, err);
-    }
-
-    return doc;
-  }
-
-  if (previousDoc?._status === 'published' && doc._status !== 'published') {
-    try {
-      await removeArticleCache(articleId);
-    } catch (err) {
-      console.error(`[article-cache] Failed to remove unpublished article ${articleId}:`, err);
+      console.error(`[cache] Failed to invalidate article ${doc.id}:`, err);
     }
   }
 
@@ -41,13 +23,12 @@ export const syncArticleCache: CollectionAfterChangeHook = async ({ doc, previou
 };
 
 export const removeArticleCacheOnDelete: CollectionAfterDeleteHook = async ({ doc }) => {
-  const articleId = doc.id;
-  if (articleId == null) return doc;
+  if (doc.id == null) return doc;
 
   try {
-    await removeArticleCache(articleId);
+    await cacheDel(cacheKeys.article(doc.id));
   } catch (err) {
-    console.error(`[article-cache] Failed to remove deleted article ${articleId}:`, err);
+    console.error(`[cache] Failed to invalidate deleted article ${doc.id}:`, err);
   }
 
   return doc;
