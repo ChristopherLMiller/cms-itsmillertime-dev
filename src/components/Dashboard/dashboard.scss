@@ -352,6 +352,47 @@
   height: calc(var(--base) * 0.8125);
 }
 
+// Deploy version (dashboard widget)
+.deploy-version-widget {
+  background: var(--theme-elevation-0);
+  border: 1px solid var(--theme-elevation-150);
+  border-radius: 4px;
+  padding: calc(var(--base) * 1.25) calc(var(--base) * 1.5);
+}
+
+.deploy-version-widget__content {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: calc(var(--base) * 1);
+  flex-wrap: wrap;
+}
+
+.deploy-version-widget__label {
+  font-size: calc(var(--base) * 0.8125);
+  font-weight: 600;
+  color: var(--theme-text);
+  letter-spacing: 0.02em;
+}
+
+.deploy-version-widget__value {
+  font-size: calc(var(--base) * 1.125);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--theme-elevation-800);
+}
+
+.deploy-version-widget__hint {
+  margin: calc(var(--base) * 0.75) 0 0;
+  font-size: calc(var(--base) * 0.75);
+  color: var(--theme-elevation-500);
+  line-height: 1.4;
+}
+
+.deploy-version-widget__hint code {
+  font-size: 0.95em;
+}
+
 // Responsive
 @media (max-width: 768px) {
   .dashboard__content {
