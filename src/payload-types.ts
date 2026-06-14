@@ -178,6 +178,7 @@ export interface Config {
   widgets: {
     'site-analytics': SiteAnalyticsWidget;
     'recent-content': RecentContentWidget;
+    'deploy-version': DeployVersionWidget;
     collections: CollectionsWidget;
   };
   user: User | PayloadMcpApiKey;
@@ -3104,6 +3105,16 @@ export interface RecentContentWidget {
     icon: string;
   };
   width: 'small' | 'medium';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "deploy-version_widget".
+ */
+export interface DeployVersionWidget {
+  data?: {
+    [k: string]: unknown;
+  };
+  width: 'small' | 'medium' | 'large' | 'x-large' | 'full';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

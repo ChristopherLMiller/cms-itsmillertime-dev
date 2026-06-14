@@ -55,7 +55,6 @@ import { WebhookCollectionRowLabel as WebhookCollectionRowLabel_fcb2dafdf0f59a6c
 import { CustomNav as CustomNav_7a25bf58b9bf0789c79437d44273b9e5 } from 'payload-sidebar-plugin/rsc'
 import { LogoutButton as LogoutButton_aa8e4427b70b37c7820895ace344eb78 } from '@delmaredigital/payload-better-auth/components'
 import { SearchButton as SearchButton_3bf5d3e334c5eaf4f0d216451590d3c2 } from '@veiag/payload-cmdk/client'
-import { default as default_b6d8c610b4d95791d45b9341cff87ac1 } from '@/components/DeployVersion'
 import { SecurityNavLinks as SecurityNavLinks_e3642e6c1e5dbb92bcf178f42e87e19e } from '@delmaredigital/payload-better-auth/components/management'
 import { BeforeLogin as BeforeLogin_aa8e4427b70b37c7820895ace344eb78 } from '@delmaredigital/payload-better-auth/components'
 import { default as default_e5727cf75af5a5f3715e1efb9b6b07eb } from '@/components/NavBadgeProvider'
@@ -66,6 +65,7 @@ import { LoginViewWrapper as LoginViewWrapper_76e4fd5e0c2ccc05732c17408c72107e }
 import { ApiKeysView as ApiKeysView_6234f869b6abd89bf631f5883bc67bd5 } from '@delmaredigital/payload-better-auth/rsc/api-key'
 import { default as default_838fb0a30eb441ddfea0c8d82d1e35c3 } from '@/components/Dashboard/widgets/AnalyticsWidget'
 import { default as default_f295ca6a3d97191f9cda7f6e79f83657 } from '@/components/Dashboard/widgets/RecentContentWidget'
+import { default as default_d818225534c63ffd29af315bedc786c0 } from '@/components/Dashboard/widgets/DeployVersionWidget'
 import { CollectionCards as CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1 } from '@payloadcms/next/rsc'
 
 /** @type import('payload').ImportMap */
@@ -127,7 +127,6 @@ export const importMap = {
   "payload-sidebar-plugin/rsc#CustomNav": CustomNav_7a25bf58b9bf0789c79437d44273b9e5,
   "@delmaredigital/payload-better-auth/components#LogoutButton": LogoutButton_aa8e4427b70b37c7820895ace344eb78,
   "@veiag/payload-cmdk/client#SearchButton": SearchButton_3bf5d3e334c5eaf4f0d216451590d3c2,
-  "@/components/DeployVersion#default": default_b6d8c610b4d95791d45b9341cff87ac1,
   "@delmaredigital/payload-better-auth/components/management#SecurityNavLinks": SecurityNavLinks_e3642e6c1e5dbb92bcf178f42e87e19e,
   "@delmaredigital/payload-better-auth/components#BeforeLogin": BeforeLogin_aa8e4427b70b37c7820895ace344eb78,
   "@/components/NavBadgeProvider#default": default_e5727cf75af5a5f3715e1efb9b6b07eb,
@@ -138,5 +137,6 @@ export const importMap = {
   "@delmaredigital/payload-better-auth/rsc/api-key#ApiKeysView": ApiKeysView_6234f869b6abd89bf631f5883bc67bd5,
   "@/components/Dashboard/widgets/AnalyticsWidget#default": default_838fb0a30eb441ddfea0c8d82d1e35c3,
   "@/components/Dashboard/widgets/RecentContentWidget#default": default_f295ca6a3d97191f9cda7f6e79f83657,
+  "@/components/Dashboard/widgets/DeployVersionWidget#default": default_d818225534c63ffd29af315bedc786c0,
   "@payloadcms/next/rsc#CollectionCards": CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1
 }

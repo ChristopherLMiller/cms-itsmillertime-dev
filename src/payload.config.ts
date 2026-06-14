@@ -143,6 +143,12 @@ export default buildConfig({
             },
           ],
         },
+        {
+          slug: 'deploy-version',
+          Component: '@/components/Dashboard/widgets/DeployVersionWidget',
+          minWidth: 'small',
+          maxWidth: 'full',
+        },
       ],
       defaultLayout: () => [
         { widgetSlug: 'collections', width: 'full' },
@@ -183,10 +189,10 @@ export default buildConfig({
             icon: 'image',
           },
         },
+        { widgetSlug: 'deploy-version', width: 'full' },
       ],
     },
     components: {
-      afterNavLinks: ['@/components/DeployVersion'],
       providers: ['@/components/NavBadgeProvider'],
       views: {
         bgg: {
