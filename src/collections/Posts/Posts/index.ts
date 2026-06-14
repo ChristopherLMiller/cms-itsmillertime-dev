@@ -13,6 +13,7 @@ import {
 } from '@payloadcms/plugin-seo/fields';
 import { lexicalEditor } from '@payloadcms/richtext-lexical';
 import { CollectionConfig } from 'payload';
+import { removeArticleCacheOnDelete, syncArticleCache } from './hooks/syncArticleCache';
 
 export const Posts: CollectionConfig<'posts'> = {
   slug: 'posts',
@@ -203,5 +204,9 @@ export const Posts: CollectionConfig<'posts'> = {
       schedulePublish: true,
     },
     maxPerDoc: 5,
+  },
+  hooks: {
+    afterChange: [syncArticleCache],
+    afterDelete: [removeArticleCacheOnDelete],
   },
 };

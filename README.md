@@ -52,6 +52,8 @@ The headless CMS powering [itsmillertime.dev](https://www.itsmillertime.dev), bu
 - **EXIF Extraction** -- background job queue that parses EXIF data from uploaded images using ExifReader
 - **BlurHash Generation** -- generates placeholder blurhash strings for images
 - **Word Count** -- automatic word count tracking on posts
+- **Article cache sync** -- on publish, writes the full article to Upstash at `payload:article:{id}` for the www frontend
+- **Layout cache sync** -- on save, writes `site-meta` and `site-navigation` globals to `payload:layout:site-meta` and `payload:layout:site-navigation`
 - **Slug Field** -- auto-generated URL slugs from titles
 - **Health Endpoint** -- `GET /api/health` returns service and database status
 - **Contact Form** -- `POST /api/contact-form` queues submissions on the `email` job queue; `sendContactFormEmail` renders `emails/contact-form.tsx` via React Email and sends with Resend (requires `CONTACT_EMAIL` and `RESEND_API_KEY`)
@@ -82,6 +84,10 @@ NEXT_PUBLIC_SERVER_URL=http://localhost:3000
 
 # Redis
 REDIS_URL=redis://localhost:6379
+
+# Upstash (shared with www — article cache invalidation on publish)
+UPSTASH_REDIS_REST_URL=
+UPSTASH_REDIS_REST_TOKEN=
 
 # Cloudflare R2
 CLOUDFLARE_BUCKET=your-bucket

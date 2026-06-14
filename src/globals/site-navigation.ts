@@ -2,6 +2,7 @@ import { RBAC } from '@/access/RBAC';
 import { allowAll } from '@/access/methods/allowAll';
 import { allowedRoles } from '@/access/methods/allowedRoles';
 import { Groups } from '@/collections/shared/groups';
+import { syncSiteNavigationCache } from '@/globals/hooks/syncSiteNavigationCache';
 import { GlobalConfig } from 'payload';
 
 export const SiteNavigation: GlobalConfig = {
@@ -195,4 +196,7 @@ export const SiteNavigation: GlobalConfig = {
       ],
     },
   ],
+  hooks: {
+    afterChange: [syncSiteNavigationCache],
+  },
 };
