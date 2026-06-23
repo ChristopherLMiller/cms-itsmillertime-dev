@@ -2,6 +2,7 @@ import { nsfwFilter } from '@/access/filters/nsfwFilter';
 import { Groups } from '@/collections/shared/groups';
 import { imageContentFields, imageTechnicalFields } from '@/collections/shared/imageFields';
 import { baseUploadConfig } from '@/collections/shared/uploadConfig';
+import { removeMedusaProduct } from '@/collections/Gallery/Image/hooks/commerceDelete';
 import { PayloadRequest, slugField } from 'payload';
 import {
   MetaDescriptionField,
@@ -119,6 +120,16 @@ export const GalleryImages: CollectionConfig<'gallery-images'> = {
         },
       ],
     },
+    {
+      name: 'medusaProductId',
+      type: 'text',
+      label: 'Medusa Product ID',
+      admin: {
+        readOnly: true,
+        hidden: true,
+        description: 'Pointer to the Medusa product. Managed by the Store tab.',
+      },
+    },
     ...imageTechnicalFields,
     {
       type: 'group',
@@ -220,11 +231,27 @@ export const GalleryImages: CollectionConfig<'gallery-images'> = {
             }),
           ],
         },
+        {
+          label: 'Store',
+          description: 'Sell this image as a digital download via Medusa.',
+          fields: [
+            {
+              name: 'storePanel',
+              type: 'ui',
+              admin: {
+                components: {
+                  Field: '@/components/Commerce/StorePanel#StorePanel',
+                },
+              },
+            },
+          ],
+        },
       ],
     },
   ],
   hooks: {
     afterChange: [generateEXIF],
+    afterDelete: [removeMedusaProduct],
     beforeValidate: [defaultAltText, generateBlurHash],
   },
 };
