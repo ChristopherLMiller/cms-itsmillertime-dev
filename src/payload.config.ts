@@ -42,6 +42,16 @@ import { VerifyAccountEmail } from '../emails/verify-account';
 import { contactFormHandler } from './endpoints/contact-form';
 import { galleryImageTrackingHandler } from './endpoints/gallery-image-tracking';
 import { trustedOriginsArray } from './lib/auth/trustedOrigins';
+import {
+  medusaCollectionCreateHandler,
+  medusaCollectionsHandler,
+  medusaProductCreateHandler,
+  medusaProductDeleteHandler,
+  medusaProductSetStatusHandler,
+  medusaProductStatusHandler,
+  medusaProductUpdateHandler,
+  medusaSalesChannelsHandler,
+} from './endpoints/medusa-commerce';
 
 const filename = fileURLToPath(import.meta.url);
 const dirname = path.dirname(filename);
@@ -92,6 +102,46 @@ export default buildConfig({
       path: '/gallery-image-tracking',
       method: 'post',
       handler: galleryImageTrackingHandler,
+    },
+    {
+      path: '/medusa/product/status',
+      method: 'get',
+      handler: medusaProductStatusHandler,
+    },
+    {
+      path: '/medusa/product/status',
+      method: 'post',
+      handler: medusaProductSetStatusHandler,
+    },
+    {
+      path: '/medusa/product/create',
+      method: 'post',
+      handler: medusaProductCreateHandler,
+    },
+    {
+      path: '/medusa/product/update',
+      method: 'post',
+      handler: medusaProductUpdateHandler,
+    },
+    {
+      path: '/medusa/product/delete',
+      method: 'post',
+      handler: medusaProductDeleteHandler,
+    },
+    {
+      path: '/medusa/collections',
+      method: 'get',
+      handler: medusaCollectionsHandler,
+    },
+    {
+      path: '/medusa/collections',
+      method: 'post',
+      handler: medusaCollectionCreateHandler,
+    },
+    {
+      path: '/medusa/sales-channels',
+      method: 'get',
+      handler: medusaSalesChannelsHandler,
     },
   ],
   kv: redisKVAdapter({

@@ -419,6 +419,10 @@ export interface GalleryImage {
     permittedRoles?: ('family' | 'friend' | 'client' | 'user' | 'admin')[] | null;
     allowedUsers?: (number | User)[] | null;
   };
+  /**
+   * Pointer to the Medusa product. Managed by the Store tab.
+   */
+  medusaProductId?: string | null;
   exif?:
     | {
         [k: string]: unknown;
@@ -2181,6 +2185,7 @@ export interface GalleryImagesSelect<T extends boolean = true> {
         permittedRoles?: T;
         allowedUsers?: T;
       };
+  medusaProductId?: T;
   exif?: T;
   blurhash?: T;
   tracking?:
