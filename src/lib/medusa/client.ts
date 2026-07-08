@@ -59,23 +59,92 @@ function authHeader(apiKey: string): string {
   return `Basic ${Buffer.from(`${apiKey}:`).toString('base64')}`;
 }
 
-async function adminFetch<T>(env: MedusaEnv, path: string, init?: RequestInit): Promise<T> {
-  const res = await fetch(`${env.backendUrl}${path}`, {
-    ...init,
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: authHeader(env.adminApiKey),
-      ...(init?.headers ?? {}),
-    },
-  });
+/** JSON admin calls should be quick; uploads move bytes so they get longer. */
+const MEDUSA_API_TIMEOUT_MS = 30_000;
+const MEDUSA_UPLOAD_TIMEOUT_MS = 60_000;
 
-  if (!res.ok) {
-    const text = await res.text().catch(() => '');
-    throw new Error(`Medusa ${init?.method ?? 'GET'} ${path} -> ${res.status} ${text}`);
+/**
+ * `fetch` that aborts after `timeoutMs`. Without this, an unreachable-but-not-
+ * refused backend (a hung connection) makes the request stall indefinitely
+ * until an upstream proxy (Traefik/Cloudflare) kills it and returns an opaque
+ * 502 — with nothing in the app logs. A bounded timeout turns that into a fast,
+ * descriptive error we can actually surface and log.
+ */
+async function fetchWithTimeout(
+  label: string,
+  url: string,
+  init: RequestInit,
+  timeoutMs: number,
+): Promise<Response> {
+  try {
+    return await fetch(url, { signal: AbortSignal.timeout(timeoutMs), ...init });
+  } catch (err) {
+    if (err instanceof Error && (err.name === 'TimeoutError' || err.name === 'AbortError')) {
+      throw new Error(
+        `${label}: no response from ${url} within ${timeoutMs / 1000}s (timed out). Confirm MEDUSA_BACKEND_URL is reachable from the server.`,
+      );
+    }
+    throw new Error(
+      `${label}: could not reach ${url} (${err instanceof Error ? err.message : String(err)})`,
+    );
   }
+}
 
-  const body = await res.text();
-  return (body ? JSON.parse(body) : {}) as T;
+/**
+ * Turn a non-OK / non-JSON upstream response into a descriptive error.
+ *
+ * The important cases are redirects and HTML bodies: when a proxy/CDN (e.g.
+ * Cloudflare) sends API calls to the wrong host, `fetch` would otherwise follow
+ * the 3xx to a marketing page and JSON.parse the HTML, surfacing an opaque
+ * "Unexpected token '<', "<!doctype"... is not valid JSON" that hides the real
+ * status and destination. We fetch with `redirect: 'manual'` and name the
+ * status + Location so the failure is self-explanatory in the logs.
+ */
+function upstreamResponseError(label: string, res: Response, body: string): Error | null {
+  if (res.status >= 300 && res.status < 400) {
+    const location = res.headers.get('location') ?? '(no Location header)';
+    return new Error(
+      `${label} -> ${res.status} redirect to ${location}. The Medusa host (${res.url || 'backend'}) is misrouted — a proxy/CDN is redirecting API calls instead of serving Medusa.`,
+    );
+  }
+  if (!res.ok) {
+    return new Error(`${label} -> ${res.status} ${body.slice(0, 300)}`);
+  }
+  const contentType = res.headers.get('content-type') ?? '';
+  if (body.trim() && !contentType.includes('json')) {
+    return new Error(
+      `${label} -> ${res.status} expected JSON but received ${contentType || 'an unknown content-type'}: ${body.slice(0, 200)}`,
+    );
+  }
+  return null;
+}
+
+async function adminFetch<T>(env: MedusaEnv, path: string, init?: RequestInit): Promise<T> {
+  const label = `Medusa ${init?.method ?? 'GET'} ${path}`;
+  const res = await fetchWithTimeout(
+    label,
+    `${env.backendUrl}${path}`,
+    {
+      ...init,
+      redirect: 'manual',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: authHeader(env.adminApiKey),
+        ...(init?.headers ?? {}),
+      },
+    },
+    MEDUSA_API_TIMEOUT_MS,
+  );
+
+  const body = await res.text().catch(() => '');
+  const err = upstreamResponseError(label, res, body);
+  if (err) throw err;
+
+  try {
+    return (body ? JSON.parse(body) : {}) as T;
+  } catch {
+    throw new Error(`${label} -> ${res.status} returned an unparseable body: ${body.slice(0, 200)}`);
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -98,19 +167,30 @@ export async function uploadImageBuffer(
   // Copy into a fresh ArrayBuffer-backed Blob to satisfy strict typings.
   form.append('files', new Blob([view], { type: contentType }), filename);
 
+  const label = 'Medusa POST /admin/uploads';
   // Do not set Content-Type; fetch adds the multipart boundary automatically.
-  const res = await fetch(`${env.backendUrl}/admin/uploads`, {
-    method: 'POST',
-    headers: { Authorization: authHeader(env.adminApiKey) },
-    body: form,
-  });
+  const res = await fetchWithTimeout(
+    label,
+    `${env.backendUrl}/admin/uploads`,
+    {
+      method: 'POST',
+      redirect: 'manual',
+      headers: { Authorization: authHeader(env.adminApiKey) },
+      body: form,
+    },
+    MEDUSA_UPLOAD_TIMEOUT_MS,
+  );
 
-  if (!res.ok) {
-    const text = await res.text().catch(() => '');
-    throw new Error(`Medusa POST /admin/uploads -> ${res.status} ${text}`);
+  const text = await res.text().catch(() => '');
+  const upErr = upstreamResponseError(label, res, text);
+  if (upErr) throw upErr;
+
+  let data: MedusaUploadResponse;
+  try {
+    data = JSON.parse(text) as MedusaUploadResponse;
+  } catch {
+    throw new Error(`${label} -> ${res.status} returned an unparseable body: ${text.slice(0, 200)}`);
   }
-
-  const data = (await res.json()) as MedusaUploadResponse;
   const url = data.files?.[0]?.url;
   if (!url) {
     throw new Error('Medusa upload returned no file url.');
@@ -124,7 +204,12 @@ export async function uploadImageFromUrl(
   sourceUrl: string,
   filename?: string,
 ): Promise<string> {
-  const res = await fetch(sourceUrl);
+  const res = await fetchWithTimeout(
+    'Fetch source image',
+    sourceUrl,
+    {},
+    MEDUSA_UPLOAD_TIMEOUT_MS,
+  );
   if (!res.ok) {
     throw new Error(`Could not fetch source image ${sourceUrl} -> ${res.status}`);
   }
@@ -596,14 +681,17 @@ export async function createProduct(env: MedusaEnv, input: ProductInput): Promis
       shipping_profile_id: env.shippingProfileId,
       sales_channels: channelId ? [{ id: channelId }] : [],
       metadata: buildProductMetadata(input),
+      // Medusa requires at least one option at creation time (a bare product
+      // 400s with "Product options are not provided"). Always seed the
+      // Paper/Format axes; offering-set application extends them with the print
+      // paper/size values. The inline digital variant is only added when there
+      // is no offering set — otherwise the sells_digital workflow creates it.
+      options: [
+        { title: PAPER_OPTION, values: [DIGITAL_PAPER] },
+        { title: FORMAT_OPTION, values: [DIGITAL_FORMAT] },
+      ],
       ...(digitalOnly && input.sellsDigital
-        ? {
-            options: [
-              { title: PAPER_OPTION, values: [DIGITAL_PAPER] },
-              { title: FORMAT_OPTION, values: [DIGITAL_FORMAT] },
-            ],
-            variants: [digitalVariantBody(env, input)],
-          }
+        ? { variants: [digitalVariantBody(env, input)] }
         : {}),
     }),
   });
@@ -638,7 +726,15 @@ export async function getProduct(env: MedusaEnv, productId: string): Promise<Pro
         env,
         `/admin/products/${productId}?fields=id,title,description,status,thumbnail,metadata,collection_id,*collection,*sales_channels,*variants,*variants.prices,*variants.options,*variants.options.option,*variants.metadata`,
       ),
-      getAttachedOfferingSets(env, productId).catch(() => []),
+      // Best-effort: attached offering sets are display-only, so a failure here
+      // must not break create/update. But log it — a hang/timeout on this custom
+      // route is the most likely reason a create silently stalls.
+      getAttachedOfferingSets(env, productId).catch((err) => {
+        console.error(
+          `[medusa] getAttachedOfferingSets(${productId}) failed: ${err instanceof Error ? err.message : String(err)}`,
+        );
+        return [];
+      }),
     ]);
     return summarize(env, product, offeringSets);
   } catch (err) {

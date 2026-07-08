@@ -112,22 +112,54 @@ export class Plausible {
   }
 
   private async query(body: Record<string, unknown>) {
-    const response = await fetch(this.baseURL, {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${this.apiKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        site_id: this.siteId,
-        ...body,
-      }),
-    });
-
-    if (!response.ok) {
-      throw new Error(`Plausible API error: ${response.status} ${response.statusText}`);
+    let response: Response;
+    try {
+      response = await fetch(this.baseURL, {
+        method: 'POST',
+        // Do not silently follow redirects: a proxy/CDN redirecting API calls
+        // to an HTML page would otherwise surface as an opaque JSON parse error
+        // ("Unexpected token '<'") that hides the real status and destination.
+        redirect: 'manual',
+        headers: {
+          Authorization: `Bearer ${this.apiKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          site_id: this.siteId,
+          ...body,
+        }),
+      });
+    } catch (error) {
+      throw new Error(
+        `Plausible API unreachable at ${this.baseURL}: ${error instanceof Error ? error.message : String(error)}`,
+      );
     }
 
-    return response.json();
+    if (response.status >= 300 && response.status < 400) {
+      const location = response.headers.get('location') ?? '(no Location header)';
+      throw new Error(
+        `Plausible API at ${this.baseURL} returned ${response.status} redirect to ${location}. The host is misrouted — a proxy/CDN is redirecting API calls instead of serving Plausible.`,
+      );
+    }
+
+    const text = await response.text().catch(() => '');
+    if (!response.ok) {
+      throw new Error(`Plausible API error: ${response.status} ${response.statusText} ${text.slice(0, 200)}`);
+    }
+
+    const contentType = response.headers.get('content-type') ?? '';
+    if (text.trim() && !contentType.includes('json')) {
+      throw new Error(
+        `Plausible API at ${this.baseURL} returned ${contentType || 'a non-JSON response'} instead of JSON: ${text.slice(0, 200)}`,
+      );
+    }
+
+    try {
+      return text ? JSON.parse(text) : {};
+    } catch {
+      throw new Error(
+        `Plausible API at ${this.baseURL} returned an unparseable body: ${text.slice(0, 200)}`,
+      );
+    }
   }
 }

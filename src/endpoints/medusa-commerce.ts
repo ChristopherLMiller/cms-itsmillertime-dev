@@ -76,6 +76,18 @@ async function requireAdmin(req: PayloadRequest): Promise<boolean> {
   return allowedRoles(['admin'])({ req });
 }
 
+/**
+ * Log an upstream failure and return the 502. Server-side handlers are
+ * otherwise silent in production (Next.js doesn't log requests and caught
+ * errors only go to the response body), so a failed create/update leaves
+ * nothing in the container logs to diagnose.
+ */
+function logAndFail(context: string, err: unknown): Response {
+  const message = err instanceof Error ? err.message : String(err);
+  console.error(`[medusa] ${context} failed: ${message}`);
+  return Response.json({ error: message }, { status: 502 });
+}
+
 async function readJson(req: PayloadRequest): Promise<Record<string, unknown> | null> {
   const parseJson = req.json;
   if (!parseJson) return null;
@@ -297,8 +309,10 @@ export async function medusaProductStatusHandler(req: PayloadRequest): Promise<R
       privateChannelConfigured,
     });
   } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    console.error(`[medusa] product/status (get) failed: ${message}`);
     return Response.json(
-      { configured: true, linked: true, error: err instanceof Error ? err.message : String(err) },
+      { configured: true, linked: true, error: message },
       { status: 502 },
     );
   }
@@ -330,6 +344,9 @@ export async function medusaProductCreateHandler(req: PayloadRequest): Promise<R
     return Response.json({ error: 'This image is already listed.' }, { status: 409 });
   }
 
+  console.info(
+    `[medusa] product/create: start galleryImageId=${id} sellsDigital=${plan.sellsDigital} offeringSets=${plan.offeringSetIds.length}`,
+  );
   try {
     const env = getMedusaEnv();
     const source = (str(body.imageSource) as ImageSource) || 'gallery';
@@ -362,12 +379,10 @@ export async function medusaProductCreateHandler(req: PayloadRequest): Promise<R
       status: 'published',
     });
     await persistPointer(req, id, product.productId);
+    console.info(`[medusa] product/create: done galleryImageId=${id} product=${product.productId}`);
     return Response.json({ ok: true, product });
   } catch (err) {
-    return Response.json(
-      { error: err instanceof Error ? err.message : String(err) },
-      { status: 502 },
-    );
+    return logAndFail('product/create', err);
   }
 }
 
@@ -436,10 +451,7 @@ export async function medusaProductUpdateHandler(req: PayloadRequest): Promise<R
     });
     return Response.json({ ok: true, product });
   } catch (err) {
-    return Response.json(
-      { error: err instanceof Error ? err.message : String(err) },
-      { status: 502 },
-    );
+    return logAndFail('product/update', err);
   }
 }
 
@@ -471,10 +483,7 @@ export async function medusaProductSetStatusHandler(req: PayloadRequest): Promis
     const product = await getProduct(env, image.medusaProductId);
     return Response.json({ ok: true, product });
   } catch (err) {
-    return Response.json(
-      { error: err instanceof Error ? err.message : String(err) },
-      { status: 502 },
-    );
+    return logAndFail('product/status (set)', err);
   }
 }
 
@@ -502,10 +511,7 @@ export async function medusaProductDeleteHandler(req: PayloadRequest): Promise<R
     await persistPointer(req, id, null);
     return Response.json({ ok: true });
   } catch (err) {
-    return Response.json(
-      { error: err instanceof Error ? err.message : String(err) },
-      { status: 502 },
-    );
+    return logAndFail('product/delete', err);
   }
 }
 
@@ -523,10 +529,7 @@ export async function medusaCollectionsHandler(req: PayloadRequest): Promise<Res
     const collections = await listCollections(getMedusaEnv());
     return Response.json({ collections });
   } catch (err) {
-    return Response.json(
-      { error: err instanceof Error ? err.message : String(err) },
-      { status: 502 },
-    );
+    return logAndFail('collections (list)', err);
   }
 }
 
@@ -547,10 +550,7 @@ export async function medusaCollectionCreateHandler(req: PayloadRequest): Promis
     const collection = await createCollection(getMedusaEnv(), title);
     return Response.json({ ok: true, collection });
   } catch (err) {
-    return Response.json(
-      { error: err instanceof Error ? err.message : String(err) },
-      { status: 502 },
-    );
+    return logAndFail('collections (create)', err);
   }
 }
 
@@ -568,10 +568,7 @@ export async function medusaOfferingSetsHandler(req: PayloadRequest): Promise<Re
     const offeringSets = await listOfferingSets(getMedusaEnv());
     return Response.json({ offeringSets });
   } catch (err) {
-    return Response.json(
-      { error: err instanceof Error ? err.message : String(err) },
-      { status: 502 },
-    );
+    return logAndFail('offering-sets (list)', err);
   }
 }
 
@@ -589,9 +586,6 @@ export async function medusaSalesChannelsHandler(req: PayloadRequest): Promise<R
     const channels = await listSalesChannels(getMedusaEnv());
     return Response.json({ channels });
   } catch (err) {
-    return Response.json(
-      { error: err instanceof Error ? err.message : String(err) },
-      { status: 502 },
-    );
+    return logAndFail('sales-channels (list)', err);
   }
 }
