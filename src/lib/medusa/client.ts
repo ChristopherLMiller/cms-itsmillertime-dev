@@ -563,6 +563,8 @@ async function applyOfferingSet(
   offeringSetId: string,
   input: Pick<ProductInput, 'sellsDigital' | 'digitalPriceUSD'>,
 ): Promise<void> {
+  // The workflow prices the digital variant from `digital_price`, so send it
+  // (and the currency) alongside `sells_digital` when there's a digital price.
   await adminFetch(env, `/admin/products/${productId}/offering-set`, {
     method: 'POST',
     body: JSON.stringify({
@@ -705,8 +707,8 @@ export async function createProduct(env: MedusaEnv, input: ProductInput): Promis
     throw new Error(`Product ${product.id} disappeared after creation.`);
   }
 
-  // Apply-created digital variants have no SKU; backfill it for parity with
-  // the digital-only path.
+  // The offering-set workflow prices the digital variant but doesn't give it a
+  // SKU; backfill the SKU for parity with the inline digital-only path.
   if (input.sellsDigital && created.variantId && !created.sku) {
     await adminFetch(env, `/admin/products/${product.id}/variants/${created.variantId}`, {
       method: 'POST',
