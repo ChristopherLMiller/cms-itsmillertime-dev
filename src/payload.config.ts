@@ -52,6 +52,7 @@ import {
   medusaProductStatusHandler,
   medusaProductUpdateHandler,
   medusaSalesChannelsHandler,
+  medusaShippingProfilesHandler,
 } from './endpoints/medusa-commerce';
 
 const filename = fileURLToPath(import.meta.url);
@@ -148,6 +149,11 @@ export default buildConfig({
       path: '/medusa/offering-sets',
       method: 'get',
       handler: medusaOfferingSetsHandler,
+    },
+    {
+      path: '/medusa/shipping-profiles',
+      method: 'get',
+      handler: medusaShippingProfilesHandler,
     },
   ],
   kv: redisKVAdapter({
