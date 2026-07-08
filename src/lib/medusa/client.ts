@@ -561,16 +561,21 @@ async function applyOfferingSet(
   env: MedusaEnv,
   productId: string,
   offeringSetId: string,
-  input: Pick<ProductInput, 'sellsDigital'>,
+  input: Pick<ProductInput, 'sellsDigital' | 'digitalPriceUSD'>,
 ): Promise<void> {
-  // The backend route only accepts offering_set_id + sells_digital (it rejects
-  // any price fields). The digital variant's price is set separately via a
-  // standard variant update after the workflow creates it.
+  // The workflow prices the digital variant from `digital_price`, so send it
+  // (and the currency) alongside `sells_digital` when there's a digital price.
   await adminFetch(env, `/admin/products/${productId}/offering-set`, {
     method: 'POST',
     body: JSON.stringify({
       offering_set_id: offeringSetId,
       sells_digital: input.sellsDigital,
+      ...(input.sellsDigital && input.digitalPriceUSD != null && input.digitalPriceUSD > 0
+        ? {
+            digital_price: input.digitalPriceUSD,
+            digital_price_currency: env.currency,
+          }
+        : {}),
     }),
   });
 }
@@ -702,18 +707,12 @@ export async function createProduct(env: MedusaEnv, input: ProductInput): Promis
     throw new Error(`Product ${product.id} disappeared after creation.`);
   }
 
-  // The offering-set workflow creates the digital variant without our SKU or
-  // price (the route rejects price fields), so backfill both via a standard
-  // variant update. Inline digital-only variants already have them.
+  // The offering-set workflow prices the digital variant but doesn't give it a
+  // SKU; backfill the SKU for parity with the inline digital-only path.
   if (input.sellsDigital && created.variantId && !created.sku) {
     await adminFetch(env, `/admin/products/${product.id}/variants/${created.variantId}`, {
       method: 'POST',
-      body: JSON.stringify({
-        sku: input.sku || `GALLERY-IMG-${input.galleryImageId}`,
-        ...(input.digitalPriceUSD != null && input.digitalPriceUSD > 0
-          ? { prices: [{ amount: input.digitalPriceUSD, currency_code: env.currency }] }
-          : {}),
-      }),
+      body: JSON.stringify({ sku: input.sku || `GALLERY-IMG-${input.galleryImageId}` }),
     });
     return (await getProduct(env, product.id)) ?? created;
   }
