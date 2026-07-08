@@ -8,6 +8,7 @@ import {
   getProduct,
   isMedusaConfigured,
   listCollections,
+  listOfferingSets,
   listSalesChannels,
   setProductStatus,
   updateProduct,
@@ -211,6 +212,39 @@ function str(value: unknown): string | undefined {
   return typeof value === 'string' && value.trim() ? value.trim() : undefined;
 }
 
+function strArray(value: unknown): string[] {
+  if (!Array.isArray(value)) return [];
+  return value
+    .filter((entry): entry is string => typeof entry === 'string' && !!entry.trim())
+    .map((entry) => entry.trim());
+}
+
+interface SellablePlan {
+  sellsDigital: boolean;
+  digitalPriceUSD: number | null;
+  offeringSetIds: string[];
+}
+
+/**
+ * Validate the digital/print selling choices shared by create and update.
+ * Returns an error message when invalid.
+ */
+function parseSellablePlan(body: Record<string, unknown>): SellablePlan | string {
+  const sellsDigital = body.sellsDigital === true;
+  // priceUSD accepted as a legacy alias for the digital price.
+  const digitalPriceUSD = num(body.digitalPriceUSD ?? body.priceUSD);
+  const offeringSetIds = strArray(body.offeringSetIds);
+
+  if (!sellsDigital && offeringSetIds.length === 0) {
+    return 'Enable the digital download or select at least one print offering set.';
+  }
+  if (sellsDigital && (digitalPriceUSD == null || digitalPriceUSD <= 0)) {
+    return 'A valid digital download price is required.';
+  }
+
+  return { sellsDigital, digitalPriceUSD, offeringSetIds };
+}
+
 // ---------------------------------------------------------------------------
 // GET /api/medusa/product/status?galleryImageId=ID
 // ---------------------------------------------------------------------------
@@ -282,11 +316,12 @@ export async function medusaProductCreateHandler(req: PayloadRequest): Promise<R
 
   const id = num(body.galleryImageId);
   const title = str(body.title);
-  const priceUSD = num(body.priceUSD);
   if (id == null) return Response.json({ error: 'galleryImageId is required' }, { status: 400 });
   if (!title) return Response.json({ error: 'title is required' }, { status: 400 });
-  if (priceUSD == null || priceUSD < 0) {
-    return Response.json({ error: 'A valid priceUSD is required' }, { status: 400 });
+
+  const plan = parseSellablePlan(body);
+  if (typeof plan === 'string') {
+    return Response.json({ error: plan }, { status: 400 });
   }
 
   const image = await loadImage(req, id);
@@ -300,12 +335,25 @@ export async function medusaProductCreateHandler(req: PayloadRequest): Promise<R
     const source = (str(body.imageSource) as ImageSource) || 'gallery';
     const imageUrl = await resolveStorefrontImage(env, image, source, body);
     const download = await resolveDownloadAsset(env, image, body);
+
+    if (plan.offeringSetIds.length > 0 && !download) {
+      return Response.json(
+        {
+          error:
+            'Upload the high-res master file (General tab) — it is sent to the print service as the print file.',
+        },
+        { status: 400 },
+      );
+    }
+
     const product: ProductSummary = await createProduct(env, {
       galleryImageId: id,
       title,
       description: str(body.description),
       sku: str(body.sku),
-      priceUSD,
+      sellsDigital: plan.sellsDigital,
+      digitalPriceUSD: plan.digitalPriceUSD,
+      offeringSetIds: plan.offeringSetIds,
       imageUrl,
       downloadUrl: download?.url,
       downloadFilename: download?.filename,
@@ -335,11 +383,12 @@ export async function medusaProductUpdateHandler(req: PayloadRequest): Promise<R
 
   const id = num(body.galleryImageId);
   const title = str(body.title);
-  const priceUSD = num(body.priceUSD);
   if (id == null) return Response.json({ error: 'galleryImageId is required' }, { status: 400 });
   if (!title) return Response.json({ error: 'title is required' }, { status: 400 });
-  if (priceUSD == null || priceUSD < 0) {
-    return Response.json({ error: 'A valid priceUSD is required' }, { status: 400 });
+
+  const plan = parseSellablePlan(body);
+  if (typeof plan === 'string') {
+    return Response.json({ error: plan }, { status: 400 });
   }
 
   const image = await loadImage(req, id);
@@ -358,15 +407,29 @@ export async function medusaProductUpdateHandler(req: PayloadRequest): Promise<R
     const source = (str(body.imageSource) as ImageSource) || 'keep';
     const imageUrl = await resolveStorefrontImage(env, image, source, body);
     const download = await resolveDownloadAsset(env, image, body);
-    const product = await updateProduct(env, existing.productId, existing.variantId, {
+    const downloadUrl = download?.url ?? existing.downloadUrl ?? undefined;
+
+    if (plan.offeringSetIds.length > 0 && !downloadUrl) {
+      return Response.json(
+        {
+          error:
+            'Upload the high-res master file (General tab) — it is sent to the print service as the print file.',
+        },
+        { status: 400 },
+      );
+    }
+
+    const product = await updateProduct(env, existing.productId, existing, {
       galleryImageId: id,
       title,
       description: str(body.description),
       sku: str(body.sku),
-      priceUSD,
+      sellsDigital: plan.sellsDigital,
+      digitalPriceUSD: plan.digitalPriceUSD,
+      offeringSetIds: plan.offeringSetIds,
       imageUrl,
       // Keep the existing download asset unless a new one was uploaded.
-      downloadUrl: download?.url ?? existing.downloadUrl ?? undefined,
+      downloadUrl,
       downloadFilename: download?.filename ?? existing.downloadFilename ?? undefined,
       collectionId: 'collectionId' in body ? str(body.collectionId) ?? null : undefined,
       salesChannelId: salesChannelFromBody(body, env, image),
@@ -483,6 +546,27 @@ export async function medusaCollectionCreateHandler(req: PayloadRequest): Promis
   try {
     const collection = await createCollection(getMedusaEnv(), title);
     return Response.json({ ok: true, collection });
+  } catch (err) {
+    return Response.json(
+      { error: err instanceof Error ? err.message : String(err) },
+      { status: 502 },
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// GET /api/medusa/offering-sets  -> [{ id, name, description, isDefault }]
+// ---------------------------------------------------------------------------
+export async function medusaOfferingSetsHandler(req: PayloadRequest): Promise<Response> {
+  if (!(await requireAdmin(req))) {
+    return Response.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+  if (!isMedusaConfigured()) {
+    return Response.json({ offeringSets: [] });
+  }
+  try {
+    const offeringSets = await listOfferingSets(getMedusaEnv());
+    return Response.json({ offeringSets });
   } catch (err) {
     return Response.json(
       { error: err instanceof Error ? err.message : String(err) },

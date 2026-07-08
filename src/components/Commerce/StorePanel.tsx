@@ -39,6 +39,7 @@ interface ProductSummary {
   thumbnail: string | null;
   priceUSD: number | null;
   sku: string | null;
+  sellsDigital: boolean;
   downloadUrl: string | null;
   downloadFilename: string | null;
   collectionId: string | null;
@@ -46,6 +47,14 @@ interface ProductSummary {
   salesChannelId: string | null;
   salesChannelName: string | null;
   variants: VariantSummary[];
+  offeringSets: Array<{ id: string; name: string }>;
+}
+
+interface MedusaOfferingSet {
+  id: string;
+  name: string;
+  description: string | null;
+  isDefault: boolean;
 }
 
 interface MedusaCollection {
@@ -88,19 +97,21 @@ interface StatusResponse {
 }
 
 type ImageSource = 'gallery' | 'upload' | 'keep';
-type DrawerTab = 'general' | 'digital' | 'physical';
+type DrawerTab = 'general' | 'digital' | 'prints';
 
 const DRAWER_TABS: Array<{ id: DrawerTab; label: string }> = [
   { id: 'general', label: 'General' },
   { id: 'digital', label: 'Digital' },
-  { id: 'physical', label: 'Physical' },
+  { id: 'prints', label: 'Prints' },
 ];
 
 interface FormState {
   mode: 'create' | 'edit';
   title: string;
   description: string;
-  priceUSD: string;
+  sellsDigital: boolean;
+  digitalPriceUSD: string;
+  offeringSetIds: string[];
   sku: string;
   collectionId: string;
   salesChannelId: string;
@@ -113,7 +124,9 @@ const EMPTY_FORM: FormState = {
   mode: 'create',
   title: '',
   description: '',
-  priceUSD: '',
+  sellsDigital: true,
+  digitalPriceUSD: '',
+  offeringSetIds: [],
   sku: '',
   collectionId: '',
   salesChannelId: '',
@@ -218,6 +231,7 @@ export const StorePanel: React.FC = () => {
   const [adminUrl, setAdminUrl] = useState<string | null>(null);
   const [collections, setCollections] = useState<MedusaCollection[]>([]);
   const [salesChannels, setSalesChannels] = useState<MedusaSalesChannel[]>([]);
+  const [offeringSets, setOfferingSets] = useState<MedusaOfferingSet[]>([]);
   const [newCollectionTitle, setNewCollectionTitle] = useState('');
   const [collectionError, setCollectionError] = useState<string | null>(null);
   const [audience, setAudience] = useState<'public' | 'private'>('public');
@@ -272,11 +286,13 @@ export const StorePanel: React.FC = () => {
     Promise.all([
       fetch('/api/medusa/collections').then((r) => r.json()),
       fetch('/api/medusa/sales-channels').then((r) => r.json()),
+      fetch('/api/medusa/offering-sets').then((r) => r.json()),
     ])
-      .then(([collectionsRes, channelsRes]) => {
+      .then(([collectionsRes, channelsRes, setsRes]) => {
         if (!active) return;
         setCollections((collectionsRes as { collections?: MedusaCollection[] }).collections ?? []);
         setSalesChannels((channelsRes as { channels?: MedusaSalesChannel[] }).channels ?? []);
+        setOfferingSets((setsRes as { offeringSets?: MedusaOfferingSet[] }).offeringSets ?? []);
       })
       .catch(() => {});
     return () => {
@@ -307,6 +323,7 @@ export const StorePanel: React.FC = () => {
       ...EMPTY_FORM,
       mode: 'create',
       title: (alt ?? '').trim(),
+      offeringSetIds: offeringSets.filter((s) => s.isDefault).map((s) => s.id),
       salesChannelId: defaultSalesChannelId(galleryVisibility, salesChannels),
     });
     openModal(DRAWER_SLUG);
@@ -322,7 +339,9 @@ export const StorePanel: React.FC = () => {
       mode: 'edit',
       title: product.title ?? '',
       description: product.description ?? '',
-      priceUSD: product.priceUSD != null ? String(product.priceUSD) : '',
+      sellsDigital: product.sellsDigital,
+      digitalPriceUSD: product.priceUSD != null ? String(product.priceUSD) : '',
+      offeringSetIds: product.offeringSets.map((s) => s.id),
       sku: product.sku ?? '',
       collectionId: product.collectionId ?? '',
       salesChannelId:
@@ -333,6 +352,15 @@ export const StorePanel: React.FC = () => {
       downloadFile: null,
     });
     openModal(DRAWER_SLUG);
+  };
+
+  const toggleOfferingSet = (setId: string) => {
+    setForm((f) => ({
+      ...f,
+      offeringSetIds: f.offeringSetIds.includes(setId)
+        ? f.offeringSetIds.filter((id) => id !== setId)
+        : [...f.offeringSetIds, setId],
+    }));
   };
 
   const openCollectionDrawer = () => {
@@ -378,7 +406,7 @@ export const StorePanel: React.FC = () => {
 
   const submit = async () => {
     if (!galleryImageId) return;
-    const price = Number(form.priceUSD);
+    const digitalPrice = Number(form.digitalPriceUSD);
     if (!form.title.trim()) {
       setActiveTab('general');
       setFormError('A title is required.');
@@ -389,9 +417,23 @@ export const StorePanel: React.FC = () => {
       setFormError('Choose a storefront image file, or use the gallery image.');
       return;
     }
-    if (!Number.isFinite(price) || price < 0) {
+    if (!form.sellsDigital && form.offeringSetIds.length === 0) {
       setActiveTab('digital');
-      setFormError('Enter a valid price.');
+      setFormError('Enable the digital download or select at least one print offering set.');
+      return;
+    }
+    if (form.sellsDigital && (!Number.isFinite(digitalPrice) || digitalPrice <= 0)) {
+      setActiveTab('digital');
+      setFormError('Enter a valid digital download price.');
+      return;
+    }
+    if (
+      form.offeringSetIds.length > 0 &&
+      form.mode === 'create' &&
+      !form.downloadFile
+    ) {
+      setActiveTab('general');
+      setFormError('Upload the high-res master file — it is sent to the print service.');
       return;
     }
 
@@ -402,7 +444,9 @@ export const StorePanel: React.FC = () => {
         galleryImageId,
         title: form.title.trim(),
         description: form.description.trim() || undefined,
-        priceUSD: price,
+        sellsDigital: form.sellsDigital,
+        digitalPriceUSD: form.sellsDigital ? digitalPrice : undefined,
+        offeringSetIds: form.offeringSetIds,
         sku: form.sku.trim() || undefined,
         collectionId: form.collectionId,
         salesChannelId: form.salesChannelId,
@@ -531,7 +575,8 @@ export const StorePanel: React.FC = () => {
       {!product ? (
         <>
           <Banner type="info">
-            This image is not for sale. List it as a digital download to sell it on the storefront.
+            This image is not for sale. List it as a digital download and/or physical prints on the
+            storefront.
           </Banner>
           <div>
             <Button buttonStyle="primary" onClick={openCreate} disabled={busy}>
@@ -574,10 +619,20 @@ export const StorePanel: React.FC = () => {
                     </span>
                   </div>
                 ))}
-                <p className={styles.hint}>Physical / print variants can be added here later.</p>
+                {product.offeringSets.length === 0 && (
+                  <p className={styles.hint}>
+                    No print offering sets attached — edit the listing to add prints.
+                  </p>
+                )}
               </div>
 
               <dl className={styles.dl}>
+                <dt className={styles.dt}>Print offerings</dt>
+                <dd className={styles.dd}>
+                  {product.offeringSets.length
+                    ? product.offeringSets.map((s) => s.name).join(', ')
+                    : '—'}
+                </dd>
                 <dt className={styles.dt}>Master file</dt>
                 <dd className={styles.dd}>
                   {product.downloadFilename || (product.downloadUrl ? 'Attached' : '⚠ Not set')}
@@ -631,9 +686,6 @@ export const StorePanel: React.FC = () => {
                 onClick={() => setActiveTab(t.id)}
               >
                 {t.label}
-                {t.id === 'physical' && (
-                  <span className={styles.tabBadge}>soon</span>
-                )}
               </button>
             ))}
           </div>
@@ -816,90 +868,91 @@ export const StorePanel: React.FC = () => {
               <p className={styles.hint}>
                 Buyer instantly downloads the master file after purchase.
               </p>
-              <div className={styles.row}>
-                <div className={styles.col}>
-                  <TextInput
-                    path="commerce-price"
-                    label="Price (USD)"
-                    value={form.priceUSD}
-                    onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                      setForm((f) => ({ ...f, priceUSD: e.target.value }))
-                    }
-                    placeholder="19.99"
-                  />
+
+              <label className={styles.hint} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <input
+                  type="checkbox"
+                  checked={form.sellsDigital}
+                  onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                    setForm((f) => ({ ...f, sellsDigital: e.target.checked }))
+                  }
+                />
+                Sell this image as a digital download
+              </label>
+
+              {form.sellsDigital && (
+                <div className={styles.row}>
+                  <div className={styles.col}>
+                    <TextInput
+                      path="commerce-digital-price"
+                      label="Digital price (USD)"
+                      value={form.digitalPriceUSD}
+                      onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                        setForm((f) => ({ ...f, digitalPriceUSD: e.target.value }))
+                      }
+                      placeholder="19.99"
+                    />
+                  </div>
+                  <div className={styles.col}>
+                    <TextInput
+                      path="commerce-sku"
+                      label="SKU (optional)"
+                      value={form.sku}
+                      onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                        setForm((f) => ({ ...f, sku: e.target.value }))
+                      }
+                      placeholder="Auto-generated"
+                    />
+                  </div>
                 </div>
-                <div className={styles.col}>
-                  <TextInput
-                    path="commerce-sku"
-                    label="SKU (optional)"
-                    value={form.sku}
-                    onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                      setForm((f) => ({ ...f, sku: e.target.value }))
-                    }
-                    placeholder="Auto-generated"
-                  />
-                </div>
-              </div>
+              )}
             </div>
           )}
 
-          {activeTab === 'physical' && (
-            <div className={`${styles.tabPanel} ${styles.sectionDisabled}`}>
+          {activeTab === 'prints' && (
+            <div className={styles.tabPanel}>
               <div className={styles.sectionHead}>
-                <Pill pillStyle="light-gray" size="small">
-                  Physical
-                </Pill>
-                <h5 className={styles.sectionTitle}>Physical prints</h5>
                 <Pill pillStyle="warning" size="small">
-                  Coming soon
+                  Prints
                 </Pill>
+                <h5 className={styles.sectionTitle}>Physical prints (Prodigi)</h5>
               </div>
               <p className={styles.hint}>
-                Sizes &amp; paper will be pulled from your print-on-demand service (e.g. Gelato). One
-                variant is created per option; you set a markup over the print cost. The master file
-                (General tab) is sent as the print file. (Preview only — not yet active.)
+                Each offering set is a paper type with its print sizes and prices, managed in the
+                Medusa admin under Prodigi. Selecting a set creates one variant per size; the master
+                file (General tab) is sent as the print file. Print prices come from the catalog.
               </p>
 
-              <p className={styles.chipGroupLabel}>Sizes</p>
-              <div className={styles.chipRow}>
-                {['8×10', '11×14', '16×20', '24×36'].map((s) => (
-                  <Pill key={s} pillStyle="light" size="small">
-                    {s}
-                  </Pill>
-                ))}
-              </div>
-
-              <p className={styles.chipGroupLabel}>Paper</p>
-              <div className={styles.chipRow}>
-                {['Matte', 'Glossy', 'Fine art', 'Canvas'].map((p) => (
-                  <Pill key={p} pillStyle="light" size="small">
-                    {p}
-                  </Pill>
-                ))}
-              </div>
-
-              <div className={styles.row}>
-                <div className={styles.col}>
-                  <TextInput
-                    path="commerce-pod-provider"
-                    label="Print provider"
-                    value=""
-                    readOnly
-                    placeholder="Gelato"
-                    onChange={() => {}}
-                  />
+              {offeringSets.length === 0 ? (
+                <Banner type="info">
+                  No offering sets defined yet. Create them in the Medusa admin under Prodigi →
+                  Offering sets.
+                </Banner>
+              ) : (
+                <div className={styles.chipRow}>
+                  {offeringSets.map((set) => {
+                    const selected = form.offeringSetIds.includes(set.id);
+                    return (
+                      <Pill
+                        key={set.id}
+                        pillStyle={selected ? 'dark' : 'light'}
+                        onClick={() => toggleOfferingSet(set.id)}
+                      >
+                        {selected ? '✓ ' : ''}
+                        {set.name}
+                        {set.isDefault ? ' (default)' : ''}
+                      </Pill>
+                    );
+                  })}
                 </div>
-                <div className={styles.col}>
-                  <TextInput
-                    path="commerce-pod-markup"
-                    label="Markup over print cost (%)"
-                    value=""
-                    readOnly
-                    placeholder="100"
-                    onChange={() => {}}
-                  />
-                </div>
-              </div>
+              )}
+
+              {form.mode === 'edit' && (
+                <p className={styles.hint}>
+                  Removing a set deletes its print variants from the product; adding one creates
+                  them.
+                </p>
+              )}
             </div>
           )}
 

@@ -45,6 +45,7 @@ import { trustedOriginsArray } from './lib/auth/trustedOrigins';
 import {
   medusaCollectionCreateHandler,
   medusaCollectionsHandler,
+  medusaOfferingSetsHandler,
   medusaProductCreateHandler,
   medusaProductDeleteHandler,
   medusaProductSetStatusHandler,
@@ -142,6 +143,11 @@ export default buildConfig({
       path: '/medusa/sales-channels',
       method: 'get',
       handler: medusaSalesChannelsHandler,
+    },
+    {
+      path: '/medusa/offering-sets',
+      method: 'get',
+      handler: medusaOfferingSetsHandler,
     },
   ],
   kv: redisKVAdapter({
