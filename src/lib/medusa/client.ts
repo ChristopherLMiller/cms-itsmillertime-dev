@@ -561,19 +561,16 @@ async function applyOfferingSet(
   env: MedusaEnv,
   productId: string,
   offeringSetId: string,
-  input: Pick<ProductInput, 'sellsDigital' | 'digitalPriceUSD'>,
+  input: Pick<ProductInput, 'sellsDigital'>,
 ): Promise<void> {
+  // The backend route only accepts offering_set_id + sells_digital (it rejects
+  // any price fields). The digital variant's price is set separately via a
+  // standard variant update after the workflow creates it.
   await adminFetch(env, `/admin/products/${productId}/offering-set`, {
     method: 'POST',
     body: JSON.stringify({
       offering_set_id: offeringSetId,
       sells_digital: input.sellsDigital,
-      ...(input.sellsDigital && input.digitalPriceUSD != null && input.digitalPriceUSD > 0
-        ? {
-            digital_price: input.digitalPriceUSD,
-            digital_price_currency: env.currency,
-          }
-        : {}),
     }),
   });
 }
@@ -705,12 +702,18 @@ export async function createProduct(env: MedusaEnv, input: ProductInput): Promis
     throw new Error(`Product ${product.id} disappeared after creation.`);
   }
 
-  // Apply-created digital variants have no SKU; backfill it for parity with
-  // the digital-only path.
+  // The offering-set workflow creates the digital variant without our SKU or
+  // price (the route rejects price fields), so backfill both via a standard
+  // variant update. Inline digital-only variants already have them.
   if (input.sellsDigital && created.variantId && !created.sku) {
     await adminFetch(env, `/admin/products/${product.id}/variants/${created.variantId}`, {
       method: 'POST',
-      body: JSON.stringify({ sku: input.sku || `GALLERY-IMG-${input.galleryImageId}` }),
+      body: JSON.stringify({
+        sku: input.sku || `GALLERY-IMG-${input.galleryImageId}`,
+        ...(input.digitalPriceUSD != null && input.digitalPriceUSD > 0
+          ? { prices: [{ amount: input.digitalPriceUSD, currency_code: env.currency }] }
+          : {}),
+      }),
     });
     return (await getProduct(env, product.id)) ?? created;
   }
