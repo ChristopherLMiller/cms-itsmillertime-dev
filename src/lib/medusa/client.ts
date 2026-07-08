@@ -144,10 +144,19 @@ export interface ProductInput {
   description?: string;
   /** Public storefront image (watermarked). */
   imageUrl?: string;
-  /** High-res, non-watermarked file the buyer downloads after purchase. */
+  /**
+   * High-res, non-watermarked master file. Used as BOTH the buyer's digital
+   * download and the print file sent to Prodigi.
+   */
   downloadUrl?: string;
   downloadFilename?: string;
-  priceUSD: number;
+  /** Whether to sell a digital-download variant. */
+  sellsDigital: boolean;
+  /** Price of the digital download (required when sellsDigital). */
+  digitalPriceUSD?: number | null;
+  /** Prodigi offering sets to attach; each creates its print variants. */
+  offeringSetIds?: string[];
+  /** Optional SKU for the digital variant. */
   sku?: string;
   status?: 'published' | 'draft';
   /** Medusa collection to group the product under (storefront browsing). */
@@ -173,9 +182,23 @@ export interface MedusaSalesChannel {
   role: 'public' | 'private' | 'other';
 }
 
-/** The product's variant axis. Each format is one variant of the image. */
+/**
+ * Variant option axes, matching the Medusa backend's offering-set workflows.
+ * Print variants are `Paper (set name) x Format (offering label)`; the digital
+ * variant lives at `Paper: "Digital", Format: "Digital Download"`.
+ */
+export const PAPER_OPTION = 'Paper';
 export const FORMAT_OPTION = 'Format';
-export const FORMAT_DIGITAL = 'Digital';
+export const DIGITAL_PAPER = 'Digital';
+export const DIGITAL_FORMAT = 'Digital Download';
+
+/** A Prodigi offering set (paper type) defined in the Medusa backend. */
+export interface MedusaOfferingSet {
+  id: string;
+  name: string;
+  description: string | null;
+  isDefault: boolean;
+}
 
 /** One purchasable variant of a product (e.g. Digital download, Physical print). */
 export interface VariantSummary {
@@ -191,14 +214,16 @@ export interface VariantSummary {
 
 export interface ProductSummary {
   productId: string;
-  /** First/primary (digital) variant id, kept for the single-variant flow. */
+  /** Digital variant id when one exists. */
   variantId: string | null;
   title: string;
   description: string | null;
   status: string;
   thumbnail: string | null;
+  /** Digital download price (print prices come from the offering catalog). */
   priceUSD: number | null;
   sku: string | null;
+  sellsDigital: boolean;
   downloadUrl: string | null;
   downloadFilename: string | null;
   collectionId: string | null;
@@ -206,6 +231,8 @@ export interface ProductSummary {
   salesChannelId: string | null;
   salesChannelName: string | null;
   variants: VariantSummary[];
+  /** Offering sets currently attached to the product. */
+  offeringSets: Array<{ id: string; name: string }>;
 }
 
 interface MedusaPrice {
@@ -252,39 +279,59 @@ function metaString(meta: Record<string, unknown> | null | undefined, key: strin
 }
 
 /**
- * Product-level metadata: the link back to Payload plus the high-res master
- * asset. The master asset is the non-watermarked source that is BOTH delivered
- * for digital purchases AND sent to the print-on-demand service as the print
- * file. It lives at the product level because every format shares it (and a
- * product may be physical-only, with no digital variant to hang it on).
+ * Product-level metadata using the Medusa backend's conventions:
+ * - `print_asset_url` is the file sent to Prodigi as the print master.
+ * - `digital_download_files` is what the buyer downloads after purchase.
+ * - `sells_digital` tells the offering-set workflows to (re)create the
+ *   digital variant when a set is applied.
+ * The same high-res master file backs both print and digital.
  */
 function buildProductMetadata(input: ProductInput): Record<string, unknown> {
   return {
     gallery_image_id: String(input.galleryImageId),
     payload_collection: 'gallery-images',
-    ...(input.downloadUrl ? { master_asset_url: input.downloadUrl } : {}),
-    ...(input.downloadFilename ? { master_asset_filename: input.downloadFilename } : {}),
+    sells_digital: input.sellsDigital,
+    ...(input.downloadUrl
+      ? {
+          print_asset_url: input.downloadUrl,
+          digital_download_files: [
+            {
+              url: input.downloadUrl,
+              ...(input.downloadFilename ? { filename: input.downloadFilename } : {}),
+            },
+          ],
+        }
+      : {}),
   };
 }
 
-/**
- * Variant-level metadata holds fulfillment type only. Physical variants will
- * later add their own keys here (POD provider, size, paper, etc.) without
- * touching the product-level master asset.
- */
+/** Variant metadata the backend's digital fulfillment workflow recognizes. */
 function buildDigitalVariantMetadata(): Record<string, unknown> {
-  return { is_digital: true };
+  return { fulfillment_type: 'digital' };
+}
+
+function optionValue(variant: MedusaVariant, title: string): string | undefined {
+  return variant.options?.find((o) => o.option?.title === title)?.value ?? undefined;
 }
 
 function formatFor(variant: MedusaVariant): string {
-  return variant.options?.[0]?.value ?? variant.title ?? 'Default';
+  const paper = optionValue(variant, PAPER_OPTION);
+  const format = optionValue(variant, FORMAT_OPTION);
+  if (paper && format) {
+    return paper === DIGITAL_PAPER ? format : `${paper} · ${format}`;
+  }
+  return format ?? variant.options?.[0]?.value ?? variant.title ?? 'Default';
 }
 
 function isDigital(variant: MedusaVariant): boolean {
+  const fulfillmentType = variant.metadata?.fulfillment_type;
+  if (typeof fulfillmentType === 'string') {
+    return fulfillmentType === 'digital';
+  }
   if (typeof variant.metadata?.is_digital === 'boolean') {
     return variant.metadata.is_digital;
   }
-  // Fall back to inventory behaviour for variants created before is_digital.
+  // Legacy single-variant products created before fulfillment_type existed.
   return variant.manage_inventory === false;
 }
 
@@ -299,24 +346,47 @@ function summarizeVariant(env: MedusaEnv, variant: MedusaVariant): VariantSummar
   };
 }
 
-function summarize(env: MedusaEnv, product: MedusaProduct): ProductSummary {
+/** First configured digital download file from product metadata, if any. */
+function digitalDownloadFile(
+  meta: Record<string, unknown> | null | undefined,
+): { url: string; filename: string | null } | null {
+  const raw = meta?.digital_download_files;
+  if (!Array.isArray(raw)) return null;
+  const entry = raw.find(
+    (e): e is { url: string; filename?: string } =>
+      !!e && typeof e === 'object' && typeof (e as { url?: unknown }).url === 'string',
+  );
+  if (!entry) return null;
+  return { url: entry.url, filename: typeof entry.filename === 'string' ? entry.filename : null };
+}
+
+function summarize(
+  env: MedusaEnv,
+  product: MedusaProduct,
+  offeringSets: Array<{ id: string; name: string }> = [],
+): ProductSummary {
   const variants = (product.variants ?? []).map((v) => summarizeVariant(env, v));
-  const primary = product.variants?.[0];
-  // Master asset is product-level; `download_*` keys are read for back-compat
-  // with products created before the rename.
+  const digitalVariant = product.variants?.find((v) => isDigital(v));
+  const download = digitalDownloadFile(product.metadata);
+  // Old-key fallbacks (`master_asset_*`, `download_*`) cover products created
+  // before the print_asset_url / digital_download_files rename.
   return {
     productId: product.id,
-    variantId: primary?.id ?? null,
+    variantId: digitalVariant?.id ?? null,
     title: product.title,
     description: product.description ?? null,
     status: product.status,
     thumbnail: product.thumbnail ?? null,
-    priceUSD: priceFor(env, primary),
-    sku: primary?.sku ?? null,
+    priceUSD: priceFor(env, digitalVariant),
+    sku: digitalVariant?.sku ?? null,
+    sellsDigital: product.metadata?.sells_digital === true || !!digitalVariant,
     downloadUrl:
+      download?.url ??
+      metaString(product.metadata, 'print_asset_url') ??
       metaString(product.metadata, 'master_asset_url') ??
       metaString(product.metadata, 'download_url'),
     downloadFilename:
+      download?.filename ??
       metaString(product.metadata, 'master_asset_filename') ??
       metaString(product.metadata, 'download_filename'),
     collectionId: product.collection?.id ?? product.collection_id ?? null,
@@ -324,6 +394,7 @@ function summarize(env: MedusaEnv, product: MedusaProduct): ProductSummary {
     salesChannelId: product.sales_channels?.[0]?.id ?? null,
     salesChannelName: product.sales_channels?.[0]?.name ?? null,
     variants,
+    offeringSets,
   };
 }
 
@@ -366,13 +437,152 @@ export async function listSalesChannels(env: MedusaEnv): Promise<MedusaSalesChan
   }));
 }
 
-/** Create a single-variant digital product in the resolved sales channel. */
+/** List the Prodigi offering sets defined in the Medusa backend. */
+export async function listOfferingSets(env: MedusaEnv): Promise<MedusaOfferingSet[]> {
+  const { offering_sets } = await adminFetch<{
+    offering_sets: Array<{
+      id: string;
+      name: string;
+      description?: string | null;
+      is_default?: boolean;
+    }>;
+  }>(env, '/admin/offering-sets?limit=100');
+
+  return (offering_sets ?? []).map((set) => ({
+    id: set.id,
+    name: set.name,
+    description: set.description ?? null,
+    isDefault: set.is_default === true,
+  }));
+}
+
+/** Offering sets currently attached to a product. */
+export async function getAttachedOfferingSets(
+  env: MedusaEnv,
+  productId: string,
+): Promise<Array<{ id: string; name: string }>> {
+  const { offering_sets } = await adminFetch<{
+    offering_sets: Array<{ id: string; name: string }>;
+  }>(env, `/admin/products/${productId}/offering-set`);
+  return offering_sets ?? [];
+}
+
+/**
+ * Apply an offering set to a product. The backend workflow creates one print
+ * variant per offering (priced from the catalog) and, when `sells_digital`,
+ * a digital variant priced at `digital_price`. Idempotent and additive.
+ */
+async function applyOfferingSet(
+  env: MedusaEnv,
+  productId: string,
+  offeringSetId: string,
+  input: Pick<ProductInput, 'sellsDigital' | 'digitalPriceUSD'>,
+): Promise<void> {
+  await adminFetch(env, `/admin/products/${productId}/offering-set`, {
+    method: 'POST',
+    body: JSON.stringify({
+      offering_set_id: offeringSetId,
+      sells_digital: input.sellsDigital,
+      ...(input.sellsDigital && input.digitalPriceUSD != null && input.digitalPriceUSD > 0
+        ? {
+            digital_price: input.digitalPriceUSD,
+            digital_price_currency: env.currency,
+          }
+        : {}),
+    }),
+  });
+}
+
+/** Detach an offering set from a product (removes that set's print variants). */
+async function removeOfferingSet(
+  env: MedusaEnv,
+  productId: string,
+  offeringSetId: string,
+): Promise<void> {
+  await adminFetch(env, `/admin/products/${productId}/offering-set`, {
+    method: 'DELETE',
+    body: JSON.stringify({ offering_set_id: offeringSetId }),
+  });
+}
+
+function digitalVariantBody(env: MedusaEnv, input: ProductInput): Record<string, unknown> {
+  return {
+    title: DIGITAL_FORMAT,
+    sku: input.sku || `GALLERY-IMG-${input.galleryImageId}`,
+    manage_inventory: false,
+    options: { [PAPER_OPTION]: DIGITAL_PAPER, [FORMAT_OPTION]: DIGITAL_FORMAT },
+    prices:
+      input.digitalPriceUSD != null && input.digitalPriceUSD > 0
+        ? [{ amount: input.digitalPriceUSD, currency_code: env.currency }]
+        : [],
+    metadata: buildDigitalVariantMetadata(),
+  };
+}
+
+interface MedusaOption {
+  id: string;
+  title?: string;
+  values?: Array<{ value?: string }>;
+}
+
+/**
+ * Ensure the Paper/Format options carry the digital values, then create the
+ * digital variant. Used when digital selling is enabled on a product that has
+ * no offering set to piggyback on.
+ */
+async function createDigitalVariant(
+  env: MedusaEnv,
+  productId: string,
+  input: ProductInput,
+): Promise<void> {
+  const { product } = await adminFetch<{ product: { options?: MedusaOption[] } }>(
+    env,
+    `/admin/products/${productId}?fields=id,*options,*options.values`,
+  );
+
+  const ensureOptionValue = async (title: string, value: string) => {
+    const option = product.options?.find((o) => o.title === title);
+    if (!option) {
+      await adminFetch(env, `/admin/products/${productId}/options`, {
+        method: 'POST',
+        body: JSON.stringify({ title, values: [value] }),
+      });
+      return;
+    }
+    const values = (option.values ?? []).map((v) => v.value).filter((v): v is string => !!v);
+    if (!values.includes(value)) {
+      await adminFetch(env, `/admin/products/${productId}/options/${option.id}`, {
+        method: 'POST',
+        body: JSON.stringify({ title, values: [...values, value] }),
+      });
+    }
+  };
+
+  await ensureOptionValue(PAPER_OPTION, DIGITAL_PAPER);
+  await ensureOptionValue(FORMAT_OPTION, DIGITAL_FORMAT);
+
+  await adminFetch(env, `/admin/products/${productId}/variants`, {
+    method: 'POST',
+    body: JSON.stringify(digitalVariantBody(env, input)),
+  });
+}
+
+/**
+ * Create a product using the Medusa backend's photo-product conventions.
+ *
+ * With offering sets: the product is created bare (no options/variants) and
+ * each set application creates the print variants — plus the digital variant
+ * when enabled. Digital-only: the Paper/Format options and digital variant are
+ * created inline.
+ */
 export async function createProduct(env: MedusaEnv, input: ProductInput): Promise<ProductSummary> {
   // undefined -> public channel; null -> no channel (e.g. private image with no
   // private channel configured). A channel-less product is never visible, so we
   // force it to draft to make that explicit.
   const channelId = input.salesChannelId === undefined ? env.salesChannelId : input.salesChannelId;
   const status = channelId ? input.status ?? 'published' : 'draft';
+  const offeringSetIds = input.offeringSetIds ?? [];
+  const digitalOnly = offeringSetIds.length === 0;
 
   const { product } = await adminFetch<{ product: MedusaProduct }>(env, '/admin/products', {
     method: 'POST',
@@ -385,34 +595,52 @@ export async function createProduct(env: MedusaEnv, input: ProductInput): Promis
       ...(input.collectionId ? { collection_id: input.collectionId } : {}),
       shipping_profile_id: env.shippingProfileId,
       sales_channels: channelId ? [{ id: channelId }] : [],
-      // Single "Format" axis: Digital today, print formats added as new values
-      // and variants later (additive, no option migration needed).
-      options: [{ title: FORMAT_OPTION, values: [FORMAT_DIGITAL] }],
       metadata: buildProductMetadata(input),
-      variants: [
-        {
-          title: FORMAT_DIGITAL,
-          sku: input.sku || `GALLERY-IMG-${input.galleryImageId}`,
-          manage_inventory: false,
-          options: { [FORMAT_OPTION]: FORMAT_DIGITAL },
-          prices: [{ amount: input.priceUSD, currency_code: env.currency }],
-          metadata: buildDigitalVariantMetadata(),
-        },
-      ],
+      ...(digitalOnly && input.sellsDigital
+        ? {
+            options: [
+              { title: PAPER_OPTION, values: [DIGITAL_PAPER] },
+              { title: FORMAT_OPTION, values: [DIGITAL_FORMAT] },
+            ],
+            variants: [digitalVariantBody(env, input)],
+          }
+        : {}),
     }),
   });
 
-  return summarize(env, product);
+  for (const setId of offeringSetIds) {
+    await applyOfferingSet(env, product.id, setId, input);
+  }
+
+  const created = await getProduct(env, product.id);
+  if (!created) {
+    throw new Error(`Product ${product.id} disappeared after creation.`);
+  }
+
+  // Apply-created digital variants have no SKU; backfill it for parity with
+  // the digital-only path.
+  if (input.sellsDigital && created.variantId && !created.sku) {
+    await adminFetch(env, `/admin/products/${product.id}/variants/${created.variantId}`, {
+      method: 'POST',
+      body: JSON.stringify({ sku: input.sku || `GALLERY-IMG-${input.galleryImageId}` }),
+    });
+    return (await getProduct(env, product.id)) ?? created;
+  }
+
+  return created;
 }
 
-/** Fetch a product summary (live price/status) by id, or null if it's gone. */
+/** Fetch a product summary (live price/status/sets) by id, or null if it's gone. */
 export async function getProduct(env: MedusaEnv, productId: string): Promise<ProductSummary | null> {
   try {
-    const { product } = await adminFetch<{ product: MedusaProduct }>(
-      env,
-      `/admin/products/${productId}?fields=id,title,description,status,thumbnail,metadata,collection_id,*collection,*sales_channels,*variants,*variants.prices,*variants.options,*variants.metadata`,
-    );
-    return summarize(env, product);
+    const [{ product }, offeringSets] = await Promise.all([
+      adminFetch<{ product: MedusaProduct }>(
+        env,
+        `/admin/products/${productId}?fields=id,title,description,status,thumbnail,metadata,collection_id,*collection,*sales_channels,*variants,*variants.prices,*variants.options,*variants.options.option,*variants.metadata`,
+      ),
+      getAttachedOfferingSets(env, productId).catch(() => []),
+    ]);
+    return summarize(env, product, offeringSets);
   } catch (err) {
     if (err instanceof Error && /-> 404/.test(err.message)) {
       return null;
@@ -422,17 +650,16 @@ export async function getProduct(env: MedusaEnv, productId: string): Promise<Pro
 }
 
 /**
- * Update an existing product's core fields plus its digital variant.
+ * Update a product's core fields, reconcile its offering sets, and sync the
+ * digital variant (price, creation, or removal).
  *
- * Medusa replaces `metadata` wholesale, so we rebuild it each time. Product
- * metadata holds the gallery link + the high-res master asset; the variant
- * holds the `is_digital` marker. When no new master asset is provided, the
- * caller passes the existing one through.
+ * Medusa replaces `metadata` wholesale, so we rebuild it each time. When no
+ * new master asset is provided, the caller passes the existing one through.
  */
 export async function updateProduct(
   env: MedusaEnv,
   productId: string,
-  variantId: string | null,
+  existing: ProductSummary,
   input: ProductInput,
 ): Promise<ProductSummary> {
   await adminFetch(env, `/admin/products/${productId}`, {
@@ -451,14 +678,45 @@ export async function updateProduct(
     }),
   });
 
-  if (variantId) {
-    await adminFetch(env, `/admin/products/${productId}/variants/${variantId}`, {
-      method: 'POST',
-      body: JSON.stringify({
-        sku: input.sku || `GALLERY-IMG-${input.galleryImageId}`,
-        prices: [{ amount: input.priceUSD, currency_code: env.currency }],
-        metadata: buildDigitalVariantMetadata(),
-      }),
+  // Reconcile offering sets when the caller provided a selection.
+  if (input.offeringSetIds) {
+    const currentIds = new Set(existing.offeringSets.map((s) => s.id));
+    const nextIds = new Set(input.offeringSetIds);
+
+    for (const setId of input.offeringSetIds) {
+      if (!currentIds.has(setId)) {
+        await applyOfferingSet(env, productId, setId, input);
+      }
+    }
+    for (const set of existing.offeringSets) {
+      if (!nextIds.has(set.id)) {
+        await removeOfferingSet(env, productId, set.id);
+      }
+    }
+  }
+
+  // Sync the digital variant with the (possibly changed) selling choice.
+  const refreshed = await getProduct(env, productId);
+  const digitalVariantId = refreshed?.variantId ?? null;
+
+  if (input.sellsDigital) {
+    if (digitalVariantId) {
+      await adminFetch(env, `/admin/products/${productId}/variants/${digitalVariantId}`, {
+        method: 'POST',
+        body: JSON.stringify({
+          ...(input.sku ? { sku: input.sku } : {}),
+          ...(input.digitalPriceUSD != null && input.digitalPriceUSD > 0
+            ? { prices: [{ amount: input.digitalPriceUSD, currency_code: env.currency }] }
+            : {}),
+          metadata: buildDigitalVariantMetadata(),
+        }),
+      });
+    } else {
+      await createDigitalVariant(env, productId, input);
+    }
+  } else if (digitalVariantId) {
+    await adminFetch(env, `/admin/products/${productId}/variants/${digitalVariantId}`, {
+      method: 'DELETE',
     });
   }
 
