@@ -46,6 +46,8 @@ interface ProductSummary {
   collectionTitle: string | null;
   salesChannelId: string | null;
   salesChannelName: string | null;
+  shippingProfileId: string | null;
+  shippingProfileName: string | null;
   variants: VariantSummary[];
   offeringSets: Array<{ id: string; name: string }>;
 }
@@ -66,6 +68,17 @@ interface MedusaSalesChannel {
   id: string;
   name: string;
   role: 'public' | 'private' | 'other';
+}
+
+interface MedusaShippingProfile {
+  id: string;
+  name: string;
+  type: string;
+  isDefault: boolean;
+}
+
+function defaultShippingProfileId(profiles: MedusaShippingProfile[]): string {
+  return (profiles.find((p) => p.isDefault) ?? profiles[0])?.id ?? '';
 }
 
 type GalleryVisibility = 'ALL' | 'AUTHENTICATED' | 'PRIVILEGED';
@@ -115,6 +128,7 @@ interface FormState {
   sku: string;
   collectionId: string;
   salesChannelId: string;
+  shippingProfileId: string;
   imageSource: ImageSource;
   imageFile: File | null;
   downloadFile: File | null;
@@ -130,6 +144,7 @@ const EMPTY_FORM: FormState = {
   sku: '',
   collectionId: '',
   salesChannelId: '',
+  shippingProfileId: '',
   imageSource: 'gallery',
   imageFile: null,
   downloadFile: null,
@@ -231,6 +246,7 @@ export const StorePanel: React.FC = () => {
   const [adminUrl, setAdminUrl] = useState<string | null>(null);
   const [collections, setCollections] = useState<MedusaCollection[]>([]);
   const [salesChannels, setSalesChannels] = useState<MedusaSalesChannel[]>([]);
+  const [shippingProfiles, setShippingProfiles] = useState<MedusaShippingProfile[]>([]);
   const [offeringSets, setOfferingSets] = useState<MedusaOfferingSet[]>([]);
   const [newCollectionTitle, setNewCollectionTitle] = useState('');
   const [collectionError, setCollectionError] = useState<string | null>(null);
@@ -287,12 +303,14 @@ export const StorePanel: React.FC = () => {
       fetch('/api/medusa/collections').then((r) => r.json()),
       fetch('/api/medusa/sales-channels').then((r) => r.json()),
       fetch('/api/medusa/offering-sets').then((r) => r.json()),
+      fetch('/api/medusa/shipping-profiles').then((r) => r.json()),
     ])
-      .then(([collectionsRes, channelsRes, setsRes]) => {
+      .then(([collectionsRes, channelsRes, setsRes, profilesRes]) => {
         if (!active) return;
         setCollections((collectionsRes as { collections?: MedusaCollection[] }).collections ?? []);
         setSalesChannels((channelsRes as { channels?: MedusaSalesChannel[] }).channels ?? []);
         setOfferingSets((setsRes as { offeringSets?: MedusaOfferingSet[] }).offeringSets ?? []);
+        setShippingProfiles((profilesRes as { profiles?: MedusaShippingProfile[] }).profiles ?? []);
       })
       .catch(() => {});
     return () => {
@@ -314,6 +332,16 @@ export const StorePanel: React.FC = () => {
     });
   }, [salesChannels, galleryVisibility]);
 
+  // Default shipping profile to the store's default once profiles load.
+  useEffect(() => {
+    if (shippingProfiles.length === 0) return;
+    setForm((f) =>
+      f.shippingProfileId === ''
+        ? { ...f, shippingProfileId: defaultShippingProfileId(shippingProfiles) }
+        : f,
+    );
+  }, [shippingProfiles]);
+
   const openCreate = () => {
     setFormError(null);
     setCollectionError(null);
@@ -325,6 +353,7 @@ export const StorePanel: React.FC = () => {
       title: (alt ?? '').trim(),
       offeringSetIds: offeringSets.filter((s) => s.isDefault).map((s) => s.id),
       salesChannelId: defaultSalesChannelId(galleryVisibility, salesChannels),
+      shippingProfileId: defaultShippingProfileId(shippingProfiles),
     });
     openModal(DRAWER_SLUG);
   };
@@ -347,6 +376,8 @@ export const StorePanel: React.FC = () => {
       salesChannelId:
         product.salesChannelId ??
         defaultSalesChannelId(galleryVisibility, salesChannels),
+      shippingProfileId:
+        product.shippingProfileId ?? defaultShippingProfileId(shippingProfiles),
       imageSource: 'keep',
       imageFile: null,
       downloadFile: null,
@@ -450,6 +481,7 @@ export const StorePanel: React.FC = () => {
         sku: form.sku.trim() || undefined,
         collectionId: form.collectionId,
         salesChannelId: form.salesChannelId,
+        shippingProfileId: form.shippingProfileId,
         imageSource: form.imageSource,
       };
 
@@ -641,6 +673,8 @@ export const StorePanel: React.FC = () => {
                 <dd className={styles.dd}>{product.collectionTitle || '—'}</dd>
                 <dt className={styles.dt}>Sales channel</dt>
                 <dd className={styles.dd}>{product.salesChannelName || '— None (hidden) —'}</dd>
+                <dt className={styles.dt}>Shipping profile</dt>
+                <dd className={styles.dd}>{product.shippingProfileName || '—'}</dd>
                 <dt className={styles.dt}>Product ID</dt>
                 <dd className={styles.dd}>{product.productId}</dd>
                 <dt className={styles.dt}>Variant ID</dt>
@@ -735,6 +769,32 @@ export const StorePanel: React.FC = () => {
                   publicly or privately regardless.
                 </p>
               </div>
+
+              {shippingProfiles.length > 0 && (
+                <div>
+                  <p className={styles.dt} style={{ marginBottom: '0.4rem' }}>
+                    Shipping profile
+                  </p>
+                  <select
+                    className={styles.select}
+                    value={form.shippingProfileId}
+                    onChange={(e: ChangeEvent<HTMLSelectElement>) =>
+                      setForm((f) => ({ ...f, shippingProfileId: e.target.value }))
+                    }
+                  >
+                    {shippingProfiles.map((profile) => (
+                      <option key={profile.id} value={profile.id}>
+                        {profile.name}
+                        {profile.isDefault ? ' (default)' : ''}
+                      </option>
+                    ))}
+                  </select>
+                  <p className={styles.hint}>
+                    Defaults to the store&apos;s default profile. Choose a digital profile for
+                    download-only listings if you keep them separate.
+                  </p>
+                </div>
+              )}
 
               <div className="field-type relationship">
                 <FieldLabel label="Collection" />

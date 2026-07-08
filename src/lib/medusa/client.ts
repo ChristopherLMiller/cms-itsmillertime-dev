@@ -251,6 +251,12 @@ export interface ProductInput {
    * `null` means "no channel" (kept off every storefront, saved as draft).
    */
   salesChannelId?: string | null;
+  /**
+   * Shipping profile for the product. `undefined` resolves to Medusa's default
+   * profile server-side; pass an explicit id to override (e.g. a digital
+   * profile). Prints and digital both default to the store's default profile.
+   */
+  shippingProfileId?: string | null;
 }
 
 /** A Medusa product collection (used to group products on the storefront). */
@@ -265,6 +271,15 @@ export interface MedusaSalesChannel {
   name: string;
   /** Matches MEDUSA_SALES_CHANNEL_ID / MEDUSA_PRIVATE_SALES_CHANNEL_ID when set. */
   role: 'public' | 'private' | 'other';
+}
+
+/** A Medusa shipping profile, for the Store panel's profile selector. */
+export interface MedusaShippingProfile {
+  id: string;
+  name: string;
+  /** Medusa profile type; the store's default profile is `"default"`. */
+  type: string;
+  isDefault: boolean;
 }
 
 /**
@@ -315,6 +330,8 @@ export interface ProductSummary {
   collectionTitle: string | null;
   salesChannelId: string | null;
   salesChannelName: string | null;
+  shippingProfileId: string | null;
+  shippingProfileName: string | null;
   variants: VariantSummary[];
   /** Offering sets currently attached to the product. */
   offeringSets: Array<{ id: string; name: string }>;
@@ -351,6 +368,8 @@ interface MedusaProduct {
   collection_id?: string | null;
   collection?: { id: string; title: string } | null;
   sales_channels?: Array<{ id: string; name?: string }>;
+  shipping_profile_id?: string | null;
+  shipping_profile?: { id: string; name?: string | null } | null;
 }
 
 function priceFor(env: MedusaEnv, variant: MedusaVariant | undefined): number | null {
@@ -478,6 +497,8 @@ function summarize(
     collectionTitle: product.collection?.title ?? null,
     salesChannelId: product.sales_channels?.[0]?.id ?? null,
     salesChannelName: product.sales_channels?.[0]?.name ?? null,
+    shippingProfileId: product.shipping_profile?.id ?? product.shipping_profile_id ?? null,
+    shippingProfileName: product.shipping_profile?.name ?? null,
     variants,
     offeringSets,
   };
@@ -520,6 +541,30 @@ export async function listSalesChannels(env: MedusaEnv): Promise<MedusaSalesChan
           ? 'private'
           : 'other',
   }));
+}
+
+/** List shipping profiles, flagging the store's default profile. */
+export async function listShippingProfiles(env: MedusaEnv): Promise<MedusaShippingProfile[]> {
+  const { shipping_profiles } = await adminFetch<{
+    shipping_profiles: Array<{ id: string; name?: string; type?: string }>;
+  }>(env, '/admin/shipping-profiles?fields=id,name,type&limit=100');
+
+  return (shipping_profiles ?? []).map((profile) => ({
+    id: profile.id,
+    name: profile.name ?? profile.id,
+    type: profile.type ?? '',
+    isDefault: profile.type === 'default',
+  }));
+}
+
+/**
+ * Resolve the store's default shipping profile id (type `"default"`), falling
+ * back to the first profile. Used when a product is created without an explicit
+ * profile so it lands on the default rather than a digital-only profile.
+ */
+async function resolveDefaultShippingProfileId(env: MedusaEnv): Promise<string | undefined> {
+  const profiles = await listShippingProfiles(env);
+  return (profiles.find((p) => p.isDefault) ?? profiles[0])?.id;
 }
 
 /** List the Prodigi offering sets defined in the Medusa backend. */
@@ -671,6 +716,11 @@ export async function createProduct(env: MedusaEnv, input: ProductInput): Promis
   const offeringSetIds = input.offeringSetIds ?? [];
   const digitalOnly = offeringSetIds.length === 0;
 
+  // Default to the store's default shipping profile; only use an explicit
+  // profile (e.g. digital) when the caller passes one.
+  const shippingProfileId =
+    input.shippingProfileId ?? (await resolveDefaultShippingProfileId(env));
+
   const { product } = await adminFetch<{ product: MedusaProduct }>(env, '/admin/products', {
     method: 'POST',
     body: JSON.stringify({
@@ -680,7 +730,7 @@ export async function createProduct(env: MedusaEnv, input: ProductInput): Promis
       thumbnail: input.imageUrl,
       images: input.imageUrl ? [{ url: input.imageUrl }] : undefined,
       ...(input.collectionId ? { collection_id: input.collectionId } : {}),
-      shipping_profile_id: env.shippingProfileId,
+      ...(shippingProfileId ? { shipping_profile_id: shippingProfileId } : {}),
       sales_channels: channelId ? [{ id: channelId }] : [],
       metadata: buildProductMetadata(input),
       // Medusa requires at least one option at creation time (a bare product
@@ -726,7 +776,7 @@ export async function getProduct(env: MedusaEnv, productId: string): Promise<Pro
     const [{ product }, offeringSets] = await Promise.all([
       adminFetch<{ product: MedusaProduct }>(
         env,
-        `/admin/products/${productId}?fields=id,title,description,status,thumbnail,metadata,collection_id,*collection,*sales_channels,*variants,*variants.prices,*variants.options,*variants.options.option,*variants.metadata`,
+        `/admin/products/${productId}?fields=id,title,description,status,thumbnail,metadata,collection_id,shipping_profile_id,*collection,*sales_channels,*shipping_profile,*variants,*variants.prices,*variants.options,*variants.options.option,*variants.metadata`,
       ),
       // Best-effort: attached offering sets are display-only, so a failure here
       // must not break create/update. But log it — a hang/timeout on this custom
@@ -770,6 +820,7 @@ export async function updateProduct(
       ...(input.salesChannelId !== undefined
         ? { sales_channels: input.salesChannelId ? [{ id: input.salesChannelId }] : [] }
         : {}),
+      ...(input.shippingProfileId ? { shipping_profile_id: input.shippingProfileId } : {}),
       ...(input.imageUrl
         ? { thumbnail: input.imageUrl, images: [{ url: input.imageUrl }] }
         : {}),

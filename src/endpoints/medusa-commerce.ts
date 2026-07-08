@@ -10,6 +10,7 @@ import {
   listCollections,
   listOfferingSets,
   listSalesChannels,
+  listShippingProfiles,
   setProductStatus,
   updateProduct,
   uploadImageBuffer,
@@ -70,6 +71,16 @@ function salesChannelFromBody(
   const raw = body.salesChannelId;
   if (raw === '' || raw === null) return null;
   return typeof raw === 'string' && raw.trim() ? raw.trim() : null;
+}
+
+/**
+ * Shipping profile from the Store panel form. A non-empty value overrides;
+ * anything else returns `undefined` so the client resolves the store's default
+ * profile.
+ */
+function shippingProfileFromBody(body: Record<string, unknown>): string | undefined {
+  const raw = body.shippingProfileId;
+  return typeof raw === 'string' && raw.trim() ? raw.trim() : undefined;
 }
 
 async function requireAdmin(req: PayloadRequest): Promise<boolean> {
@@ -376,6 +387,7 @@ export async function medusaProductCreateHandler(req: PayloadRequest): Promise<R
       downloadFilename: download?.filename,
       collectionId: str(body.collectionId) ?? null,
       salesChannelId: salesChannelFromBody(body, env, image),
+      shippingProfileId: shippingProfileFromBody(body),
       status: 'published',
     });
     await persistPointer(req, id, product.productId);
@@ -448,6 +460,7 @@ export async function medusaProductUpdateHandler(req: PayloadRequest): Promise<R
       downloadFilename: download?.filename ?? existing.downloadFilename ?? undefined,
       collectionId: 'collectionId' in body ? str(body.collectionId) ?? null : undefined,
       salesChannelId: salesChannelFromBody(body, env, image),
+      shippingProfileId: shippingProfileFromBody(body),
     });
     return Response.json({ ok: true, product });
   } catch (err) {
@@ -587,5 +600,23 @@ export async function medusaSalesChannelsHandler(req: PayloadRequest): Promise<R
     return Response.json({ channels });
   } catch (err) {
     return logAndFail('sales-channels (list)', err);
+  }
+}
+
+// ---------------------------------------------------------------------------
+// GET /api/medusa/shipping-profiles  -> [{ id, name, type, isDefault }]
+// ---------------------------------------------------------------------------
+export async function medusaShippingProfilesHandler(req: PayloadRequest): Promise<Response> {
+  if (!(await requireAdmin(req))) {
+    return Response.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+  if (!isMedusaConfigured()) {
+    return Response.json({ profiles: [] });
+  }
+  try {
+    const profiles = await listShippingProfiles(getMedusaEnv());
+    return Response.json({ profiles });
+  } catch (err) {
+    return logAndFail('shipping-profiles (list)', err);
   }
 }
