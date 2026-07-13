@@ -1,4 +1,4 @@
-import { Redis } from '@upstash/redis';
+import { Redis } from 'ioredis';
 
 /** Single source of truth for the keys the www frontend reads. */
 export const cacheKeys = {
@@ -10,13 +10,12 @@ export const cacheKeys = {
 let redis: Redis | null = null;
 
 function getRedis(): Redis | null {
-  const url = process.env.UPSTASH_REDIS_REST_URL;
-  const token = process.env.UPSTASH_REDIS_REST_TOKEN;
-  if (!url || !token) {
-    console.warn('[cache] Upstash not configured; skipping cache invalidation');
+  const url = process.env.REDIS_URL;
+  if (!url) {
+    console.warn('[cache] REDIS_URL not configured; skipping cache invalidation');
     return null;
   }
-  if (!redis) redis = new Redis({ url, token });
+  if (!redis) redis = new Redis(url);
   return redis;
 }
 

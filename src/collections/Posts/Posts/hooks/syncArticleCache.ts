@@ -2,7 +2,7 @@ import { cacheDel, cacheKeys } from '@/lib/cache';
 import type { CollectionAfterChangeHook, CollectionAfterDeleteHook } from 'payload';
 
 /**
- * Invalidate the Upstash article cache on publish/unpublish/delete so the next
+ * Invalidate the article cache on publish/unpublish/delete so the next
  * www request misses and repopulates fresh from the CMS.
  */
 export const syncArticleCache: CollectionAfterChangeHook = async ({ doc, previousDoc }) => {
