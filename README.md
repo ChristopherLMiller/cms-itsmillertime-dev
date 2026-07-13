@@ -52,7 +52,7 @@ The headless CMS powering [itsmillertime.dev](https://www.itsmillertime.dev), bu
 - **EXIF Extraction** -- background job queue that parses EXIF data from uploaded images using ExifReader
 - **BlurHash Generation** -- generates placeholder blurhash strings for images
 - **Word Count** -- automatic word count tracking on posts
-- **Article cache sync** -- on publish, writes the full article to Upstash at `payload:article:{id}` for the www frontend
+- **Article cache sync** -- on publish/unpublish/delete, invalidates `payload:article:{id}` in Redis so the www frontend repopulates from the CMS
 - **Layout cache sync** -- on save, writes `site-meta` and `site-navigation` globals to `payload:layout:site-meta` and `payload:layout:site-navigation`
 - **Slug Field** -- auto-generated URL slugs from titles
 - **Health Endpoint** -- `GET /api/health` returns service and database status
@@ -82,12 +82,8 @@ DATABASE_URI=postgresql://user:password@localhost:5432/payload
 PAYLOAD_SECRET=your-secret-here
 NEXT_PUBLIC_SERVER_URL=http://localhost:3000
 
-# Redis
+# Redis (Payload KV + www frontend cache invalidation)
 REDIS_URL=redis://localhost:6379
-
-# Upstash (shared with www — article cache invalidation on publish)
-UPSTASH_REDIS_REST_URL=
-UPSTASH_REDIS_REST_TOKEN=
 
 # Cloudflare R2
 CLOUDFLARE_BUCKET=your-bucket
