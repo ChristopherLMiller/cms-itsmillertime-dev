@@ -7,7 +7,7 @@ The headless CMS powering [itsmillertime.dev](https://www.itsmillertime.dev), bu
 - **CMS**: Payload CMS 3.75
 - **Framework**: Next.js 16 (App Router)
 - **Database**: PostgreSQL (via `@payloadcms/db-postgres`)
-- **Cache / KV**: Redis (via `@payloadcms/kv-redis`)
+- **KV**: Redis (via `@payloadcms/kv-redis`) for BGG / Last.fm API route caching
 - **Object Storage**: Cloudflare R2 (via `@payloadcms/storage-s3`)
 - **Email**: Resend
 - **Error Tracking**: Sentry
@@ -52,8 +52,6 @@ The headless CMS powering [itsmillertime.dev](https://www.itsmillertime.dev), bu
 - **EXIF Extraction** -- background job queue that parses EXIF data from uploaded images using ExifReader
 - **BlurHash Generation** -- generates placeholder blurhash strings for images
 - **Word Count** -- automatic word count tracking on posts
-- **Article cache sync** -- on publish/unpublish/delete, invalidates `payload:article:{id}` in Redis so the www frontend repopulates from the CMS
-- **Layout cache sync** -- on save, writes `site-meta` and `site-navigation` globals to `payload:layout:site-meta` and `payload:layout:site-navigation`
 - **Slug Field** -- auto-generated URL slugs from titles
 - **Health Endpoint** -- `GET /api/health` returns service and database status
 - **Contact Form** -- `POST /api/contact-form` queues submissions on the `email` job queue; `sendContactFormEmail` renders `emails/contact-form.tsx` via React Email and sends with Resend (requires `CONTACT_EMAIL` and `RESEND_API_KEY`)
@@ -82,7 +80,7 @@ DATABASE_URI=postgresql://user:password@localhost:5432/payload
 PAYLOAD_SECRET=your-secret-here
 NEXT_PUBLIC_SERVER_URL=http://localhost:3000
 
-# Redis (Payload KV + www frontend cache invalidation)
+# Redis (Payload KV — BGG / Last.fm route cache)
 REDIS_URL=redis://localhost:6379
 
 # Cloudflare R2

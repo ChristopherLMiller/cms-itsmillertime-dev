@@ -13,7 +13,6 @@ import {
 } from '@payloadcms/plugin-seo/fields';
 import { lexicalEditor } from '@payloadcms/richtext-lexical';
 import { CollectionConfig } from 'payload';
-import { removeArticleCacheOnDelete, syncArticleCache } from './hooks/syncArticleCache';
 import {
   removePostFromRelatedModelsOnDelete,
   syncRelatedModelsOnPostChange,
@@ -235,7 +234,7 @@ export const Posts: CollectionConfig<'posts'> = {
     maxPerDoc: 5,
   },
   hooks: {
-    afterChange: [syncArticleCache, syncRelatedModelsOnPostChange],
-    afterDelete: [removeArticleCacheOnDelete, removePostFromRelatedModelsOnDelete],
+    afterChange: [syncRelatedModelsOnPostChange],
+    afterDelete: [removePostFromRelatedModelsOnDelete],
   },
 };

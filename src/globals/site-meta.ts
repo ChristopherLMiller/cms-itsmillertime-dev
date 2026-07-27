@@ -2,7 +2,6 @@ import { RBAC } from '@/access/RBAC';
 import { allowAll } from '@/access/methods/allowAll';
 import { allowedRoles } from '@/access/methods/allowedRoles';
 import { Groups } from '@/collections/shared/groups';
-import { syncSiteMetaCache } from '@/globals/hooks/syncSiteMetaCache';
 import { GlobalConfig } from 'payload';
 
 export const SiteMeta: GlobalConfig = {
@@ -41,7 +40,4 @@ export const SiteMeta: GlobalConfig = {
       ],
     },
   ],
-  hooks: {
-    afterChange: [syncSiteMetaCache],
-  },
 };
