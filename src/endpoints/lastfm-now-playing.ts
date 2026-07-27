@@ -1,28 +1,34 @@
-import { getPayload } from 'payload';
-import config from '@payload-config';
-import { NextRequest, NextResponse } from 'next/server';
 import { getTrustedOrigins } from '@/lib/auth/trustedOrigins';
 import { parseRecentTracksPayload, type NowPlayingResponse } from '@/lib/lastfm/parseRecentTracks';
+import type { PayloadRequest } from 'payload';
+import { headersWithCors } from 'payload';
+
+/**
+ * Public Last.fm now-playing proxy with Redis KV cache.
+ *   GET /api/lastfm/now-playing
+ *
+ * CORS: uses Payload `headersWithCors`, then upgrades Allow-Origin when the
+ * request Origin is a trusted / *.itsmillertime.dev preview host.
+ */
 
 const CACHE_VERSION = 'v1';
-/** Min time between upstream Last.fm calls per deploy (rate limit friendly). */
 const FRESH_MS = 60 * 1000;
+const CACHE_KEY = `payload:lastfm:${CACHE_VERSION}:now-playing`;
 
 type CacheEntry = {
   data: NowPlayingResponse;
   fetchedAt: number;
 };
 
-const CACHE_KEY = `payload:lastfm:${CACHE_VERSION}:now-playing`;
-
 function normalizeOrigin(o: string): string {
   return o.replace(/\/$/, '');
 }
 
-function corsOriginFor(req: NextRequest): string | null {
+function corsOriginFor(req: PayloadRequest): string | null {
   const origin = req.headers.get('origin');
   if (!origin) return null;
-  const allowed = getTrustedOrigins(req);
+  // PayloadRequest is Request-like; trustedOrigins only needs headers/url.
+  const allowed = getTrustedOrigins(req as unknown as Request);
   const n = normalizeOrigin(origin);
   for (const a of allowed) {
     if (normalizeOrigin(a) === n) return origin;
@@ -30,38 +36,31 @@ function corsOriginFor(req: NextRequest): string | null {
   return null;
 }
 
+function applyCors(req: PayloadRequest, headers: Headers): Headers {
+  const withPayload = headersWithCors({ headers, req });
+  const cors = corsOriginFor(req);
+  if (cors) {
+    withPayload.set('Access-Control-Allow-Origin', cors);
+    withPayload.set('Vary', 'Origin');
+  }
+  return withPayload;
+}
+
 function jsonWithCors(
-  req: NextRequest,
+  req: PayloadRequest,
   data: NowPlayingResponse,
   status: number,
   extraHeaders?: Record<string, string>,
-): NextResponse {
-  const cors = corsOriginFor(req);
-  const headers = new Headers(extraHeaders);
-  if (cors) {
-    headers.set('Access-Control-Allow-Origin', cors);
-    headers.set('Vary', 'Origin');
-  }
-  return NextResponse.json(data, { status, headers });
+): Response {
+  return Response.json(data, {
+    status,
+    headers: applyCors(req, new Headers(extraHeaders)),
+  });
 }
 
-export async function OPTIONS(req: NextRequest) {
-  const cors = corsOriginFor(req);
-  const headers = new Headers();
-  if (cors) {
-    headers.set('Access-Control-Allow-Origin', cors);
-    headers.set('Vary', 'Origin');
-  }
-  headers.set('Access-Control-Allow-Methods', 'GET, OPTIONS');
-  headers.set('Access-Control-Allow-Headers', 'Content-Type');
-  headers.set('Access-Control-Max-Age', '86400');
-  return new NextResponse(null, { status: 204, headers });
-}
-
-export async function GET(req: NextRequest) {
+export async function lastfmNowPlayingHandler(req: PayloadRequest): Promise<Response> {
   const apiKey = process.env.LASTFM_API_KEY;
   const username = process.env.LASTFM_USERNAME;
-
   const empty: NowPlayingResponse = { isPlaying: false, track: null };
 
   if (!apiKey?.trim() || !username?.trim()) {
@@ -69,10 +68,8 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    const payload = await getPayload({ config });
-    const kv = payload.kv;
+    const kv = req.payload.kv;
     const now = Date.now();
-
     const cached = (await kv.get(CACHE_KEY)) as CacheEntry | null;
 
     if (cached && now - cached.fetchedAt < FRESH_MS) {
@@ -89,10 +86,7 @@ export async function GET(req: NextRequest) {
     url.searchParams.set('format', 'json');
     url.searchParams.set('limit', '1');
 
-    const res = await fetch(url.toString(), {
-      method: 'GET',
-      next: { revalidate: 0 },
-    });
+    const res = await fetch(url.toString(), { method: 'GET' });
 
     if (!res.ok) {
       if (cached) {
@@ -114,7 +108,7 @@ export async function GET(req: NextRequest) {
       'X-Cache-State': 'miss',
     });
   } catch (error) {
-    console.error('Last.fm now-playing route error:', error);
+    console.error('Last.fm now-playing endpoint error:', error);
     return jsonWithCors(req, empty, 500);
   }
 }

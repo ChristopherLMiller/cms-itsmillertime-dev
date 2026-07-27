@@ -32,16 +32,16 @@ import { defaultLexical } from './fields/defaultLexical';
 import { SiteMeta } from './globals/site-meta';
 import { SiteNavigation } from './globals/site-navigation';
 import { plugins } from './plugins';
-import ExifReader from 'exifreader';
-import { render } from '@react-email/render';
-import React from 'react';
-import { ContactFormEmail } from '../emails/contact-form';
-import { safeEmailSubjectLine } from './utilities/sanitizeContactForm';
-import { ResetPasswordEmail } from '../emails/reset-password';
-import { VerifyAccountEmail } from '../emails/verify-account';
+import { bggCollectionHandler } from './endpoints/bgg-collection';
+import {
+  clockifyProjectsHandler,
+  clockifyTimerStartHandler,
+  clockifyTimerStatusHandler,
+  clockifyTimerStopHandler,
+} from './endpoints/clockify-timer';
 import { contactFormHandler } from './endpoints/contact-form';
 import { galleryImageTrackingHandler } from './endpoints/gallery-image-tracking';
-import { trustedOriginsArray } from './lib/auth/trustedOrigins';
+import { lastfmNowPlayingHandler } from './endpoints/lastfm-now-playing';
 import {
   medusaCollectionCreateHandler,
   medusaCollectionsHandler,
@@ -54,6 +54,14 @@ import {
   medusaSalesChannelsHandler,
   medusaShippingProfilesHandler,
 } from './endpoints/medusa-commerce';
+import ExifReader from 'exifreader';
+import { render } from '@react-email/render';
+import React from 'react';
+import { ContactFormEmail } from '../emails/contact-form';
+import { safeEmailSubjectLine } from './utilities/sanitizeContactForm';
+import { ResetPasswordEmail } from '../emails/reset-password';
+import { VerifyAccountEmail } from '../emails/verify-account';
+import { trustedOriginsArray } from './lib/auth/trustedOrigins';
 
 const filename = fileURLToPath(import.meta.url);
 const dirname = path.dirname(filename);
@@ -154,6 +162,36 @@ export default buildConfig({
       path: '/medusa/shipping-profiles',
       method: 'get',
       handler: medusaShippingProfilesHandler,
+    },
+    {
+      path: '/clockify/projects',
+      method: 'get',
+      handler: clockifyProjectsHandler,
+    },
+    {
+      path: '/clockify/timer',
+      method: 'get',
+      handler: clockifyTimerStatusHandler,
+    },
+    {
+      path: '/clockify/timer/start',
+      method: 'post',
+      handler: clockifyTimerStartHandler,
+    },
+    {
+      path: '/clockify/timer/stop',
+      method: 'post',
+      handler: clockifyTimerStopHandler,
+    },
+    {
+      path: '/bgg/collection',
+      method: 'get',
+      handler: bggCollectionHandler,
+    },
+    {
+      path: '/lastfm/now-playing',
+      method: 'get',
+      handler: lastfmNowPlayingHandler,
     },
   ],
   kv: redisKVAdapter({
