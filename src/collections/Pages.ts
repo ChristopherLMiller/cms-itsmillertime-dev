@@ -173,7 +173,8 @@ export const Pages: CollectionConfig<'pages'> = {
   versions: {
     drafts: {
       autosave: {
-        interval: 100,
+        // Keep in sync with Posts — 100ms races keystrokes and overwrites typed text.
+        interval: 2000,
       },
       schedulePublish: true,
     },

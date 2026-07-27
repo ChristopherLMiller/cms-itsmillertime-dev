@@ -13,6 +13,10 @@ import {
 } from '@payloadcms/plugin-seo/fields';
 import { lexicalEditor } from '@payloadcms/richtext-lexical';
 import { CollectionConfig } from 'payload';
+import {
+  removeModelFromRelatedPostsOnDelete,
+  syncRelatedPostsOnModelChange,
+} from './hooks/syncRelatedPosts';
 
 export const Models: CollectionConfig<'models'> = {
   slug: 'models',
@@ -62,6 +66,8 @@ export const Models: CollectionConfig<'models'> = {
         }
       },
     ],
+    afterChange: [syncRelatedPostsOnModelChange],
+    afterDelete: [removeModelFromRelatedPostsOnDelete],
   },
   fields: [
     {
@@ -190,6 +196,9 @@ export const Models: CollectionConfig<'models'> = {
           type: 'relationship',
           hasMany: true,
           relationTo: 'posts',
+          admin: {
+            description: 'Link articles from this model. Also editable from the article.',
+          },
         },
         {
           name: 'relatedModels',
