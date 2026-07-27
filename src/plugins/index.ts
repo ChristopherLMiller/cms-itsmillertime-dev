@@ -2,10 +2,12 @@ import { generateDescription } from '@/utilities/generateDescription';
 import { generateImage } from '@/utilities/generateImage';
 import { generateTitle } from '@/utilities/generateTitle';
 import { generateURL } from '@/utilities/generateURL';
+import { navRoutesExtension } from '@/endpoints/openapi-docs';
 import { searchPlugin } from '@payloadcms/plugin-search';
 import { sentryPlugin } from '@payloadcms/plugin-sentry';
 import { seoPlugin } from '@payloadcms/plugin-seo';
 import { s3Storage } from '@payloadcms/storage-s3';
+import { openapi, scalar } from '@seshuk/payload-plugin-openapi';
 import * as Sentry from '@sentry/nextjs';
 import { mcpPlugin } from './mcp';
 import { payloadSidebar } from 'payload-sidebar-plugin';
@@ -19,6 +21,26 @@ import { payloadPluginAndroidUpload } from 'payload-plugin-android-upload';
 export const plugins: Plugin[] = [
   ...betterAuthPlugin(),
   mcpPlugin(),
+  openapi({
+    metadata: {
+      title: 'itsmillertime CMS API',
+      version: '1.0.0',
+      description:
+        'REST API for the itsmillertime.dev Payload CMS — collections, globals, auth, and custom integrations.',
+    },
+    openapiVersion: '3.1',
+    interactiveAuth: true,
+    extensions: [navRoutesExtension],
+    filters: {
+      includeJobs: false,
+      includeSystem: false,
+    },
+  }),
+  scalar({
+    configuration: {
+      hideDownloadButton: false,
+    },
+  }),
   seoPlugin({
     generateTitle: generateTitle,
     generateURL: generateURL,
@@ -120,6 +142,13 @@ export const plugins: Plugin[] = [
         group: Groups.misc,
         icon: 'chart-line',
         external: true,
+      },
+      {
+        label: 'API Docs',
+        href: '/api/docs',
+        group: Groups.misc,
+        icon: 'book-open',
+        external: false,
       },
       {
         label: 'Board Games',

@@ -44,6 +44,7 @@
     "@react-email/components": "1.0.12",
     "@react-email/render": "2.1.0",
     "@sentry/nextjs": "10.68.0",
+    "@seshuk/payload-plugin-openapi": "^0.2.0",
     "@veiag/payload-cmdk": "^1.1.0",
     "better-auth": "^1.6.25",
     "blurhash": "^2.0.5",
