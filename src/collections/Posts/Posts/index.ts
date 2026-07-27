@@ -14,6 +14,13 @@ import {
 import { lexicalEditor } from '@payloadcms/richtext-lexical';
 import { CollectionConfig } from 'payload';
 import { removeArticleCacheOnDelete, syncArticleCache } from './hooks/syncArticleCache';
+import {
+  removePostFromRelatedModelsOnDelete,
+  syncRelatedModelsOnPostChange,
+} from './hooks/syncRelatedModels';
+
+/** Autosave interval slow enough to avoid racing keystrokes in title/text fields. */
+const AUTOSAVE_INTERVAL_MS = 2000;
 
 export const Posts: CollectionConfig<'posts'> = {
   slug: 'posts',
@@ -131,6 +138,28 @@ export const Posts: CollectionConfig<'posts'> = {
       relationTo: 'posts',
     },
     {
+      name: 'relatedModels',
+      type: 'relationship',
+      label: 'Related Models',
+      admin: {
+        position: 'sidebar',
+        description: 'Link models from this article. Also editable from the model.',
+      },
+      hasMany: true,
+      relationTo: 'models',
+    },
+    {
+      name: 'relatedAlbums',
+      type: 'relationship',
+      label: 'Related Photo Galleries',
+      admin: {
+        position: 'sidebar',
+        description: 'Link photo gallery albums to this article.',
+      },
+      hasMany: true,
+      relationTo: 'gallery-albums',
+    },
+    {
       type: 'tabs',
       tabs: [
         {
@@ -199,14 +228,14 @@ export const Posts: CollectionConfig<'posts'> = {
   versions: {
     drafts: {
       autosave: {
-        interval: 100,
+        interval: AUTOSAVE_INTERVAL_MS,
       },
       schedulePublish: true,
     },
     maxPerDoc: 5,
   },
   hooks: {
-    afterChange: [syncArticleCache],
-    afterDelete: [removeArticleCacheOnDelete],
+    afterChange: [syncArticleCache, syncRelatedModelsOnPostChange],
+    afterDelete: [removeArticleCacheOnDelete, removePostFromRelatedModelsOnDelete],
   },
 };
