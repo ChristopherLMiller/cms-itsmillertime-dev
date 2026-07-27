@@ -42,9 +42,55 @@ The headless CMS powering [itsmillertime.dev](https://www.itsmillertime.dev), bu
 | `@payloadcms/plugin-sentry` | Error reporting to Sentry |
 | `@payloadcms/plugin-mcp` | MCP server integration |
 | `@payloadcms/storage-s3` | Cloudflare R2 file storage |
+| `@seshuk/payload-plugin-openapi` | OpenAPI 3.1 spec + Scalar docs UI |
 | `payload-plugin-webhooks` | Webhook delivery on collection events |
 | `payload-sidebar-plugin` | Custom admin sidebar with grouped navigation and icons |
 | `@veiag/payload-cmdk` | Command palette (Cmd+K) in the admin panel |
+
+## API Documentation
+
+Interactive docs (Scalar) and the generated OpenAPI document:
+
+| URL | Purpose |
+|---|---|
+| `/api/docs` | Scalar UI |
+| `/api/openapi.json` | OpenAPI 3.1 spec |
+| `/api/openapi-auth` | Interactive login for the docs UI (JWT) |
+
+Generate a static spec file: `pnpm exec payload openapi:generate`
+
+### Custom routes
+
+Collections, globals, and auth are documented automatically. Custom routes:
+
+| Method | Path | Auth | Notes |
+|---|---|---|---|
+| `GET` | `/api/health` | Public | DB connectivity check |
+| `POST` | `/api/contact-form` | Public | Queues contact email job |
+| `POST` | `/api/gallery-image-tracking` | Public | Increments gallery tracking counters |
+| `GET` | `/api/bgg/collection` | Public | BGG collection proxy (Redis KV cache) |
+| `GET` | `/api/lastfm/now-playing` | Public | Last.fm now-playing (Redis KV cache) |
+| `GET` | `/api/clockify/projects` | Admin | Clockify projects |
+| `GET` | `/api/clockify/timer` | Admin | In-progress timer |
+| `POST` | `/api/clockify/timer/start` | Admin | Start timer |
+| `POST` | `/api/clockify/timer/stop` | Admin | Stop timer |
+| `GET` | `/api/medusa/product/status` | Admin | Linked Medusa product status |
+| `POST` | `/api/medusa/product/status` | Admin | Set draft/published |
+| `POST` | `/api/medusa/product/create` | Admin | Create Medusa product from gallery image |
+| `POST` | `/api/medusa/product/update` | Admin | Update Medusa product |
+| `POST` | `/api/medusa/product/delete` | Admin | Delete Medusa product |
+| `GET` | `/api/medusa/collections` | Admin | List collections |
+| `POST` | `/api/medusa/collections` | Admin | Create collection |
+| `GET` | `/api/medusa/sales-channels` | Admin | List sales channels |
+| `GET` | `/api/medusa/offering-sets` | Admin | List offering sets |
+| `GET` | `/api/medusa/shipping-profiles` | Admin | List shipping profiles |
+| `GET` | `/api/nav/pinned` | Session | Sidebar pins (`payload-sidebar-plugin`) |
+| `POST` | `/api/nav/pin` | Session | Pin item |
+| `POST` | `/api/nav/unpin` | Session | Unpin item |
+| `POST` | `/api/nav/reorder` | Session | Reorder pins |
+| `GET` | `/api/nav/jobs` | Session | Active jobs count (sidebar badge) |
+
+Nav routes stay as Next.js App Router handlers (plugin contract). Everything else above is a Payload endpoint.
 
 ## Custom Features
 
@@ -53,8 +99,6 @@ The headless CMS powering [itsmillertime.dev](https://www.itsmillertime.dev), bu
 - **BlurHash Generation** -- generates placeholder blurhash strings for images
 - **Word Count** -- automatic word count tracking on posts
 - **Slug Field** -- auto-generated URL slugs from titles
-- **Health Endpoint** -- `GET /api/health` returns service and database status
-- **Contact Form** -- `POST /api/contact-form` queues submissions on the `email` job queue; `sendContactFormEmail` renders `emails/contact-form.tsx` via React Email and sends with Resend (requires `CONTACT_EMAIL` and `RESEND_API_KEY`)
 - **Custom Dashboard** -- analytics dashboard with Plausible integration
 - **BGG Integration** -- Board Game Geek collection viewer in the admin panel
 - **Clockify Integration** -- project time tracking via Clockify API

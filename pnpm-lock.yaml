@@ -74,6 +74,9 @@ importers:
       '@sentry/nextjs':
         specifier: 10.68.0
         version: 10.68.0(@opentelemetry/core@2.10.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-base@2.10.0(@opentelemetry/api@1.9.1))(next@16.2.12(@babel/core@7.29.0)(@opentelemetry/api@1.9.1)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(sass@1.77.4))(react@19.2.8)(webpack@5.99.9(esbuild@0.25.12))
+      '@seshuk/payload-plugin-openapi':
+        specifier: ^0.2.0
+        version: 0.2.0(@payloadcms/translations@3.86.0)(payload@3.86.0(graphql@16.11.0)(typescript@5.8.3))
       '@veiag/payload-cmdk':
         specifier: ^1.1.0
         version: 1.1.0(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(payload@3.86.0(graphql@16.11.0)(typescript@5.8.3))(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
@@ -2970,6 +2973,10 @@ packages:
   '@rtsao/scc@1.1.0':
     resolution: {integrity: sha512-zt6OdqaDoOnJ1ZYsCYGt9YmWzDXl4vQdKTyJev62gFhRGKdx7mcT54V9KIjg+d2wi9EXsPvAPKe7i7WjfVWB8g==}
 
+  '@scalar/openapi-types@0.9.3':
+    resolution: {integrity: sha512-34qglt5jSo55iZfH9i7EhjQCdE0Po2xZeh8wytQKolSnXrxsYMSyFDJEBxz1Gaew4on9N3XIWsd0QpwKVA5CSA==}
+    engines: {node: '>=22'}
+
   '@selderee/plugin-htmlparser2@0.11.0':
     resolution: {integrity: sha512-P33hHGdldxGabLFjPPpaTxVolMrzrcegejx+0GxjrIb9Zv48D8yAIA/QTDR2dFl7Uz7urX8aX6+5bCZslr+gWQ==}
 
@@ -3206,6 +3213,13 @@ packages:
     engines: {node: '>= 18'}
     peerDependencies:
       webpack: '>=5.0.0'
+
+  '@seshuk/payload-plugin-openapi@0.2.0':
+    resolution: {integrity: sha512-5mRcj/uJFvnkgODTYP/VUUXFy4hbYqd83QfUgsWyQ9GrI1771FbLz6rOgoQy5b/ukI5cKZhOlxZTk8G5a08GuA==}
+    engines: {node: '>=20.9.0'}
+    peerDependencies:
+      '@payloadcms/translations': ^3.53.0
+      payload: ^3.53.0
 
   '@simplewebauthn/browser@13.2.2':
     resolution: {integrity: sha512-FNW1oLQpTJyqG5kkDg5ZsotvWgmBaC6jCHR7Ej0qUNep36Wl9tj2eZu7J5rP+uhXgHaLk+QQ3lqcw2vS5MX1IA==}
@@ -10439,6 +10453,8 @@ snapshots:
 
   '@rtsao/scc@1.1.0': {}
 
+  '@scalar/openapi-types@0.9.3': {}
+
   '@selderee/plugin-htmlparser2@0.11.0':
     dependencies:
       domhandler: 5.0.3
@@ -10807,6 +10823,12 @@ snapshots:
     transitivePeerDependencies:
       - encoding
       - supports-color
+
+  '@seshuk/payload-plugin-openapi@0.2.0(@payloadcms/translations@3.86.0)(payload@3.86.0(graphql@16.11.0)(typescript@5.8.3))':
+    dependencies:
+      '@payloadcms/translations': 3.86.0
+      '@scalar/openapi-types': 0.9.3
+      payload: 3.86.0(graphql@16.11.0)(typescript@5.8.3)
 
   '@simplewebauthn/browser@13.2.2': {}
 

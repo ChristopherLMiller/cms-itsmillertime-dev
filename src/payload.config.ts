@@ -54,6 +54,27 @@ import {
   medusaSalesChannelsHandler,
   medusaShippingProfilesHandler,
 } from './endpoints/medusa-commerce';
+import {
+  openapiBggCollection,
+  openapiClockifyProjects,
+  openapiClockifyTimerGet,
+  openapiClockifyTimerStart,
+  openapiClockifyTimerStop,
+  openapiContactForm,
+  openapiGalleryImageTracking,
+  openapiHealth,
+  openapiLastfmNowPlaying,
+  openapiMedusaCollectionsGet,
+  openapiMedusaCollectionsPost,
+  openapiMedusaOfferingSets,
+  openapiMedusaProductCreate,
+  openapiMedusaProductDelete,
+  openapiMedusaProductStatusGet,
+  openapiMedusaProductStatusPost,
+  openapiMedusaProductUpdate,
+  openapiMedusaSalesChannels,
+  openapiMedusaShippingProfiles,
+} from './endpoints/openapi-docs';
 import ExifReader from 'exifreader';
 import { render } from '@react-email/render';
 import React from 'react';
@@ -102,96 +123,115 @@ export default buildConfig({
           return Response.json(response, { status: 500 });
         }
       },
+      custom: { openapi: openapiHealth },
     },
     {
       path: '/contact-form',
       method: 'post',
       handler: contactFormHandler,
+      custom: { openapi: openapiContactForm },
     },
     {
       path: '/gallery-image-tracking',
       method: 'post',
       handler: galleryImageTrackingHandler,
+      custom: { openapi: openapiGalleryImageTracking },
     },
     {
       path: '/medusa/product/status',
       method: 'get',
       handler: medusaProductStatusHandler,
+      custom: { openapi: openapiMedusaProductStatusGet },
     },
     {
       path: '/medusa/product/status',
       method: 'post',
       handler: medusaProductSetStatusHandler,
+      custom: { openapi: openapiMedusaProductStatusPost },
     },
     {
       path: '/medusa/product/create',
       method: 'post',
       handler: medusaProductCreateHandler,
+      custom: { openapi: openapiMedusaProductCreate },
     },
     {
       path: '/medusa/product/update',
       method: 'post',
       handler: medusaProductUpdateHandler,
+      custom: { openapi: openapiMedusaProductUpdate },
     },
     {
       path: '/medusa/product/delete',
       method: 'post',
       handler: medusaProductDeleteHandler,
+      custom: { openapi: openapiMedusaProductDelete },
     },
     {
       path: '/medusa/collections',
       method: 'get',
       handler: medusaCollectionsHandler,
+      custom: { openapi: openapiMedusaCollectionsGet },
     },
     {
       path: '/medusa/collections',
       method: 'post',
       handler: medusaCollectionCreateHandler,
+      custom: { openapi: openapiMedusaCollectionsPost },
     },
     {
       path: '/medusa/sales-channels',
       method: 'get',
       handler: medusaSalesChannelsHandler,
+      custom: { openapi: openapiMedusaSalesChannels },
     },
     {
       path: '/medusa/offering-sets',
       method: 'get',
       handler: medusaOfferingSetsHandler,
+      custom: { openapi: openapiMedusaOfferingSets },
     },
     {
       path: '/medusa/shipping-profiles',
       method: 'get',
       handler: medusaShippingProfilesHandler,
+      custom: { openapi: openapiMedusaShippingProfiles },
     },
     {
       path: '/clockify/projects',
       method: 'get',
       handler: clockifyProjectsHandler,
+      custom: { openapi: openapiClockifyProjects },
     },
     {
       path: '/clockify/timer',
       method: 'get',
       handler: clockifyTimerStatusHandler,
+      custom: { openapi: openapiClockifyTimerGet },
     },
     {
       path: '/clockify/timer/start',
       method: 'post',
       handler: clockifyTimerStartHandler,
+      custom: { openapi: openapiClockifyTimerStart },
     },
     {
       path: '/clockify/timer/stop',
       method: 'post',
       handler: clockifyTimerStopHandler,
+      custom: { openapi: openapiClockifyTimerStop },
     },
     {
       path: '/bgg/collection',
       method: 'get',
       handler: bggCollectionHandler,
+      custom: { openapi: openapiBggCollection },
     },
     {
       path: '/lastfm/now-playing',
       method: 'get',
       handler: lastfmNowPlayingHandler,
+      custom: { openapi: openapiLastfmNowPlaying },
     },
   ],
   kv: redisKVAdapter({
