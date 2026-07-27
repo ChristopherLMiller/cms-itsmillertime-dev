@@ -16,9 +16,11 @@ export function createBetterAuthOptions(payload?: BasePayload): Partial<BetterAu
     trustedOrigins: getTrustedOrigins,
     user: {
       additionalFields: {
+        // Server-assigned only — clients cannot set role at sign-up (payload-better-auth 0.8+).
         role: {
           type: 'string',
           defaultValue: 'user',
+          input: false,
         },
       },
     },

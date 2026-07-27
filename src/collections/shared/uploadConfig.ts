@@ -8,7 +8,7 @@ export const sharedImageSizes: NonNullable<
     name: 'thumbnail',
     width: 300,
     formatOptions: {
-      format: 'jpg',
+      format: 'jpeg',
       options: {
         quality: 80,
       },
@@ -69,7 +69,7 @@ export const sharedImageSizes: NonNullable<
     height: 630,
     crop: 'center',
     formatOptions: {
-      format: 'jpg',
+      format: 'jpeg',
       options: {
         quality: 85,
       },

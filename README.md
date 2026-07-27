@@ -4,7 +4,7 @@ The headless CMS powering [itsmillertime.dev](https://www.itsmillertime.dev), bu
 
 ## Tech Stack
 
-- **CMS**: Payload CMS 3.75
+- **CMS**: Payload CMS 3.86
 - **Framework**: Next.js 16 (App Router)
 - **Database**: PostgreSQL (via `@payloadcms/db-postgres`)
 - **KV**: Redis (via `@payloadcms/kv-redis`) for BGG / Last.fm API route caching
