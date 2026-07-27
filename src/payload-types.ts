@@ -112,6 +112,7 @@ export interface Config {
       relatedPosts: 'posts';
     };
     'gallery-albums': {
+      relatedPosts: 'posts';
       images: 'gallery-images';
     };
     kits: {
@@ -291,6 +292,14 @@ export interface GalleryAlbum {
     shares?: number | null;
     totalImages?: number | null;
   };
+  /**
+   * Articles that link to this photo gallery.
+   */
+  relatedPosts?: {
+    docs?: (number | Post)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
   title: string;
   content?: {
     root: {
@@ -403,6 +412,357 @@ export interface User {
   updatedAt: string;
   createdAt: string;
   collection: 'users';
+}
+/**
+ * Blog Posts
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "posts".
+ */
+export interface Post {
+  id: number;
+  originalPublicationDate?: string | null;
+  slug?: string | null;
+  slugLock?: boolean | null;
+  word_count?: number | null;
+  category?: (number | null) | PostsCategory;
+  tags?: (number | PostsTag)[] | null;
+  relatedPosts?: (number | Post)[] | null;
+  /**
+   * Link models from this article. Also editable from the model.
+   */
+  relatedModels?: (number | Model)[] | null;
+  /**
+   * Link photo gallery albums to this article.
+   */
+  relatedAlbums?: (number | GalleryAlbum)[] | null;
+  title: string;
+  subheading?: string | null;
+  featuredImage?: (number | null) | Media;
+  content?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  meta?: {
+    title?: string | null;
+    description?: string | null;
+    image?: (number | null) | Media;
+  };
+  updatedAt: string;
+  createdAt: string;
+  deletedAt?: string | null;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * Blog categories.  Used for general classification of blog posts.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "posts-categories".
+ */
+export interface PostsCategory {
+  id: number;
+  title: string;
+  slug?: string | null;
+  slugLock?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Blog tags.  Used for more focused classification of blog posts.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "posts-tags".
+ */
+export interface PostsTag {
+  id: number;
+  title: string;
+  slug?: string | null;
+  slugLock?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * A built model, not to be confused with a kit
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "models".
+ */
+export interface Model {
+  id: number;
+  title: string;
+  slug?: string | null;
+  slugLock?: boolean | null;
+  /**
+   * Select a Clockify Project from your workspace
+   */
+  clockify_project?: string | null;
+  model_meta: {
+    featuredImage: number | Media;
+    status: 'NOT_STARTED' | 'IN_PROGRESS' | 'COMPLETED';
+    completionDate?: string | null;
+    kit: number | Kit;
+    tags?: (number | ModelsTag)[] | null;
+    videos?:
+      | {
+          title: string;
+          url?: string | null;
+          id?: string | null;
+        }[]
+      | null;
+  };
+  relatedResources?: {
+    /**
+     * Link articles from this model. Also editable from the article.
+     */
+    relatedPosts?: (number | Post)[] | null;
+    relatedModels?: (number | Model)[] | null;
+  };
+  buildLog?:
+    | {
+        title: string;
+        content?: {
+          root: {
+            type: string;
+            children: {
+              type: any;
+              version: number;
+              [k: string]: unknown;
+            }[];
+            direction: ('ltr' | 'rtl') | null;
+            format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+            indent: number;
+            version: number;
+          };
+          [k: string]: unknown;
+        } | null;
+        id?: string | null;
+      }[]
+    | null;
+  image?: (number | Media)[] | null;
+  meta?: {
+    title?: string | null;
+    description?: string | null;
+    image?: (number | null) | Media;
+  };
+  updatedAt: string;
+  createdAt: string;
+  deletedAt?: string | null;
+}
+/**
+ * Media Items, images and otherwise
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media".
+ */
+export interface Media {
+  id: number;
+  exif?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  blurhash?: string | null;
+  alt: string;
+  caption?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  relatedPosts?: {
+    docs?: {
+      relationTo?: 'posts';
+      value: number | Post;
+    }[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
+  folder?: (number | null) | FolderInterface;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+  sizes?: {
+    thumbnail?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    square?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    small?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    medium?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    large?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    xlarge?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    og?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+  };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-folders".
+ */
+export interface FolderInterface {
+  id: number;
+  name: string;
+  folder?: (number | null) | FolderInterface;
+  documentsAndFolders?: {
+    docs?: (
+      | {
+          relationTo?: 'payload-folders';
+          value: number | FolderInterface;
+        }
+      | {
+          relationTo?: 'media';
+          value: number | Media;
+        }
+    )[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
+  folderType?: 'media'[] | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Model Kits
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "kits".
+ */
+export interface Kit {
+  id: number;
+  full_title: string;
+  title: string;
+  kit_number: string;
+  year_released: number;
+  scalemates?: string | null;
+  models?: {
+    docs?: (number | Model)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
+  manufacturer: number | Manufacturer;
+  scale: number | Scale;
+  boxart?: (number | null) | Media;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Model kit manufacturers
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "manufacturers".
+ */
+export interface Manufacturer {
+  id: number;
+  title: string;
+  slug?: string | null;
+  slugLock?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Model kit scales
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "scales".
+ */
+export interface Scale {
+  id: number;
+  title: string;
+  slug?: string | null;
+  slugLock?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Models tags.  Used for more focused classification of models.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "models-tags".
+ */
+export interface ModelsTag {
+  id: number;
+  title: string;
+  slug?: string | null;
+  slugLock?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * Image
@@ -537,216 +897,6 @@ export interface GalleryImage {
   };
 }
 /**
- * Media Items, images and otherwise
- *
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "media".
- */
-export interface Media {
-  id: number;
-  exif?:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
-  blurhash?: string | null;
-  alt: string;
-  caption?: {
-    root: {
-      type: string;
-      children: {
-        type: any;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  } | null;
-  relatedPosts?: {
-    docs?: {
-      relationTo?: 'posts';
-      value: number | Post;
-    }[];
-    hasNextPage?: boolean;
-    totalDocs?: number;
-  };
-  folder?: (number | null) | FolderInterface;
-  updatedAt: string;
-  createdAt: string;
-  url?: string | null;
-  thumbnailURL?: string | null;
-  filename?: string | null;
-  mimeType?: string | null;
-  filesize?: number | null;
-  width?: number | null;
-  height?: number | null;
-  focalX?: number | null;
-  focalY?: number | null;
-  sizes?: {
-    thumbnail?: {
-      url?: string | null;
-      width?: number | null;
-      height?: number | null;
-      mimeType?: string | null;
-      filesize?: number | null;
-      filename?: string | null;
-    };
-    square?: {
-      url?: string | null;
-      width?: number | null;
-      height?: number | null;
-      mimeType?: string | null;
-      filesize?: number | null;
-      filename?: string | null;
-    };
-    small?: {
-      url?: string | null;
-      width?: number | null;
-      height?: number | null;
-      mimeType?: string | null;
-      filesize?: number | null;
-      filename?: string | null;
-    };
-    medium?: {
-      url?: string | null;
-      width?: number | null;
-      height?: number | null;
-      mimeType?: string | null;
-      filesize?: number | null;
-      filename?: string | null;
-    };
-    large?: {
-      url?: string | null;
-      width?: number | null;
-      height?: number | null;
-      mimeType?: string | null;
-      filesize?: number | null;
-      filename?: string | null;
-    };
-    xlarge?: {
-      url?: string | null;
-      width?: number | null;
-      height?: number | null;
-      mimeType?: string | null;
-      filesize?: number | null;
-      filename?: string | null;
-    };
-    og?: {
-      url?: string | null;
-      width?: number | null;
-      height?: number | null;
-      mimeType?: string | null;
-      filesize?: number | null;
-      filename?: string | null;
-    };
-  };
-}
-/**
- * Blog Posts
- *
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "posts".
- */
-export interface Post {
-  id: number;
-  originalPublicationDate?: string | null;
-  slug?: string | null;
-  slugLock?: boolean | null;
-  word_count?: number | null;
-  category?: (number | null) | PostsCategory;
-  tags?: (number | PostsTag)[] | null;
-  relatedPosts?: (number | Post)[] | null;
-  title: string;
-  subheading?: string | null;
-  featuredImage?: (number | null) | Media;
-  content?: {
-    root: {
-      type: string;
-      children: {
-        type: any;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  } | null;
-  meta?: {
-    title?: string | null;
-    description?: string | null;
-    image?: (number | null) | Media;
-  };
-  updatedAt: string;
-  createdAt: string;
-  deletedAt?: string | null;
-  _status?: ('draft' | 'published') | null;
-}
-/**
- * Blog categories.  Used for general classification of blog posts.
- *
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "posts-categories".
- */
-export interface PostsCategory {
-  id: number;
-  title: string;
-  slug?: string | null;
-  slugLock?: boolean | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * Blog tags.  Used for more focused classification of blog posts.
- *
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "posts-tags".
- */
-export interface PostsTag {
-  id: number;
-  title: string;
-  slug?: string | null;
-  slugLock?: boolean | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "payload-folders".
- */
-export interface FolderInterface {
-  id: number;
-  name: string;
-  folder?: (number | null) | FolderInterface;
-  documentsAndFolders?: {
-    docs?: (
-      | {
-          relationTo?: 'payload-folders';
-          value: number | FolderInterface;
-        }
-      | {
-          relationTo?: 'media';
-          value: number | Media;
-        }
-    )[];
-    hasNextPage?: boolean;
-    totalDocs?: number;
-  };
-  folderType?: 'media'[] | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
  * Singular dynamic page of the front end
  *
  * This interface was referenced by `Config`'s JSON-Schema
@@ -827,136 +977,6 @@ export interface Garden {
   updatedAt: string;
   createdAt: string;
   deletedAt?: string | null;
-}
-/**
- * Model Kits
- *
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "kits".
- */
-export interface Kit {
-  id: number;
-  full_title: string;
-  title: string;
-  kit_number: string;
-  year_released: number;
-  scalemates?: string | null;
-  models?: {
-    docs?: (number | Model)[];
-    hasNextPage?: boolean;
-    totalDocs?: number;
-  };
-  manufacturer: number | Manufacturer;
-  scale: number | Scale;
-  boxart?: (number | null) | Media;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * A built model, not to be confused with a kit
- *
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "models".
- */
-export interface Model {
-  id: number;
-  title: string;
-  slug?: string | null;
-  slugLock?: boolean | null;
-  /**
-   * Select a Clockify Project from your workspace
-   */
-  clockify_project?: string | null;
-  model_meta: {
-    featuredImage: number | Media;
-    status: 'NOT_STARTED' | 'IN_PROGRESS' | 'COMPLETED';
-    completionDate?: string | null;
-    kit: number | Kit;
-    tags?: (number | ModelsTag)[] | null;
-    videos?:
-      | {
-          title: string;
-          url?: string | null;
-          id?: string | null;
-        }[]
-      | null;
-  };
-  relatedResources?: {
-    relatedPosts?: (number | Post)[] | null;
-    relatedModels?: (number | Model)[] | null;
-  };
-  buildLog?:
-    | {
-        title: string;
-        content?: {
-          root: {
-            type: string;
-            children: {
-              type: any;
-              version: number;
-              [k: string]: unknown;
-            }[];
-            direction: ('ltr' | 'rtl') | null;
-            format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-            indent: number;
-            version: number;
-          };
-          [k: string]: unknown;
-        } | null;
-        id?: string | null;
-      }[]
-    | null;
-  image?: (number | Media)[] | null;
-  meta?: {
-    title?: string | null;
-    description?: string | null;
-    image?: (number | null) | Media;
-  };
-  updatedAt: string;
-  createdAt: string;
-  deletedAt?: string | null;
-}
-/**
- * Models tags.  Used for more focused classification of models.
- *
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "models-tags".
- */
-export interface ModelsTag {
-  id: number;
-  title: string;
-  slug?: string | null;
-  slugLock?: boolean | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * Model kit manufacturers
- *
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "manufacturers".
- */
-export interface Manufacturer {
-  id: number;
-  title: string;
-  slug?: string | null;
-  slugLock?: boolean | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * Model kit scales
- *
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "scales".
- */
-export interface Scale {
-  id: number;
-  title: string;
-  slug?: string | null;
-  slugLock?: boolean | null;
-  updatedAt: string;
-  createdAt: string;
 }
 /**
  * Coding projects and portfolio items
@@ -1143,6 +1163,8 @@ export interface TwoFactor {
   backupCodes: string;
   user: number | User;
   verified?: boolean | null;
+  failedVerificationCount?: number | null;
+  lockedUntil?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -2064,6 +2086,8 @@ export interface PostsSelect<T extends boolean = true> {
   category?: T;
   tags?: T;
   relatedPosts?: T;
+  relatedModels?: T;
+  relatedAlbums?: T;
   title?: T;
   subheading?: T;
   featuredImage?: T;
@@ -2158,6 +2182,7 @@ export interface GalleryAlbumsSelect<T extends boolean = true> {
         shares?: T;
         totalImages?: T;
       };
+  relatedPosts?: T;
   title?: T;
   content?: T;
   images?: T;
@@ -2553,6 +2578,8 @@ export interface TwoFactorsSelect<T extends boolean = true> {
   backupCodes?: T;
   user?: T;
   verified?: T;
+  failedVerificationCount?: T;
+  lockedUntil?: T;
   updatedAt?: T;
   createdAt?: T;
 }

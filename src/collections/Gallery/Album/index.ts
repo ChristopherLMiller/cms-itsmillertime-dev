@@ -193,6 +193,17 @@ export const GalleryAlbums: CollectionConfig<'gallery-albums'> = {
       ],
     },
     {
+      name: 'relatedPosts',
+      type: 'join',
+      collection: 'posts',
+      on: 'relatedAlbums',
+      label: 'Related Articles',
+      admin: {
+        description: 'Articles that link to this photo gallery.',
+        allowCreate: false,
+      },
+    },
+    {
       type: 'tabs',
       tabs: [
         {

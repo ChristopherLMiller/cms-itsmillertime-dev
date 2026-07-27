@@ -34,18 +34,22 @@ export function betterAuthPlugin() {
         delete: isAdmin(),
       },
       skipCollections: ['user'],
+      // Role assignment is server-side (0.8+); defaultSignUpRole on LoginView is ignored.
+      firstUserAdmin: { defaultRole: 'user', adminRole: 'admin' },
     }),
     // Initialize better auth with auto-injected endspoints and admin components
     createBetterAuthPlugin({
       admin: {
         betterAuthOptions: createBetterAuthOptions(),
         enableManagementUI: true,
+        // Passkey lives in a separate entry so non-passkey apps don't pull the peer (0.9.1+).
+        loginViewComponent:
+          '@delmaredigital/payload-better-auth/components/login-passkey#LoginViewWrapperWithPasskey',
         login: {
           title: 'Admin Login',
           requiredRole: ['admin'],
           requireAllRoles: false,
           enableSignUp: 'auto',
-          defaultSignUpRole: 'user',
           enableForgotPassword: 'auto',
           enablePasskey: 'auto',
         },
