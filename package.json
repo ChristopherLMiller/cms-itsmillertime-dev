@@ -18,7 +18,7 @@
     "payload": "cross-env NODE_OPTIONS=--no-deprecation payload",
     "release": "pnpm build && changeset publish",
     "start": "cross-env NODE_OPTIONS=--no-deprecation next start",
-    "start:prod": "cross-env NODE_OPTIONS=--no-deprecation payload migrate && pnpm start",
+    "start:prod": "node scripts/clear-dev-migration-marker.mjs && cross-env NODE_OPTIONS=--no-deprecation payload migrate && pnpm start",
     "version": "changeset version",
     "email:dev": "email dev --port 3001"
   },
