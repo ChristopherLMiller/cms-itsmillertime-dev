@@ -87,6 +87,48 @@ import { trustedOriginsArray } from './lib/auth/trustedOrigins';
 const filename = fileURLToPath(import.meta.url);
 const dirname = path.dirname(filename);
 
+/** Keys that commonly hold large binary/base64 blobs from ExifReader expanded output */
+const EXIF_HEAVY_KEYS = new Set([
+  'Thumbnail',
+  'thumbnail',
+  'MakerNote',
+  'makerNote',
+  'icc',
+]);
+
+/**
+ * Strip binary/thumbnail payloads and null bytes so EXIF JSON stays small enough
+ * for Payload admin Server Action saves (Next.js default body limit is 1MB).
+ */
+function sanitizeExifForStorage(rawExif: unknown): Record<string, unknown> | null {
+  if (rawExif == null) return null;
+
+  const stripHeavy = (value: unknown): unknown => {
+    if (value == null) return value;
+    if (typeof ArrayBuffer !== 'undefined' && value instanceof ArrayBuffer) return undefined;
+    if (ArrayBuffer.isView?.(value)) return undefined;
+    if (Array.isArray(value)) return value.map(stripHeavy).filter((v) => v !== undefined);
+    if (typeof value === 'object') {
+      const out: Record<string, unknown> = {};
+      for (const [key, child] of Object.entries(value as Record<string, unknown>)) {
+        if (EXIF_HEAVY_KEYS.has(key)) continue;
+        const cleaned = stripHeavy(child);
+        if (cleaned !== undefined) out[key] = cleaned;
+      }
+      return out;
+    }
+    return value;
+  };
+
+  try {
+    const stripped = stripHeavy(rawExif);
+    // PostgreSQL JSON rejects \u0000; XMP packets often end with it
+    return JSON.parse(JSON.stringify(stripped).replace(/\\u0000/g, ''));
+  } catch {
+    return { _error: 'failed_to_sanitize_exif' };
+  }
+}
+
 export default buildConfig({
   email: resendAdapter({
     defaultFromAddress: 'support@itsmillertime.dev',
@@ -567,9 +609,11 @@ export default buildConfig({
               throw err;
             }
 
-            // Sanitize: PostgreSQL JSON does not allow \u0000 (null). XMP packets often end with <?xpacket end="w"?>\u0000
-            const exif =
-              rawExif == null ? null : JSON.parse(JSON.stringify(rawExif).replace(/\\u0000/g, ''));
+            // Sanitize before persist:
+            // - PostgreSQL JSON rejects \u0000 (common at end of XMP packets)
+            // - ExifReader expanded output includes Thumbnail/MakerNote binary that can be
+            //   hundreds of KB–MB and blow past Next.js Server Action body limits on admin save
+            const exif = sanitizeExifForStorage(rawExif);
 
             // Update the image with the EXIF data
             console.log('Updating image with EXIF data');
