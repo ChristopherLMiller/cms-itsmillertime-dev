@@ -4,7 +4,13 @@ import { withPayload } from '@payloadcms/next/withPayload';
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   allowedDevOrigins: ['http://localhost:3000', 'http://10.19.136.30:3000'],
-  // Your Next.js config here
+  // Media docs with EXIF/XMP (esp. phone photos) routinely exceed the 1MB default
+  // when Payload admin saves via Server Actions.
+  experimental: {
+    serverActions: {
+      bodySizeLimit: '10mb',
+    },
+  },
   async redirects() {
     return [
       {
