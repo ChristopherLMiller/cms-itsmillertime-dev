@@ -5,10 +5,10 @@ import { withPayload } from '@payloadcms/next/withPayload';
 const nextConfig = {
   allowedDevOrigins: ['http://localhost:3000', 'http://10.19.136.30:3000'],
   // Media docs with EXIF/XMP (esp. phone photos) routinely exceed the 1MB default
-  // when Payload admin saves via Server Actions.
+  // when Payload admin saves via Server Actions. Override via SERVER_ACTIONS_BODY_SIZE_LIMIT.
   experimental: {
     serverActions: {
-      bodySizeLimit: '10mb',
+      bodySizeLimit: process.env.SERVER_ACTIONS_BODY_SIZE_LIMIT || '50mb',
     },
   },
   async redirects() {
