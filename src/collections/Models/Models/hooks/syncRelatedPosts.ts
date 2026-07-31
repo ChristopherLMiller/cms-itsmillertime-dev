@@ -8,16 +8,18 @@ import type { CollectionAfterChangeHook, CollectionAfterDeleteHook } from 'paylo
 /**
  * Keep Posts.relatedModels in sync when a model's relatedPosts change.
  *
- * Nested post updates omit `req` (separate from the model transaction) and use
- * overrideLock so draft/autosave locks on articles don't block the model save.
+ * Nested Local API calls must pass `req` so they join the parent Postgres
+ * transaction — omitting it opens a second transaction and deadlocks the save.
+ * overrideLock avoids draft locks on articles blocking the model save.
  */
 export const syncRelatedPostsOnModelChange: CollectionAfterChangeHook = async ({
   doc,
   previousDoc,
   req,
   context,
+  operation,
 }) => {
-  if (shouldSkipRelationSync(req, context) || doc?.id == null) return doc
+  if (shouldSkipRelationSync(req, context, operation) || doc?.id == null) return doc
 
   const modelId = typeof doc.id === 'number' ? doc.id : Number(doc.id)
   if (Number.isNaN(modelId)) return doc
@@ -38,6 +40,7 @@ export const syncRelatedPostsOnModelChange: CollectionAfterChangeHook = async ({
         id: postId,
         depth: 0,
         overrideAccess: true,
+        req,
       })
 
       const currentModels = normalizeRelationIds(post.relatedModels)
@@ -53,6 +56,7 @@ export const syncRelatedPostsOnModelChange: CollectionAfterChangeHook = async ({
         overrideAccess: true,
         overrideLock: true,
         context: { skipRelationSync: true },
+        req,
       })
     } catch (err) {
       payload.logger.error({
@@ -69,6 +73,7 @@ export const syncRelatedPostsOnModelChange: CollectionAfterChangeHook = async ({
         id: postId,
         depth: 0,
         overrideAccess: true,
+        req,
       })
 
       const currentModels = normalizeRelationIds(post.relatedModels)
@@ -84,6 +89,7 @@ export const syncRelatedPostsOnModelChange: CollectionAfterChangeHook = async ({
         overrideAccess: true,
         overrideLock: true,
         context: { skipRelationSync: true },
+        req,
       })
     } catch (err) {
       payload.logger.error({
@@ -117,6 +123,7 @@ export const removeModelFromRelatedPostsOnDelete: CollectionAfterDeleteHook = as
         id: postId,
         depth: 0,
         overrideAccess: true,
+        req,
       })
 
       const currentModels = normalizeRelationIds(post.relatedModels)
@@ -132,6 +139,7 @@ export const removeModelFromRelatedPostsOnDelete: CollectionAfterDeleteHook = as
         overrideAccess: true,
         overrideLock: true,
         context: { skipRelationSync: true },
+        req,
       })
     } catch (err) {
       payload.logger.error({
