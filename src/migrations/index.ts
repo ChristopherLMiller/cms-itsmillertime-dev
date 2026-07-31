@@ -3,6 +3,7 @@ import * as migration_20260727_article_relations from './20260727_article_relati
 import * as migration_20260727_article_relations_repair from './20260727_article_relations_repair';
 import * as migration_20260727_twofactor_lockout from './20260727_twofactor_lockout';
 import * as migration_20260731_models_related_posts_join from './20260731_models_related_posts_join';
+import * as migration_20260731_restore_models_related_posts from './20260731_restore_models_related_posts';
 
 export const migrations = [
   {
@@ -29,5 +30,10 @@ export const migrations = [
     up: migration_20260731_models_related_posts_join.up,
     down: migration_20260731_models_related_posts_join.down,
     name: '20260731_models_related_posts_join',
+  },
+  {
+    up: migration_20260731_restore_models_related_posts.up,
+    down: migration_20260731_restore_models_related_posts.down,
+    name: '20260731_restore_models_related_posts',
   },
 ];

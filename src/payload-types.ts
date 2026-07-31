@@ -118,9 +118,6 @@ export interface Config {
     kits: {
       models: 'models';
     };
-    models: {
-      relatedPosts: 'posts';
-    };
     'payload-folders': {
       documentsAndFolders: 'payload-folders' | 'media';
     };
@@ -432,7 +429,7 @@ export interface Post {
   tags?: (number | PostsTag)[] | null;
   relatedPosts?: (number | Post)[] | null;
   /**
-   * Link models to this article. Shown as Related Articles on the model.
+   * Link models from this article. Also editable from the model.
    */
   relatedModels?: (number | Model)[] | null;
   /**
@@ -525,13 +522,9 @@ export interface Model {
       | null;
   };
   /**
-   * Articles that link to this model. Add or remove links from the article sidebar.
+   * Link articles from this model. Also editable from the article.
    */
-  relatedPosts?: {
-    docs?: (number | Post)[];
-    hasNextPage?: boolean;
-    totalDocs?: number;
-  };
+  relatedPosts?: (number | Post)[] | null;
   relatedResources?: {
     relatedModels?: (number | Model)[] | null;
   };
