@@ -2,6 +2,7 @@ import * as migration_20260612_072836_better_auth_1_6 from './20260612_072836_be
 import * as migration_20260727_article_relations from './20260727_article_relations';
 import * as migration_20260727_article_relations_repair from './20260727_article_relations_repair';
 import * as migration_20260727_twofactor_lockout from './20260727_twofactor_lockout';
+import * as migration_20260731_models_related_posts_join from './20260731_models_related_posts_join';
 
 export const migrations = [
   {
@@ -23,5 +24,10 @@ export const migrations = [
     up: migration_20260727_article_relations_repair.up,
     down: migration_20260727_article_relations_repair.down,
     name: '20260727_article_relations_repair',
+  },
+  {
+    up: migration_20260731_models_related_posts_join.up,
+    down: migration_20260731_models_related_posts_join.down,
+    name: '20260731_models_related_posts_join',
   },
 ];

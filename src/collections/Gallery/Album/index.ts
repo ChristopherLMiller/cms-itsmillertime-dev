@@ -199,7 +199,8 @@ export const GalleryAlbums: CollectionConfig<'gallery-albums'> = {
       on: 'relatedAlbums',
       label: 'Related Articles',
       admin: {
-        description: 'Articles that link to this photo gallery.',
+        description:
+          'Articles that link to this photo gallery. Add or remove links from the article sidebar.',
         allowCreate: false,
       },
     },

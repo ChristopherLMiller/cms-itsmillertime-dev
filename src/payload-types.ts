@@ -118,6 +118,9 @@ export interface Config {
     kits: {
       models: 'models';
     };
+    models: {
+      relatedPosts: 'posts';
+    };
     'payload-folders': {
       documentsAndFolders: 'payload-folders' | 'media';
     };
@@ -293,7 +296,7 @@ export interface GalleryAlbum {
     totalImages?: number | null;
   };
   /**
-   * Articles that link to this photo gallery.
+   * Articles that link to this photo gallery. Add or remove links from the article sidebar.
    */
   relatedPosts?: {
     docs?: (number | Post)[];
@@ -429,11 +432,11 @@ export interface Post {
   tags?: (number | PostsTag)[] | null;
   relatedPosts?: (number | Post)[] | null;
   /**
-   * Link models from this article. Also editable from the model.
+   * Link models to this article. Shown as Related Articles on the model.
    */
   relatedModels?: (number | Model)[] | null;
   /**
-   * Link photo gallery albums to this article.
+   * Link photo gallery albums to this article. Shown on the album as Related Articles.
    */
   relatedAlbums?: (number | GalleryAlbum)[] | null;
   title: string;
@@ -521,11 +524,15 @@ export interface Model {
         }[]
       | null;
   };
+  /**
+   * Articles that link to this model. Add or remove links from the article sidebar.
+   */
+  relatedPosts?: {
+    docs?: (number | Post)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
   relatedResources?: {
-    /**
-     * Link articles from this model. Also editable from the article.
-     */
-    relatedPosts?: (number | Post)[] | null;
     relatedModels?: (number | Model)[] | null;
   };
   buildLog?:
@@ -2437,10 +2444,10 @@ export interface ModelsSelect<T extends boolean = true> {
               id?: T;
             };
       };
+  relatedPosts?: T;
   relatedResources?:
     | T
     | {
-        relatedPosts?: T;
         relatedModels?: T;
       };
   buildLog?:
