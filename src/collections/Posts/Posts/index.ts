@@ -13,10 +13,6 @@ import {
 } from '@payloadcms/plugin-seo/fields';
 import { lexicalEditor } from '@payloadcms/richtext-lexical';
 import { CollectionConfig } from 'payload';
-import {
-  removePostFromRelatedModelsOnDelete,
-  syncRelatedModelsOnPostChange,
-} from './hooks/syncRelatedModels';
 
 /** Autosave interval slow enough to avoid racing keystrokes in title/text fields. */
 const AUTOSAVE_INTERVAL_MS = 2000;
@@ -142,7 +138,7 @@ export const Posts: CollectionConfig<'posts'> = {
       label: 'Related Models',
       admin: {
         position: 'sidebar',
-        description: 'Link models from this article. Also editable from the model.',
+        description: 'Link models to this article. Shown as Related Articles on the model.',
       },
       hasMany: true,
       relationTo: 'models',
@@ -153,7 +149,7 @@ export const Posts: CollectionConfig<'posts'> = {
       label: 'Related Photo Galleries',
       admin: {
         position: 'sidebar',
-        description: 'Link photo gallery albums to this article.',
+        description: 'Link photo gallery albums to this article. Shown on the album as Related Articles.',
       },
       hasMany: true,
       relationTo: 'gallery-albums',
@@ -232,9 +228,5 @@ export const Posts: CollectionConfig<'posts'> = {
       schedulePublish: true,
     },
     maxPerDoc: 5,
-  },
-  hooks: {
-    afterChange: [syncRelatedModelsOnPostChange],
-    afterDelete: [removePostFromRelatedModelsOnDelete],
   },
 };
