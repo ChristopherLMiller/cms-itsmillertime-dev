@@ -12,10 +12,13 @@ export const idsEqual = (a: number[], b: number[]) => {
   return sortedA.every((id, index) => id === sortedB[index])
 }
 
-/** Autosave fires afterChange too; syncing there races drafts/locks and hangs the admin save. */
+/** Autosave fires afterChange too; skip sync there to keep keystroke saves light. */
 export function isAutosaveRequest(req: PayloadRequest): boolean {
   const query = (req as { query?: Record<string, unknown> }).query
   if (query?.autosave === true || query?.autosave === 'true') return true
+
+  const search = (req as { searchParams?: URLSearchParams }).searchParams
+  if (search?.get?.('autosave') === 'true') return true
 
   if (req.url) {
     try {
@@ -29,9 +32,17 @@ export function isAutosaveRequest(req: PayloadRequest): boolean {
   return false
 }
 
-export function shouldSkipRelationSync(req: PayloadRequest, context: unknown): boolean {
+export function shouldSkipRelationSync(
+  req: PayloadRequest,
+  context: unknown,
+  operation?: string,
+): boolean {
   const syncContext = context as RelationSyncContext
-  return Boolean(syncContext?.skipRelationSync) || isAutosaveRequest(req)
+  return (
+    Boolean(syncContext?.skipRelationSync) ||
+    operation === 'autosave' ||
+    isAutosaveRequest(req)
+  )
 }
 
 export { normalizeRelationIds }
