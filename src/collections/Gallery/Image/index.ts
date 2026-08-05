@@ -26,7 +26,7 @@ export const GalleryImages: CollectionConfig<'gallery-images'> = {
     group: Groups.galleries,
     description: 'Image',
     useAsTitle: 'alt',
-    defaultColumns: ['title', 'slug', 'gallery-tags'],
+    defaultColumns: ['filename', 'alt', 'albums', 'mimeType', 'filesize'],
   },
   labels: {
     singular: 'Image',
