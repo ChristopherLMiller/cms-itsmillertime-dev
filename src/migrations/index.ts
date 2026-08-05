@@ -5,6 +5,7 @@ import * as migration_20260727_twofactor_lockout from './20260727_twofactor_lock
 import * as migration_20260731_models_related_posts_join from './20260731_models_related_posts_join';
 import * as migration_20260731_restore_models_related_posts from './20260731_restore_models_related_posts';
 import * as migration_20260805_gallery_albums_default_sort from './20260805_gallery_albums_default_sort';
+import * as migration_20260805_upload_collection_prefixes from './20260805_upload_collection_prefixes';
 
 export const migrations = [
   {
@@ -41,5 +42,10 @@ export const migrations = [
     up: migration_20260805_gallery_albums_default_sort.up,
     down: migration_20260805_gallery_albums_default_sort.down,
     name: '20260805_gallery_albums_default_sort',
+  },
+  {
+    up: migration_20260805_upload_collection_prefixes.up,
+    down: migration_20260805_upload_collection_prefixes.down,
+    name: '20260805_upload_collection_prefixes',
   },
 ];

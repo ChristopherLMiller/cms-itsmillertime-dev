@@ -16,10 +16,31 @@ import { type CollectionConfig } from 'payload';
 import { generateEXIF } from '@/collections/shared/generateEXIF';
 import { generateBlurHash } from '@/collections/shared/generateBlurHash';
 import { defaultAltText } from '@/collections/shared/defaultAltText';
+import { ensureUploadPrefix } from '@/collections/shared/ensureUploadPrefix';
 import { visibilityFilter } from '@/access/filters/visibilityFilter';
 import { allowAll } from '@/access/methods/allowAll';
 import { allowedRoles } from '@/access/methods/allowedRoles';
 
+/**
+ * R2 / S3 key namespacing (shared bucket with media):
+ *
+ * Media and gallery-images share one Cloudflare R2 bucket. Filenames alone are not
+ * unique across collections, so same-name uploads used to overwrite each other.
+ *
+ * We use a document-level `prefix` (default `gallery-images`) so NEW uploads land
+ * under `gallery-images/…`. Existing docs keep NULL/empty prefix and still resolve
+ * at the bucket root — do NOT set collection-level `prefix` in `s3Storage` yet, or
+ * those root keys break (Payload falls back to collection prefix when doc prefix
+ * is empty).
+ *
+ * Overwritten root objects cannot be recovered; re-upload those assets.
+ *
+ * Future: once every live Gallery Image asset lives under `gallery-images/`
+ * (re-upload through the CMS, or move objects +
+ * `UPDATE gallery_images SET prefix = 'gallery-images' WHERE prefix IS NULL`),
+ * set `prefix: 'gallery-images'` on the gallery-images entry in
+ * `src/plugins/index.ts` s3Storage config.
+ */
 export const GalleryImages: CollectionConfig<'gallery-images'> = {
   slug: 'gallery-images',
   admin: {
@@ -44,6 +65,16 @@ export const GalleryImages: CollectionConfig<'gallery-images'> = {
   },
   upload: baseUploadConfig,
   fields: [
+    // Document R2 prefix — see collection comment above. Leave NULL on legacy root docs.
+    {
+      name: 'prefix',
+      type: 'text',
+      defaultValue: 'gallery-images',
+      admin: {
+        hidden: true,
+        readOnly: true,
+      },
+    },
     {
       type: 'group',
       name: 'settings',
@@ -252,6 +283,7 @@ export const GalleryImages: CollectionConfig<'gallery-images'> = {
   hooks: {
     afterChange: [generateEXIF],
     afterDelete: [removeMedusaProduct],
+    beforeChange: [ensureUploadPrefix('gallery-images')],
     beforeValidate: [defaultAltText, generateBlurHash],
   },
 };
