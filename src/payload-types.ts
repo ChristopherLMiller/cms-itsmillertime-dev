@@ -277,6 +277,10 @@ export interface GalleryAlbum {
   slugLock?: boolean | null;
   settings: {
     isNsfw?: boolean | null;
+    /**
+     * Default order for images in this album. Frontends can override per request.
+     */
+    defaultSort: '-createdAt' | 'createdAt' | 'filename' | '-filename';
     category?: (number | null) | GalleryCategory;
     tags?: (number | GalleryTag)[] | null;
     visibility: 'ALL' | 'AUTHENTICATED' | 'PRIVILEGED';
@@ -2165,6 +2169,7 @@ export interface GalleryAlbumsSelect<T extends boolean = true> {
     | T
     | {
         isNsfw?: T;
+        defaultSort?: T;
         category?: T;
         tags?: T;
         visibility?: T;
