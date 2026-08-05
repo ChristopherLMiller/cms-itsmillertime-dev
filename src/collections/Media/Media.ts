@@ -3,12 +3,30 @@ import { Groups } from '../shared/groups';
 import { imageContentFields, imageTechnicalFields } from '../shared/imageFields';
 import { baseUploadConfig } from '../shared/uploadConfig';
 import { defaultAltText } from '../shared/defaultAltText';
+import { ensureUploadPrefix } from '../shared/ensureUploadPrefix';
 import { generateBlurHash } from '../shared/generateBlurHash';
 import { generateEXIF } from '../shared/generateEXIF';
 import { RBAC } from '@/access/RBAC';
 import { allowAll } from '@/access/methods/allowAll';
 import { allowedRoles } from '@/access/methods/allowedRoles';
 
+/**
+ * R2 / S3 key namespacing (shared bucket with gallery-images):
+ *
+ * Media and gallery-images share one Cloudflare R2 bucket. Filenames alone are not
+ * unique across collections, so same-name uploads used to overwrite each other.
+ *
+ * We use a document-level `prefix` (default `media`) so NEW uploads land under
+ * `media/…`. Existing docs keep NULL/empty prefix and still resolve at the bucket
+ * root — do NOT set collection-level `prefix` in `s3Storage` yet, or those root
+ * keys break (Payload falls back to collection prefix when doc prefix is empty).
+ *
+ * Overwritten root objects cannot be recovered; re-upload those assets.
+ *
+ * Future: once every live Media asset lives under `media/` (re-upload through the
+ * CMS, or move objects + `UPDATE media SET prefix = 'media' WHERE prefix IS NULL`),
+ * set `prefix: 'media'` on the media entry in `src/plugins/index.ts` s3Storage config.
+ */
 export const Media: CollectionConfig = {
   slug: 'media',
   admin: {
@@ -30,6 +48,16 @@ export const Media: CollectionConfig = {
     admin: RBAC(allowedRoles(['admin']), [], 'media', 'admin'),
   },
   fields: [
+    // Document R2 prefix — see collection comment above. Leave NULL on legacy root docs.
+    {
+      name: 'prefix',
+      type: 'text',
+      defaultValue: 'media',
+      admin: {
+        hidden: true,
+        readOnly: true,
+      },
+    },
     ...imageTechnicalFields,
     {
       type: 'tabs',
@@ -59,6 +87,7 @@ export const Media: CollectionConfig = {
   upload: baseUploadConfig,
   hooks: {
     afterChange: [generateEXIF],
+    beforeChange: [ensureUploadPrefix('media')],
     beforeValidate: [defaultAltText, generateBlurHash],
   },
 };

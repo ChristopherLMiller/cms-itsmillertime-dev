@@ -571,6 +571,7 @@ export interface Model {
  */
 export interface Media {
   id: number;
+  prefix?: string | null;
   exif?:
     | {
         [k: string]: unknown;
@@ -776,6 +777,7 @@ export interface ModelsTag {
  */
 export interface GalleryImage {
   id: number;
+  prefix?: string | null;
   settings: {
     isNsfw?: boolean | null;
     'gallery-tags'?: (number | GalleryTag)[] | null;
@@ -1986,6 +1988,7 @@ export interface UsersSelect<T extends boolean = true> {
  * via the `definition` "media_select".
  */
 export interface MediaSelect<T extends boolean = true> {
+  prefix?: T;
   exif?: T;
   blurhash?: T;
   alt?: T;
@@ -2206,6 +2209,7 @@ export interface GalleryAlbumsSelect<T extends boolean = true> {
  * via the `definition` "gallery-images_select".
  */
 export interface GalleryImagesSelect<T extends boolean = true> {
+  prefix?: T;
   settings?:
     | T
     | {
