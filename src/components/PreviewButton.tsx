@@ -52,6 +52,9 @@ export const PreviewButton = () => {
       case 'models':
         pathSegments.push('models', identifier);
         break;
+      case 'gallery-albums':
+        pathSegments.push('galleries', identifier);
+        break;
       default:
         if (safeCollectionSlug) {
           pathSegments.push(safeCollectionSlug);

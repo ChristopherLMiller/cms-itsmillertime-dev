@@ -40,6 +40,15 @@ export const GalleryAlbums: CollectionConfig<'gallery-albums'> = {
     group: Groups.galleries,
     description: 'Listing of all photo albums',
     useAsTitle: 'title',
+    components: {
+      edit: {
+        beforeDocumentControls: [
+          {
+            path: '@/components/PreviewButton#PreviewButton',
+          },
+        ],
+      },
+    },
   },
   fields: [
     ...slugField('title'),
@@ -56,6 +65,23 @@ export const GalleryAlbums: CollectionConfig<'gallery-albums'> = {
           type: 'checkbox',
           defaultValue: false,
           label: 'Is NSFW?',
+        },
+        {
+          name: 'defaultSort',
+          type: 'select',
+          label: 'Default image sort',
+          defaultValue: '-createdAt',
+          required: true,
+          options: [
+            { label: 'Newest first', value: '-createdAt' },
+            { label: 'Oldest first', value: 'createdAt' },
+            { label: 'Filename (A–Z)', value: 'filename' },
+            { label: 'Filename (Z–A)', value: '-filename' },
+          ],
+          admin: {
+            description:
+              'Default order for images in this album. Frontends can override per request.',
+          },
         },
         {
           name: 'category',
@@ -237,6 +263,17 @@ export const GalleryAlbums: CollectionConfig<'gallery-albums'> = {
               collection: 'gallery-images',
               on: 'albums',
               hasMany: true,
+              admin: {
+                defaultColumns: [
+                  'filename',
+                  'alt',
+                  'albums',
+                  'mimeType',
+                  'filesize',
+                  'width',
+                  'height',
+                ],
+              },
             },
           ],
         },
