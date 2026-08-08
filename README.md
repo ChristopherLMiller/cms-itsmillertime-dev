@@ -46,6 +46,7 @@ The headless CMS powering [itsmillertime.dev](https://www.itsmillertime.dev), bu
 | `payload-plugin-webhooks` | Webhook delivery on collection events |
 | `payload-sidebar-plugin` | Custom admin sidebar with grouped navigation and icons |
 | `@veiag/payload-cmdk` | Command palette (Cmd+K) in the admin panel |
+| `@delmaredigital/payload-better-auth` | Better Auth sessions; Authentik OIDC + local email/password |
 
 ## API Documentation
 
@@ -142,6 +143,19 @@ CONTACT_EMAIL=you@example.com
 # Sentry
 SENTRY_ORG=your-org
 SENTRY_PROJECT=your-project
+
+# Better Auth
+BETTER_AUTH_SECRET=generate-a-long-random-secret
+BETTER_AUTH_URL=http://localhost:3000
+
+# Authentik OIDC (optional until the application/provider exists)
+# Discovery URL shape:
+# https://auth.itsmillertime.dev/application/o/<app-slug>/.well-known/openid-configuration
+# Callback URL to register in Authentik:
+# {BETTER_AUTH_URL}/api/auth/oauth2/callback/authentik
+AUTHENTIK_CLIENT_ID=
+AUTHENTIK_CLIENT_SECRET=
+AUTHENTIK_DISCOVERY_URL=
 ```
 
 ### Installation

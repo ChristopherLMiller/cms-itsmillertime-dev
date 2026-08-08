@@ -63,7 +63,7 @@ import { AdminErrorBoundary as AdminErrorBoundary_e5a9e14bdbe97e70ba60697217fe76
 import { CommandMenuProvider as CommandMenuProvider_3bf5d3e334c5eaf4f0d216451590d3c2 } from '@veiag/payload-cmdk/client'
 import { S3ClientUploadHandler as S3ClientUploadHandler_f97aa6c64367fa259c5bc0567239ef24 } from '@payloadcms/storage-s3/client'
 import { default as default_41e34effe3f4ece2ddcb2839119d86bb } from '@/components/BGG'
-import { LoginViewWrapperWithPasskey as LoginViewWrapperWithPasskey_32122ff130abf1886fc6ac22c8c20952 } from '@delmaredigital/payload-better-auth/components/login-passkey'
+import { AuthentikLoginViewWrapper as AuthentikLoginViewWrapper_ec378eedda62e1fa662ddd95e7b51280 } from '@/components/auth/AuthentikLoginViewWrapper'
 import { ApiKeysView as ApiKeysView_6234f869b6abd89bf631f5883bc67bd5 } from '@delmaredigital/payload-better-auth/rsc/api-key'
 import { default as default_838fb0a30eb441ddfea0c8d82d1e35c3 } from '@/components/Dashboard/widgets/AnalyticsWidget'
 import { default as default_f295ca6a3d97191f9cda7f6e79f83657 } from '@/components/Dashboard/widgets/RecentContentWidget'
@@ -137,7 +137,7 @@ export const importMap = {
   "@veiag/payload-cmdk/client#CommandMenuProvider": CommandMenuProvider_3bf5d3e334c5eaf4f0d216451590d3c2,
   "@payloadcms/storage-s3/client#S3ClientUploadHandler": S3ClientUploadHandler_f97aa6c64367fa259c5bc0567239ef24,
   "@/components/BGG#default": default_41e34effe3f4ece2ddcb2839119d86bb,
-  "@delmaredigital/payload-better-auth/components/login-passkey#LoginViewWrapperWithPasskey": LoginViewWrapperWithPasskey_32122ff130abf1886fc6ac22c8c20952,
+  "@/components/auth/AuthentikLoginViewWrapper#AuthentikLoginViewWrapper": AuthentikLoginViewWrapper_ec378eedda62e1fa662ddd95e7b51280,
   "@delmaredigital/payload-better-auth/rsc/api-key#ApiKeysView": ApiKeysView_6234f869b6abd89bf631f5883bc67bd5,
   "@/components/Dashboard/widgets/AnalyticsWidget#default": default_838fb0a30eb441ddfea0c8d82d1e35c3,
   "@/components/Dashboard/widgets/RecentContentWidget#default": default_f295ca6a3d97191f9cda7f6e79f83657,
