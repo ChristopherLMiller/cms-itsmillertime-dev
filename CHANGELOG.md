@@ -1,5 +1,14 @@
 # cms-itsmillertime-dev
 
+## 3.23.0
+
+### Minor Changes
+
+- Add Authentik OIDC login via Better Auth (genericOAuth), with local email/password as break-glass
+- Remove GitHub and Discord social providers
+- Auto-provision users on first Authentik login as role `user`
+- Disable public email signup
+
 ## 3.18.0
 
 ### Minor Changes

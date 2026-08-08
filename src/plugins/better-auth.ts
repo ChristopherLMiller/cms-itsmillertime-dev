@@ -42,16 +42,16 @@ export function betterAuthPlugin() {
       admin: {
         betterAuthOptions: createBetterAuthOptions(),
         enableManagementUI: true,
-        // Passkey lives in a separate entry so non-passkey apps don't pull the peer (0.9.1+).
-        loginViewComponent:
-          '@delmaredigital/payload-better-auth/components/login-passkey#LoginViewWrapperWithPasskey',
+        // Authentik-first login; local email/password + passkey remain as break-glass.
+        loginViewComponent: '@/components/auth/AuthentikLoginViewWrapper#AuthentikLoginViewWrapper',
         login: {
           title: 'Admin Login',
           requiredRole: ['admin'],
           requireAllRoles: false,
-          enableSignUp: 'auto',
-          enableForgotPassword: 'auto',
-          enablePasskey: 'auto',
+          enableSignUp: false,
+          enableForgotPassword: true,
+          enablePasskey: true,
+          enablePassword: true,
         },
       },
       autoInjectAdminComponents: true,
