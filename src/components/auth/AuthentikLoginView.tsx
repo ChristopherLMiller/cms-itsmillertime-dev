@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { LoginView, type LoginViewProps } from '@delmaredigital/payload-better-auth/components';
 import { AUTHENTIK_PROVIDER_ID } from '@/lib/auth/authentik-constants';
 import { authClient } from '@/lib/auth/auth-client';
@@ -26,23 +27,94 @@ function wantsLocalLogin(): boolean {
   return new URLSearchParams(window.location.search).get('local') === '1';
 }
 
+function normalizeRoles(role: unknown): string[] {
+  if (Array.isArray(role)) {
+    return role.filter((r): r is string => typeof r === 'string');
+  }
+  if (typeof role === 'string') {
+    return role ? [role] : [];
+  }
+  return [];
+}
+
+function checkUserRoles(
+  user: { role?: unknown } | null | undefined,
+  requiredRole: string | string[] | null | undefined,
+  requireAllRoles: boolean | undefined,
+): boolean {
+  if (!requiredRole) return true;
+  if (!user) return false;
+  const needed = Array.isArray(requiredRole) ? requiredRole : [requiredRole];
+  const userRoles = normalizeRoles(user.role);
+  if (requireAllRoles) {
+    return needed.every((role) => userRoles.includes(role));
+  }
+  return needed.some((role) => userRoles.includes(role));
+}
+
 export function AuthentikLoginView({
   authentikEnabled,
   title = 'Admin Login',
   afterLoginPath = '/admin',
+  requiredRole = ['admin'],
+  requireAllRoles = false,
   ...loginProps
 }: AuthentikLoginViewProps) {
+  const router = useRouter();
   const [authentikLoading, setAuthentikLoading] = useState(false);
   const [authentikError, setAuthentikError] = useState<string | null>(null);
   const [showLocal, setShowLocal] = useState(() => !authentikEnabled || wantsLocalLogin());
+  const [checkingSession, setCheckingSession] = useState(() => authentikEnabled && !wantsLocalLogin());
+  const [accessDenied, setAccessDenied] = useState(false);
 
   useEffect(() => {
     if (!authentikEnabled) {
       setShowLocal(true);
+      setCheckingSession(false);
       return;
     }
-    setShowLocal(wantsLocalLogin());
+    const local = wantsLocalLogin();
+    setShowLocal(local);
+    if (local) setCheckingSession(false);
   }, [authentikEnabled]);
+
+  // After Authentik OIDC, Better Auth redirects back to this login page with a
+  // session cookie. The stock LoginView does that gate — our Authentik card must too.
+  useEffect(() => {
+    if (!authentikEnabled || showLocal) return;
+
+    let ignore = false;
+
+    async function checkSession() {
+      try {
+        const result = await authClient.getSession();
+        if (ignore) return;
+        if (result.data?.user) {
+          if (checkUserRoles(result.data.user, requiredRole, requireAllRoles)) {
+            router.push(afterLoginPath);
+            router.refresh();
+            return;
+          }
+          setAccessDenied(true);
+        }
+      } catch {
+        // No session — show Authentik login
+      }
+      if (!ignore) setCheckingSession(false);
+    }
+
+    void checkSession();
+    return () => {
+      ignore = true;
+    };
+  }, [
+    authentikEnabled,
+    showLocal,
+    afterLoginPath,
+    requiredRole,
+    requireAllRoles,
+    router,
+  ]);
 
   useEffect(() => {
     if (!authentikEnabled || typeof window === 'undefined') return;
@@ -50,6 +122,7 @@ export function AuthentikLoginView({
     const error = params.get('error');
     if (!error) return;
     setAuthentikError(humanizeOAuthError(error));
+    setCheckingSession(false);
     params.delete('error');
     params.delete('error_description');
     const next = `${window.location.pathname}${params.toString() ? `?${params}` : ''}`;
@@ -89,11 +162,19 @@ export function AuthentikLoginView({
     }
   }
 
+  async function handleSignOut() {
+    await authClient.signOut();
+    setAccessDenied(false);
+    setCheckingSession(false);
+    router.refresh();
+  }
+
   function openLocalLogin() {
     const url = new URL(window.location.href);
     url.searchParams.set('local', '1');
     window.history.replaceState({}, '', url.toString());
     setShowLocal(true);
+    setCheckingSession(false);
   }
 
   function backToAuthentik() {
@@ -101,6 +182,7 @@ export function AuthentikLoginView({
     url.searchParams.delete('local');
     window.history.replaceState({}, '', url.toString());
     setShowLocal(false);
+    setCheckingSession(true);
   }
 
   if (!authentikEnabled || showLocal) {
@@ -138,9 +220,92 @@ export function AuthentikLoginView({
           {...loginProps}
           title={authentikEnabled ? 'Local login' : title}
           afterLoginPath={afterLoginPath}
+          requiredRole={requiredRole}
+          requireAllRoles={requireAllRoles}
           authClient={authClient}
           socialProviders={[]}
         />
+      </div>
+    );
+  }
+
+  if (checkingSession) {
+    return (
+      <div
+        style={{
+          minHeight: '100vh',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          background: 'var(--theme-bg)',
+          color: 'var(--theme-text)',
+        }}
+      >
+        Completing sign-in…
+      </div>
+    );
+  }
+
+  if (accessDenied) {
+    return (
+      <div
+        style={{
+          minHeight: '100vh',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          background: 'var(--theme-bg)',
+          padding: 'var(--base)',
+        }}
+      >
+        <div
+          style={{
+            width: '100%',
+            maxWidth: '400px',
+            padding: 'calc(var(--base) * 2)',
+            borderRadius: 'var(--style-radius-m)',
+            background: 'var(--theme-elevation-50)',
+            boxShadow: '0 2px 20px rgba(0, 0, 0, 0.1)',
+            textAlign: 'center',
+          }}
+        >
+          <h1
+            style={{
+              color: 'var(--theme-error-500)',
+              fontSize: 'var(--font-size-h3)',
+              fontWeight: 600,
+              margin: '0 0 var(--base) 0',
+            }}
+          >
+            Access Denied
+          </h1>
+          <p
+            style={{
+              color: 'var(--theme-text)',
+              opacity: 0.8,
+              marginBottom: 'calc(var(--base) * 1.5)',
+              fontSize: 'var(--font-size-small)',
+            }}
+          >
+            You signed in with Authentik, but this account does not have admin
+            access. Promote the user to <code>admin</code> in Payload, then try again.
+          </p>
+          <button
+            type="button"
+            onClick={handleSignOut}
+            style={{
+              padding: 'calc(var(--base) * 0.75) calc(var(--base) * 1.5)',
+              background: 'var(--theme-elevation-150)',
+              border: 'none',
+              borderRadius: 'var(--style-radius-s)',
+              color: 'var(--theme-text)',
+              fontSize: 'var(--font-size-base)',
+              cursor: 'pointer',
+            }}
+          >
+            Sign out and try again
+          </button>
+        </div>
       </div>
     );
   }
