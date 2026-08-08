@@ -1,8 +1,10 @@
 import type { BasePayload } from 'payload';
 import { BetterAuthOptions } from 'better-auth';
-import { admin, twoFactor } from 'better-auth/plugins';
+import { admin, genericOAuth, twoFactor } from 'better-auth/plugins';
 import { apiKey } from '@better-auth/api-key';
 import { passkey } from '@better-auth/passkey';
+import { getAuthentikOAuthConfig } from './authentik';
+import { AUTHENTIK_PROVIDER_ID } from './authentik-constants';
 import { getBaseUrl } from './getBaseUrl';
 import { getTrustedOrigins } from './trustedOrigins';
 
@@ -12,6 +14,8 @@ import { getTrustedOrigins } from './trustedOrigins';
  * Callbacks also use setAuthPayload() as fallback when payload is set by createAuth.
  */
 export function createBetterAuthOptions(payload?: BasePayload): Partial<BetterAuthOptions> {
+  const authentik = getAuthentikOAuthConfig();
+
   return {
     trustedOrigins: getTrustedOrigins,
     user: {
@@ -26,6 +30,13 @@ export function createBetterAuthOptions(payload?: BasePayload): Partial<BetterAu
     },
     session: {
       expiresIn: 60 * 60 * 24 * 30, // 30 days
+    },
+    account: {
+      accountLinking: {
+        enabled: true,
+        // Authentik is our trusted IdP — link by email on first OIDC login.
+        trustedProviders: [AUTHENTIK_PROVIDER_ID],
+      },
     },
     emailVerification: {
       sendVerificationEmail: async ({ user, url }) => {
@@ -92,6 +103,8 @@ export function createBetterAuthOptions(payload?: BasePayload): Partial<BetterAu
     emailAndPassword: {
       requireEmailVerification: true,
       enabled: true,
+      // New accounts come from Authentik; keep password for existing/break-glass users.
+      disableSignUp: true,
       revokeSessionsOnPasswordReset: true,
       autoSignIn: true,
       sendResetPassword: async ({ user, url }) => {
@@ -105,18 +118,18 @@ export function createBetterAuthOptions(payload?: BasePayload): Partial<BetterAu
         });
       },
     },
-    socialProviders: {
-      github: {
-        enabled: true,
-        clientId: process.env.GITHUB_CLIENT_ID as string,
-        clientSecret: process.env.GITHUB_CLIENT_SECRET as string,
-      },
-      discord: {
-        enabled: true,
-        clientId: process.env.DISCORD_CLIENT_ID as string,
-        clientSecret: process.env.DISCORD_CLIENT_SECRET as string,
-      },
-    },
-    plugins: [admin(), twoFactor(), passkey(), apiKey({ enableMetadata: true })],
+    plugins: [
+      admin(),
+      twoFactor(),
+      passkey(),
+      apiKey({ enableMetadata: true }),
+      ...(authentik
+        ? [
+            genericOAuth({
+              config: [authentik],
+            }),
+          ]
+        : []),
+    ],
   };
 }
