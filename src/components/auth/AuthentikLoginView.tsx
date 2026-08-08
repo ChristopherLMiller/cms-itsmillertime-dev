@@ -90,7 +90,8 @@ export function AuthentikLoginView({
         const result = await authClient.getSession();
         if (ignore) return;
         if (result.data?.user) {
-          if (checkUserRoles(result.data.user, requiredRole, requireAllRoles)) {
+          const user = result.data.user as { role?: unknown };
+          if (checkUserRoles(user, requiredRole, requireAllRoles)) {
             router.push(afterLoginPath);
             router.refresh();
             return;
