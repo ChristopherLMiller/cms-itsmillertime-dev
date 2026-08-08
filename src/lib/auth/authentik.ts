@@ -9,7 +9,6 @@ export type AuthentikOAuthConfig = {
   discoveryUrl: string;
   scopes: string[];
   pkce: boolean;
-  requireIssuerValidation: boolean;
 };
 
 /**
@@ -32,7 +31,8 @@ export function getAuthentikOAuthConfig(): AuthentikOAuthConfig | null {
     discoveryUrl,
     scopes: ['openid', 'profile', 'email'],
     pkce: true,
-    requireIssuerValidation: true,
+    // Do not set requireIssuerValidation: Authentik often omits RFC 9207 `iss`
+    // on the authorization response, which Better Auth would reject as issuer_missing.
   };
 }
 
