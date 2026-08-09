@@ -12,8 +12,6 @@ import {
 } from '@delmaredigital/payload-better-auth';
 import { CollectionSlug } from 'payload';
 
-const baseUrl = getBaseUrl();
-
 const userLinkedCollections: { collection: CollectionSlug; field: string }[] = [
   { collection: 'sessions', field: 'user' },
   { collection: 'accounts', field: 'user' },
@@ -21,6 +19,21 @@ const userLinkedCollections: { collection: CollectionSlug; field: string }[] = [
   { collection: 'twoFactors', field: 'user' },
   { collection: 'passkeys', field: 'user' },
 ];
+
+function resolveAuthBaseUrl(): string {
+  return getBaseUrl().replace(/\/+$/, '');
+}
+
+function crossSubDomainForBaseUrl(baseUrl: string): string | null {
+  try {
+    const host = new URL(baseUrl).hostname;
+    return host === 'itsmillertime.dev' || host.endsWith('.itsmillertime.dev')
+      ? '.itsmillertime.dev'
+      : null;
+  } catch {
+    return null;
+  }
+}
 
 export function betterAuthPlugin() {
   return [
@@ -57,17 +70,9 @@ export function betterAuthPlugin() {
       autoInjectAdminComponents: true,
       autoRegisterEndpoints: true,
       createAuth: (payload) => {
-        const crossSubDomain =
-          (() => {
-            try {
-              const host = new URL(baseUrl).hostname;
-              return host === 'itsmillertime.dev' || host.endsWith('.itsmillertime.dev')
-                ? '.itsmillertime.dev'
-                : null;
-            } catch {
-              return null;
-            }
-          })();
+        // Resolve at auth-init time (not module load) so Coolify runtime env is used.
+        const baseUrl = resolveAuthBaseUrl();
+        const crossSubDomain = crossSubDomainForBaseUrl(baseUrl);
 
         return betterAuth({
           ...createBetterAuthOptions(payload),
