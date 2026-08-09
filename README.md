@@ -154,6 +154,8 @@ BETTER_AUTH_URL=http://localhost:3000
 # Callback URL to register in Authentik (must match BETTER_AUTH_URL):
 #   https://cms.itsmillertime.dev/api/auth/oauth2/callback/authentik
 # Session cookies use Domain=.itsmillertime.dev so www can reuse the session.
+# Frontend (www) login starts via GET /api/frontend-oauth-start?callbackURL=...
+# so OAuth state is set on the CMS origin (same as admin), then returns to www.
 AUTHENTIK_CLIENT_ID=
 AUTHENTIK_CLIENT_SECRET=
 AUTHENTIK_DISCOVERY_URL=
