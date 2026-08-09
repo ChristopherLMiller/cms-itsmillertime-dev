@@ -151,14 +151,17 @@ BETTER_AUTH_URL=http://localhost:3000
 # Authentik OIDC (optional until the application/provider exists)
 # Discovery URL shape:
 # https://auth.itsmillertime.dev/application/o/<app-slug>/.well-known/openid-configuration
-# Callback URL to register in Authentik (CMS direct):
-# {BETTER_AUTH_URL}/api/auth/oauth2/callback/authentik
-# Also register frontend proxy callbacks when www initiates login:
-# https://itsmillertime.dev/api/auth/oauth2/callback/authentik
-# http://localhost:5173/api/auth/oauth2/callback/authentik
+#
+# Register BOTH redirect URIs in Authentik:
+#   https://cms.itsmillertime.dev/api/auth/oauth2/callback/authentik
+#   https://www.itsmillertime.dev/api/auth/oauth2/callback/authentik
+#
+# Production uses the www URI (from NEXT_PUBLIC_FRONTEND_URL or AUTHENTIK_REDIRECT_URI)
+# so frontend session cookies are set via the www auth proxy.
 AUTHENTIK_CLIENT_ID=
 AUTHENTIK_CLIENT_SECRET=
 AUTHENTIK_DISCOVERY_URL=
+# AUTHENTIK_REDIRECT_URI=https://www.itsmillertime.dev/api/auth/oauth2/callback/authentik
 ```
 
 ### Installation
