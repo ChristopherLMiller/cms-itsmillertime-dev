@@ -33,6 +33,7 @@ import { SiteMeta } from './globals/site-meta';
 import { SiteNavigation } from './globals/site-navigation';
 import { plugins } from './plugins';
 import { bggCollectionHandler } from './endpoints/bgg-collection';
+import { frontendOauthStartHandler } from './endpoints/frontend-oauth-start';
 import {
   clockifyProjectsHandler,
   clockifyTimerStartHandler,
@@ -172,6 +173,11 @@ export default buildConfig({
       method: 'post',
       handler: contactFormHandler,
       custom: { openapi: openapiContactForm },
+    },
+    {
+      path: '/frontend-oauth-start',
+      method: 'get',
+      handler: frontendOauthStartHandler,
     },
     {
       path: '/gallery-image-tracking',
