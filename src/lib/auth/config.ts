@@ -36,6 +36,10 @@ export function createBetterAuthOptions(payload?: BasePayload): Partial<BetterAu
         enabled: true,
         // Authentik is our trusted IdP — link by email on first OIDC login.
         trustedProviders: [AUTHENTIK_PROVIDER_ID],
+        // Existing Payload admins often have emailVerified=false (checkbox default).
+        // Better Auth would then refuse to link Authentik and redirect to login
+        // with ?error=account_not_linked (no session cookie) — looks like a no-op login.
+        requireLocalEmailVerified: false,
       },
     },
     emailVerification: {

@@ -14,10 +14,17 @@ function humanizeOAuthError(code: string): string {
   const messages: Record<string, string> = {
     access_denied: 'Access was denied by Authentik.',
     oauth_provider_not_found: 'Authentik is not configured. Please contact support.',
-    oauth_code_verification_failed: 'Could not complete Authentik sign-in. Please try again.',
+    oauth_code_verification_failed:
+      'Could not exchange the Authentik code (redirect URI / PKCE mismatch). Please try again.',
+    state_mismatch: 'Login session expired or cookies were blocked. Please try again.',
+    account_not_linked:
+      'Your email already exists but could not be linked to Authentik. Use local login once, or contact support.',
+    signup_disabled: 'No account exists for this Authentik user, and sign-up is disabled.',
     user_info_is_missing: 'Authentik did not return user information.',
     email_is_missing: 'Authentik did not share an email address.',
+    name_is_missing: 'Authentik did not share a display name.',
     unable_to_link_account: 'Could not link this Authentik account to an existing user.',
+    unable_to_create_session: 'Signed in with Authentik, but creating a session failed.',
   };
   return messages[code] ?? `Sign-in failed (${code}). Please try again or use local login.`;
 }
