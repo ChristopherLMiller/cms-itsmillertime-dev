@@ -34,6 +34,11 @@ function wantsLocalLogin(): boolean {
   return new URLSearchParams(window.location.search).get('local') === '1';
 }
 
+function getOAuthErrorCodeFromUrl(): string | null {
+  if (typeof window === 'undefined') return null;
+  return new URLSearchParams(window.location.search).get('error');
+}
+
 function normalizeRoles(role: unknown): string[] {
   if (Array.isArray(role)) {
     return role.filter((r): r is string => typeof r === 'string');
@@ -69,9 +74,19 @@ export function AuthentikLoginView({
 }: AuthentikLoginViewProps) {
   const router = useRouter();
   const [authentikLoading, setAuthentikLoading] = useState(false);
-  const [authentikError, setAuthentikError] = useState<string | null>(null);
+  // Read OAuth errors synchronously so we never flash "Completing sign-in…" then
+  // wipe ?error= from the URL (that made failed Authentik logins look like a no-op).
+  const [oauthErrorCode, setOauthErrorCode] = useState<string | null>(() =>
+    getOAuthErrorCodeFromUrl(),
+  );
+  const [authentikError, setAuthentikError] = useState<string | null>(() => {
+    const code = getOAuthErrorCodeFromUrl();
+    return code ? humanizeOAuthError(code) : null;
+  });
   const [showLocal, setShowLocal] = useState(() => !authentikEnabled || wantsLocalLogin());
-  const [checkingSession, setCheckingSession] = useState(() => authentikEnabled && !wantsLocalLogin());
+  const [checkingSession, setCheckingSession] = useState(
+    () => authentikEnabled && !wantsLocalLogin() && !getOAuthErrorCodeFromUrl(),
+  );
   const [accessDenied, setAccessDenied] = useState(false);
 
   useEffect(() => {
@@ -88,7 +103,7 @@ export function AuthentikLoginView({
   // After Authentik OIDC, Better Auth redirects back to this login page with a
   // session cookie. The stock LoginView does that gate — our Authentik card must too.
   useEffect(() => {
-    if (!authentikEnabled || showLocal) return;
+    if (!authentikEnabled || showLocal || oauthErrorCode) return;
 
     let ignore = false;
 
@@ -118,6 +133,7 @@ export function AuthentikLoginView({
   }, [
     authentikEnabled,
     showLocal,
+    oauthErrorCode,
     afterLoginPath,
     requiredRole,
     requireAllRoles,
@@ -126,21 +142,19 @@ export function AuthentikLoginView({
 
   useEffect(() => {
     if (!authentikEnabled || typeof window === 'undefined') return;
-    const params = new URLSearchParams(window.location.search);
-    const error = params.get('error');
-    if (!error) return;
-    setAuthentikError(humanizeOAuthError(error));
+    const code = getOAuthErrorCodeFromUrl();
+    if (!code) return;
+    setOauthErrorCode(code);
+    setAuthentikError(humanizeOAuthError(code));
     setCheckingSession(false);
-    params.delete('error');
-    params.delete('error_description');
-    const next = `${window.location.pathname}${params.toString() ? `?${params}` : ''}`;
-    window.history.replaceState({}, '', next);
+    // Keep ?error= in the URL so failures are visible in the address bar / screenshots.
   }, [authentikEnabled]);
 
   async function handleAuthentikSignIn() {
     if (authentikLoading) return;
     setAuthentikLoading(true);
     setAuthentikError(null);
+    setOauthErrorCode(null);
 
     const loginUrl =
       typeof window !== 'undefined' ? window.location.href.split('?')[0]! : '/admin/login';
@@ -363,7 +377,12 @@ export function AuthentikLoginView({
               fontSize: 'var(--font-size-small)',
             }}
           >
-            {authentikError}
+            <div>{authentikError}</div>
+            {oauthErrorCode && (
+              <div style={{ marginTop: '0.5em', opacity: 0.8, fontFamily: 'monospace' }}>
+                error={oauthErrorCode}
+              </div>
+            )}
           </div>
         )}
 
