@@ -57,6 +57,18 @@ export function betterAuthPlugin() {
       autoInjectAdminComponents: true,
       autoRegisterEndpoints: true,
       createAuth: (payload) => {
+        const crossSubDomain =
+          (() => {
+            try {
+              const host = new URL(baseUrl).hostname;
+              return host === 'itsmillertime.dev' || host.endsWith('.itsmillertime.dev')
+                ? '.itsmillertime.dev'
+                : null;
+            } catch {
+              return null;
+            }
+          })();
+
         return betterAuth({
           ...createBetterAuthOptions(payload),
           database: payloadAdapter({
@@ -66,6 +78,17 @@ export function betterAuthPlugin() {
             database: {
               generateId: 'serial',
             },
+            // Honor X-Forwarded-Host from the www auth proxy so OAuth
+            // redirect_uri matches the browser origin (avoids state_mismatch).
+            trustedProxyHeaders: true,
+            ...(crossSubDomain
+              ? {
+                  crossSubDomainCookies: {
+                    enabled: true,
+                    domain: crossSubDomain,
+                  },
+                }
+              : {}),
           },
           baseURL: baseUrl,
           secret: process.env.BETTER_AUTH_SECRET,

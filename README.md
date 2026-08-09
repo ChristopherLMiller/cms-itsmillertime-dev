@@ -151,8 +151,11 @@ BETTER_AUTH_URL=http://localhost:3000
 # Authentik OIDC (optional until the application/provider exists)
 # Discovery URL shape:
 # https://auth.itsmillertime.dev/application/o/<app-slug>/.well-known/openid-configuration
-# Callback URL to register in Authentik:
+# Callback URL to register in Authentik (CMS direct):
 # {BETTER_AUTH_URL}/api/auth/oauth2/callback/authentik
+# Also register frontend proxy callbacks when www initiates login:
+# https://itsmillertime.dev/api/auth/oauth2/callback/authentik
+# http://localhost:5173/api/auth/oauth2/callback/authentik
 AUTHENTIK_CLIENT_ID=
 AUTHENTIK_CLIENT_SECRET=
 AUTHENTIK_DISCOVERY_URL=
