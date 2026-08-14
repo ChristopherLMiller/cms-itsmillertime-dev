@@ -1,6 +1,10 @@
 import { nsfwFilter } from '@/access/filters/nsfwFilter';
 import { Groups } from '@/collections/shared/groups';
-import { imageContentFields, imageTechnicalFields } from '@/collections/shared/imageFields';
+import {
+  cdnShareUrlField,
+  imageContentFields,
+  imageTechnicalFields,
+} from '@/collections/shared/imageFields';
 import { baseUploadConfig } from '@/collections/shared/uploadConfig';
 import { removeMedusaProduct } from '@/collections/Gallery/Image/hooks/commerceDelete';
 import { PayloadRequest, slugField } from 'payload';
@@ -75,6 +79,7 @@ export const GalleryImages: CollectionConfig<'gallery-images'> = {
         readOnly: true,
       },
     },
+    cdnShareUrlField,
     {
       type: 'group',
       name: 'settings',
