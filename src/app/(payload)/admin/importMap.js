@@ -1,6 +1,7 @@
 import { RowLabel as RowLabel_d4655109717a6f5707cd0a6520a4fd9e } from '@/components/RowLabel'
 import { TwoFactorField as TwoFactorField_aa8e4427b70b37c7820895ace344eb78 } from '@delmaredigital/payload-better-auth/components'
 import { PasskeysField as PasskeysField_b43647e48ab3e028b782c335a88830d2 } from '@delmaredigital/payload-better-auth/components/passkey'
+import { CdnShareUrl as CdnShareUrl_0192fb28f6360825f5cf614f35d69a37 } from '@/components/CdnShareUrl'
 import { EXIFCell as EXIFCell_4480aec29364ed5b9b8eceaa4eff77ef } from '@/components/EXIFCell'
 import { EXIFDisplay as EXIFDisplay_6fcfec44911dfff19a45246c27579691 } from '@/components/EXIFDisplay'
 import { BlurhashField as BlurhashField_cca06512cc763e8c25c885f0d870995d } from '@/components/BlurhashField'
@@ -75,6 +76,7 @@ export const importMap = {
   "@/components/RowLabel#RowLabel": RowLabel_d4655109717a6f5707cd0a6520a4fd9e,
   "@delmaredigital/payload-better-auth/components#TwoFactorField": TwoFactorField_aa8e4427b70b37c7820895ace344eb78,
   "@delmaredigital/payload-better-auth/components/passkey#PasskeysField": PasskeysField_b43647e48ab3e028b782c335a88830d2,
+  "@/components/CdnShareUrl#CdnShareUrl": CdnShareUrl_0192fb28f6360825f5cf614f35d69a37,
   "@/components/EXIFCell#EXIFCell": EXIFCell_4480aec29364ed5b9b8eceaa4eff77ef,
   "@/components/EXIFDisplay#EXIFDisplay": EXIFDisplay_6fcfec44911dfff19a45246c27579691,
   "@/components/BlurhashField#BlurhashField": BlurhashField_cca06512cc763e8c25c885f0d870995d,

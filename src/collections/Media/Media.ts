@@ -1,6 +1,6 @@
 import { type CollectionConfig } from 'payload';
 import { Groups } from '../shared/groups';
-import { imageContentFields, imageTechnicalFields } from '../shared/imageFields';
+import { cdnShareUrlField, imageContentFields, imageTechnicalFields } from '../shared/imageFields';
 import { baseUploadConfig } from '../shared/uploadConfig';
 import { defaultAltText } from '../shared/defaultAltText';
 import { ensureUploadPrefix } from '../shared/ensureUploadPrefix';
@@ -58,6 +58,7 @@ export const Media: CollectionConfig = {
         readOnly: true,
       },
     },
+    cdnShareUrlField,
     ...imageTechnicalFields,
     {
       type: 'tabs',
