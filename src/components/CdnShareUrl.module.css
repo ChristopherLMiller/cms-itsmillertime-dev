@@ -1,0 +1,46 @@
+.field {
+  margin-bottom: var(--base);
+}
+
+.row {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  padding: 0.5rem 0.65rem;
+  border: 1px solid var(--theme-border-color);
+  border-radius: var(--theme-border-radius);
+  background: var(--theme-elevation-50);
+}
+
+.url {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+  font-size: 0.75rem;
+  line-height: 1.4;
+  word-break: break-all;
+  color: var(--theme-text);
+  text-decoration: none;
+}
+
+.url:hover {
+  text-decoration: underline;
+}
+
+.copy {
+  flex-shrink: 0;
+  margin-top: 0.05rem;
+}
+
+.hint {
+  margin: 0.4rem 0 0;
+  color: var(--theme-elevation-500);
+  font-size: 0.75rem;
+}
+
+.empty {
+  margin: 0;
+  color: var(--theme-elevation-400);
+  font-size: 0.8125rem;
+  font-style: italic;
+}

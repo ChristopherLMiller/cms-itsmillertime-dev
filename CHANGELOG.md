@@ -1,5 +1,11 @@
 # cms-itsmillertime-dev
 
+## 3.24.0
+
+### Minor Changes
+
+- Add Cloudflare CDN share URLs to media and gallery-image editors
+
 ## 3.23.0
 
 ### Minor Changes

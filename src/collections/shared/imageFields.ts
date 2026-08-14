@@ -23,6 +23,18 @@ export const imageContentFields: Field[] = [
   },
 ];
 
+/** Cloudflare CDN share URL — shown in the editor sidebar for upload collections. */
+export const cdnShareUrlField: Field = {
+  name: 'cdnShareUrl',
+  type: 'ui',
+  admin: {
+    position: 'sidebar',
+    components: {
+      Field: '@/components/CdnShareUrl#CdnShareUrl',
+    },
+  },
+};
+
 // Shared image technical fields (exif, blurhash, etc.)
 export const imageTechnicalFields: Field[] = [
   {
