@@ -21,6 +21,7 @@ import { generateEXIF } from '@/collections/shared/generateEXIF';
 import { generateBlurHash } from '@/collections/shared/generateBlurHash';
 import { defaultAltText } from '@/collections/shared/defaultAltText';
 import { ensureUploadPrefix } from '@/collections/shared/ensureUploadPrefix';
+import { sanitizeIncomingExif } from '@/collections/shared/sanitizeIncomingExif';
 import { visibilityFilter } from '@/access/filters/visibilityFilter';
 import { allowAll } from '@/access/methods/allowAll';
 import { allowedRoles } from '@/access/methods/allowedRoles';
@@ -299,7 +300,7 @@ export const GalleryImages: CollectionConfig<'gallery-images'> = {
   hooks: {
     afterChange: [generateEXIF],
     afterDelete: [removeMedusaProduct],
-    beforeChange: [ensureUploadPrefix('gallery-images')],
+    beforeChange: [ensureUploadPrefix('gallery-images'), sanitizeIncomingExif],
     beforeValidate: [defaultAltText, generateBlurHash],
   },
 };
