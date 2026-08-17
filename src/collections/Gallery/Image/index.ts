@@ -166,6 +166,17 @@ export const GalleryImages: CollectionConfig<'gallery-images'> = {
         description: 'Pointer to the Medusa product. Managed by the Store tab.',
       },
     },
+    {
+      name: 'master',
+      type: 'upload',
+      relationTo: 'gallery-masters',
+      label: 'Master file',
+      admin: {
+        position: 'sidebar',
+        description:
+          'Private full-resolution original (no watermark). Used for store downloads and prints. Not publicly accessible.',
+      },
+    },
     ...imageTechnicalFields,
     {
       type: 'group',

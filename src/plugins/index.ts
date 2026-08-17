@@ -119,6 +119,7 @@ export const plugins: Plugin[] = [
       'models-tags': 'tag',
       'gallery-albums': 'images',
       'gallery-images': 'image',
+      'gallery-masters': 'lock',
       'gallery-tags': 'tag',
       'gallery-categories': 'folder',
       pages: 'page',
@@ -165,6 +166,9 @@ export const plugins: Plugin[] = [
       },
       'gallery-images': {
         signedDownloads: false,
+      },
+      'gallery-masters': {
+        signedDownloads: true,
       },
     },
     bucket: process.env.CLOUDFLARE_BUCKET as string,
