@@ -126,7 +126,18 @@ export function createBetterAuthOptions(payload?: BasePayload): Partial<BetterAu
       admin(),
       twoFactor(),
       passkey(),
-      apiKey({ enableMetadata: true }),
+      apiKey({
+        enableMetadata: true,
+        // REST clients (piu, curl) send `x-api-key`. Without this, getSession()
+        // ignores the header and Payload req.user stays null — uploads 403.
+        enableSessionForAPIKeys: true,
+        // Default is 10 requests / 24h, which cannot upload a photo album.
+        rateLimit: {
+          enabled: true,
+          timeWindow: 1000 * 60 * 60,
+          maxRequests: 10_000,
+        },
+      }),
       ...(authentik
         ? [
             genericOAuth({
