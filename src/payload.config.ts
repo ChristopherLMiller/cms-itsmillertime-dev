@@ -11,6 +11,7 @@ import { resendAdapter } from '@payloadcms/email-resend';
 import { GalleryAlbums } from './collections/Gallery/Album';
 import { GalleryCategories } from './collections/Gallery/Categories';
 import { GalleryImages } from './collections/Gallery/Image';
+import { GalleryMasters } from './collections/Gallery/Master';
 import { GalleryTags } from './collections/Gallery/Tags';
 import { Gardens } from './collections/Gardens';
 import { MapMarkers } from './collections/Map';
@@ -405,6 +406,7 @@ export default buildConfig({
     Pages,
     GalleryAlbums,
     GalleryImages,
+    GalleryMasters,
     GalleryTags,
     GalleryCategories,
     Gardens,

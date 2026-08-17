@@ -77,6 +77,7 @@ export interface Config {
     pages: Page;
     'gallery-albums': GalleryAlbum;
     'gallery-images': GalleryImage;
+    'gallery-masters': GalleryMaster;
     'gallery-tags': GalleryTag;
     'gallery-categories': GalleryCategory;
     gardens: Garden;
@@ -132,6 +133,7 @@ export interface Config {
     pages: PagesSelect<false> | PagesSelect<true>;
     'gallery-albums': GalleryAlbumsSelect<false> | GalleryAlbumsSelect<true>;
     'gallery-images': GalleryImagesSelect<false> | GalleryImagesSelect<true>;
+    'gallery-masters': GalleryMastersSelect<false> | GalleryMastersSelect<true>;
     'gallery-tags': GalleryTagsSelect<false> | GalleryTagsSelect<true>;
     'gallery-categories': GalleryCategoriesSelect<false> | GalleryCategoriesSelect<true>;
     gardens: GardensSelect<false> | GardensSelect<true>;
@@ -789,6 +791,10 @@ export interface GalleryImage {
    * Pointer to the Medusa product. Managed by the Store tab.
    */
   medusaProductId?: string | null;
+  /**
+   * Private full-resolution original (no watermark). Used for store downloads and prints. Not publicly accessible.
+   */
+  master?: (number | null) | GalleryMaster;
   exif?:
     | {
         [k: string]: unknown;
@@ -901,6 +907,30 @@ export interface GalleryImage {
       filename?: string | null;
     };
   };
+}
+/**
+ * Private full-resolution originals. Not publicly readable.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "gallery-masters".
+ */
+export interface GalleryMaster {
+  id: number;
+  prefix?: string | null;
+  alt: string;
+  /**
+   * Local filename stem from ingest (piu).
+   */
+  sourceStem?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
 }
 /**
  * Singular dynamic page of the front end
@@ -1758,6 +1788,10 @@ export interface PayloadLockedDocument {
         value: number | GalleryImage;
       } | null)
     | ({
+        relationTo: 'gallery-masters';
+        value: number | GalleryMaster;
+      } | null)
+    | ({
         relationTo: 'gallery-tags';
         value: number | GalleryTag;
       } | null)
@@ -2220,6 +2254,7 @@ export interface GalleryImagesSelect<T extends boolean = true> {
         allowedUsers?: T;
       };
   medusaProductId?: T;
+  master?: T;
   exif?: T;
   blurhash?: T;
   tracking?:
@@ -2327,6 +2362,24 @@ export interface GalleryImagesSelect<T extends boolean = true> {
               filename?: T;
             };
       };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "gallery-masters_select".
+ */
+export interface GalleryMastersSelect<T extends boolean = true> {
+  prefix?: T;
+  alt?: T;
+  sourceStem?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -2989,6 +3042,7 @@ export interface Webhook {
           | 'pages'
           | 'gallery-albums'
           | 'gallery-images'
+          | 'gallery-masters'
           | 'gallery-tags'
           | 'gallery-categories'
           | 'gardens'

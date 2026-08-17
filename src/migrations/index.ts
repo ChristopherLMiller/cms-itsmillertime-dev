@@ -6,6 +6,7 @@ import * as migration_20260731_models_related_posts_join from './20260731_models
 import * as migration_20260731_restore_models_related_posts from './20260731_restore_models_related_posts';
 import * as migration_20260805_gallery_albums_default_sort from './20260805_gallery_albums_default_sort';
 import * as migration_20260805_upload_collection_prefixes from './20260805_upload_collection_prefixes';
+import * as migration_20260817_gallery_masters from './20260817_gallery_masters';
 
 export const migrations = [
   {
@@ -47,5 +48,10 @@ export const migrations = [
     up: migration_20260805_upload_collection_prefixes.up,
     down: migration_20260805_upload_collection_prefixes.down,
     name: '20260805_upload_collection_prefixes',
+  },
+  {
+    up: migration_20260817_gallery_masters.up,
+    down: migration_20260817_gallery_masters.down,
+    name: '20260817_gallery_masters',
   },
 ];

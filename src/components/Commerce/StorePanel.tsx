@@ -106,6 +106,8 @@ interface StatusResponse {
   adminUrl?: string | null;
   audience?: 'public' | 'private';
   privateChannelConfigured?: boolean;
+  hasMaster?: boolean;
+  masterFilename?: string | null;
   error?: string;
 }
 
@@ -253,6 +255,8 @@ export const StorePanel: React.FC = () => {
   const [audience, setAudience] = useState<'public' | 'private'>('public');
   const [privateChannelConfigured, setPrivateChannelConfigured] = useState(true);
   const [statusError, setStatusError] = useState<string | null>(null);
+  const [hasMaster, setHasMaster] = useState(false);
+  const [masterFilename, setMasterFilename] = useState<string | null>(null);
 
   const [form, setForm] = useState<FormState>(EMPTY_FORM);
   const [busy, setBusy] = useState(false);
@@ -284,6 +288,8 @@ export const StorePanel: React.FC = () => {
       setAdminUrl(data.adminUrl ?? null);
       setAudience(data.audience ?? 'public');
       setPrivateChannelConfigured(data.privateChannelConfigured !== false);
+      setHasMaster(data.hasMaster === true);
+      setMasterFilename(data.masterFilename ?? null);
       if (data.error) setStatusError(data.error);
     } catch (err) {
       setStatusError(err instanceof Error ? err.message : 'Failed to load store status');
@@ -459,12 +465,13 @@ export const StorePanel: React.FC = () => {
       return;
     }
     if (
-      form.offeringSetIds.length > 0 &&
       form.mode === 'create' &&
-      !form.downloadFile
+      (form.sellsDigital || form.offeringSetIds.length > 0) &&
+      !form.downloadFile &&
+      !hasMaster
     ) {
       setActiveTab('general');
-      setFormError('Upload the high-res master file — it is sent to the print service.');
+      setFormError('This image has no master file. Re-upload with piu or drop a high-res file here.');
       return;
     }
 
@@ -907,11 +914,16 @@ export const StorePanel: React.FC = () => {
                         Current: {product.downloadFilename} (leave blank to keep)
                       </p>
                     )}
+                    {!product?.downloadFilename && hasMaster && masterFilename && (
+                      <p className={styles.fileInfo}>
+                        Using attached master: {masterFilename}
+                      </p>
+                    )}
                   </>
                 )}
                 <p className={styles.hint}>
                   Used for the digital download <em>and</em> as the print file sent to the
-                  print-on-demand service. Stored in Medusa.
+                  print-on-demand service. Leave blank to use the private master attached at ingest.
                 </p>
               </div>
             </div>

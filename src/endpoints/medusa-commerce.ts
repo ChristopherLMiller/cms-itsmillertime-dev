@@ -18,6 +18,7 @@ import {
   type MedusaEnv,
   type ProductSummary,
 } from '@/lib/medusa/client';
+import { readStoredUpload } from '@/utilities/readStoredUpload';
 
 /**
  * Admin-only endpoints that let the gallery-image "Store" panel drive Medusa.
@@ -34,9 +35,28 @@ interface GalleryImageDoc {
   alt?: string | null;
   url?: string | null;
   medusaProductId?: string | null;
+  master?:
+    | number
+    | {
+        id: number;
+        filename?: string | null;
+        mimeType?: string | null;
+        prefix?: string | null;
+      }
+    | null;
   sizes?: Record<string, { url?: string | null } | undefined> | null;
   settings?: { visibility?: string | null } | null;
 }
+
+interface MasterDoc {
+  id: number;
+  filename?: string | null;
+  mimeType?: string | null;
+  prefix?: string | null;
+}
+
+const MASTER_REQUIRED =
+  'This image has no master file. Re-upload with piu or drop a high-res file on the General tab.';
 
 /** Non-public images must stay off the public storefront sales channel. */
 function isPrivateImage(image: GalleryImageDoc): boolean {
@@ -140,6 +160,26 @@ async function loadImage(req: PayloadRequest, id: number): Promise<GalleryImageD
   })) as GalleryImageDoc | null;
 }
 
+function masterIdOf(image: GalleryImageDoc): number | null {
+  if (typeof image.master === 'number') return image.master;
+  if (image.master && typeof image.master === 'object' && typeof image.master.id === 'number') {
+    return image.master.id;
+  }
+  return null;
+}
+
+async function loadMaster(req: PayloadRequest, image: GalleryImageDoc): Promise<MasterDoc | null> {
+  const id = masterIdOf(image);
+  if (id == null) return null;
+  return (await req.payload.findByID({
+    collection: 'gallery-masters',
+    id,
+    depth: 0,
+    overrideAccess: true,
+    disableErrors: true,
+  })) as MasterDoc | null;
+}
+
 async function persistPointer(
   req: PayloadRequest,
   id: number,
@@ -205,16 +245,29 @@ async function resolveStorefrontImage(
   return uploadImageFromUrl(env, src, `gallery-image-${image.id}`);
 }
 
-/** Resolve the buyer's download asset (high-res, no watermark), if provided. */
+/** Resolve the buyer's download asset (high-res, no watermark). */
 async function resolveDownloadAsset(
+  req: PayloadRequest,
   env: MedusaEnv,
   image: GalleryImageDoc,
   body: Record<string, unknown>,
+  allowAttachedMaster: boolean,
 ): Promise<{ url: string; filename: string } | null> {
   const file = decodeUpload(body, 'download', `gallery-image-${image.id}-original`);
-  if (!file) return null;
-  const url = await uploadImageBuffer(env, file.bytes, file.filename, file.contentType);
-  return { url, filename: file.filename };
+  if (file) {
+    const url = await uploadImageBuffer(env, file.bytes, file.filename, file.contentType);
+    return { url, filename: file.filename };
+  }
+
+  if (!allowAttachedMaster) return null;
+
+  const master = await loadMaster(req, image);
+  if (!master?.filename) return null;
+  const bytes = await readStoredUpload(master);
+  const filename = master.filename;
+  const contentType = master.mimeType || 'application/octet-stream';
+  const url = await uploadImageBuffer(env, bytes, filename, contentType);
+  return { url, filename };
 }
 
 /** Deep-link to a product in the Medusa admin dashboard. */
@@ -292,9 +345,20 @@ export async function medusaProductStatusHandler(req: PayloadRequest): Promise<R
 
   const audience = isPrivateImage(image) ? 'private' : 'public';
   const privateChannelConfigured = Boolean(process.env.MEDUSA_PRIVATE_SALES_CHANNEL_ID);
+  const master = await loadMaster(req, image);
+  const masterInfo = {
+    hasMaster: Boolean(master?.filename),
+    masterFilename: master?.filename ?? null,
+  };
 
   if (!image.medusaProductId) {
-    return Response.json({ configured: true, linked: false, audience, privateChannelConfigured });
+    return Response.json({
+      configured: true,
+      linked: false,
+      audience,
+      privateChannelConfigured,
+      ...masterInfo,
+    });
   }
 
   try {
@@ -309,6 +373,7 @@ export async function medusaProductStatusHandler(req: PayloadRequest): Promise<R
         audience,
         privateChannelConfigured,
         staleCleared: true,
+        ...masterInfo,
       });
     }
     return Response.json({
@@ -318,6 +383,7 @@ export async function medusaProductStatusHandler(req: PayloadRequest): Promise<R
       adminUrl: adminProductUrl(product.productId),
       audience,
       privateChannelConfigured,
+      ...masterInfo,
     });
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
@@ -362,16 +428,10 @@ export async function medusaProductCreateHandler(req: PayloadRequest): Promise<R
     const env = getMedusaEnv();
     const source = (str(body.imageSource) as ImageSource) || 'gallery';
     const imageUrl = await resolveStorefrontImage(env, image, source, body);
-    const download = await resolveDownloadAsset(env, image, body);
+    const download = await resolveDownloadAsset(req, env, image, body, true);
 
-    if (plan.offeringSetIds.length > 0 && !download) {
-      return Response.json(
-        {
-          error:
-            'Upload the high-res master file (General tab) — it is sent to the print service as the print file.',
-        },
-        { status: 400 },
-      );
+    if ((plan.sellsDigital || plan.offeringSetIds.length > 0) && !download) {
+      return Response.json({ error: MASTER_REQUIRED }, { status: 400 });
     }
 
     const product: ProductSummary = await createProduct(env, {
@@ -433,17 +493,17 @@ export async function medusaProductUpdateHandler(req: PayloadRequest): Promise<R
     }
     const source = (str(body.imageSource) as ImageSource) || 'keep';
     const imageUrl = await resolveStorefrontImage(env, image, source, body);
-    const download = await resolveDownloadAsset(env, image, body);
+    const download = await resolveDownloadAsset(
+      req,
+      env,
+      image,
+      body,
+      !existing.downloadUrl,
+    );
     const downloadUrl = download?.url ?? existing.downloadUrl ?? undefined;
 
-    if (plan.offeringSetIds.length > 0 && !downloadUrl) {
-      return Response.json(
-        {
-          error:
-            'Upload the high-res master file (General tab) — it is sent to the print service as the print file.',
-        },
-        { status: 400 },
-      );
+    if ((plan.sellsDigital || plan.offeringSetIds.length > 0) && !downloadUrl) {
+      return Response.json({ error: MASTER_REQUIRED }, { status: 400 });
     }
 
     const product = await updateProduct(env, existing.productId, existing, {
