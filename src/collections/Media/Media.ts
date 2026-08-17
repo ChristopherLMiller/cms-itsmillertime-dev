@@ -4,6 +4,7 @@ import { cdnShareUrlField, imageContentFields, imageTechnicalFields } from '../s
 import { baseUploadConfig } from '../shared/uploadConfig';
 import { defaultAltText } from '../shared/defaultAltText';
 import { ensureUploadPrefix } from '../shared/ensureUploadPrefix';
+import { sanitizeIncomingExif } from '../shared/sanitizeIncomingExif';
 import { generateBlurHash } from '../shared/generateBlurHash';
 import { generateEXIF } from '../shared/generateEXIF';
 import { RBAC } from '@/access/RBAC';
@@ -88,7 +89,7 @@ export const Media: CollectionConfig = {
   upload: baseUploadConfig,
   hooks: {
     afterChange: [generateEXIF],
-    beforeChange: [ensureUploadPrefix('media')],
+    beforeChange: [ensureUploadPrefix('media'), sanitizeIncomingExif],
     beforeValidate: [defaultAltText, generateBlurHash],
   },
 };
