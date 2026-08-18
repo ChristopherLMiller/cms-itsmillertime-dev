@@ -121,6 +121,7 @@ export const plugins: Plugin[] = [
       'gallery-images': 'image',
       'gallery-masters': 'lock',
       'gallery-tags': 'tag',
+      'gallery-product-requests': 'bell',
       'gallery-categories': 'folder',
       pages: 'page',
       users: 'user',

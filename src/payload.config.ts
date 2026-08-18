@@ -12,6 +12,7 @@ import { GalleryAlbums } from './collections/Gallery/Album';
 import { GalleryCategories } from './collections/Gallery/Categories';
 import { GalleryImages } from './collections/Gallery/Image';
 import { GalleryMasters } from './collections/Gallery/Master';
+import { GalleryProductRequests } from './collections/Gallery/ProductRequest';
 import { GalleryTags } from './collections/Gallery/Tags';
 import { Gardens } from './collections/Gardens';
 import { MapMarkers } from './collections/Map';
@@ -42,6 +43,7 @@ import {
   clockifyTimerStopHandler,
 } from './endpoints/clockify-timer';
 import { contactFormHandler } from './endpoints/contact-form';
+import { galleryProductRequestHandler } from './endpoints/gallery-product-request';
 import { galleryImageTrackingHandler } from './endpoints/gallery-image-tracking';
 import { lastfmNowPlayingHandler } from './endpoints/lastfm-now-playing';
 import {
@@ -63,6 +65,7 @@ import {
   openapiClockifyTimerStart,
   openapiClockifyTimerStop,
   openapiContactForm,
+  openapiGalleryProductRequest,
   openapiGalleryImageTracking,
   openapiHealth,
   openapiLastfmNowPlaying,
@@ -84,6 +87,10 @@ import { ContactFormEmail } from '../emails/contact-form';
 import { safeEmailSubjectLine } from './utilities/sanitizeContactForm';
 import { ResetPasswordEmail } from '../emails/reset-password';
 import { VerifyAccountEmail } from '../emails/verify-account';
+import {
+  sendProductRequestAdminEmailTask,
+  sendProductRequestAvailableEmailTask,
+} from './jobs/productRequestEmails';
 import { trustedOriginsArray } from './lib/auth/trustedOrigins';
 import { sanitizeExifForStorage } from './utilities/sanitizeExif';
 
@@ -133,6 +140,12 @@ export default buildConfig({
       method: 'post',
       handler: contactFormHandler,
       custom: { openapi: openapiContactForm },
+    },
+    {
+      path: '/gallery-product-request',
+      method: 'post',
+      handler: galleryProductRequestHandler,
+      custom: { openapi: openapiGalleryProductRequest },
     },
     {
       path: '/frontend-oauth-start',
@@ -366,6 +379,7 @@ export default buildConfig({
     GalleryAlbums,
     GalleryImages,
     GalleryMasters,
+    GalleryProductRequests,
     GalleryTags,
     GalleryCategories,
     Gardens,
@@ -805,6 +819,8 @@ export default buildConfig({
           }
         },
       },
+      sendProductRequestAdminEmailTask,
+      sendProductRequestAvailableEmailTask,
     ],
     autoRun: [
       {

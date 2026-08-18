@@ -87,6 +87,58 @@ export const openapiContactForm = {
   },
 };
 
+export const openapiGalleryProductRequest = {
+  summary: 'Request a gallery image shop listing',
+  description:
+    'Creates a waitlist request for a gallery image that is not yet listed in the shop, and emails support. Duplicate pending requests for the same email + image are ignored.',
+  tags: ['Public'],
+  requestBody: {
+    required: true,
+    content: {
+      'application/json': {
+        schema: {
+          type: 'object',
+          required: ['name', 'email', 'galleryImageId'],
+          properties: {
+            name: { type: 'string' },
+            email: { type: 'string', format: 'email' },
+            galleryImageId: { type: 'integer', minimum: 1 },
+            albumSlug: { type: 'string' },
+          },
+        },
+      },
+    },
+  },
+  responses: {
+    '200': {
+      description: 'Request saved (or already pending)',
+      content: {
+        'application/json': {
+          schema: {
+            type: 'object',
+            properties: {
+              success: { type: 'boolean', example: true },
+              duplicate: { type: 'boolean' },
+            },
+          },
+        },
+      },
+    },
+    '400': {
+      description: 'Validation error',
+      content: { 'application/json': { schema: errorSchema } },
+    },
+    '404': {
+      description: 'Gallery image not found',
+      content: { 'application/json': { schema: errorSchema } },
+    },
+    '500': {
+      description: 'Save or queue failure',
+      content: { 'application/json': { schema: errorSchema } },
+    },
+  },
+};
+
 export const openapiGalleryImageTracking = {
   summary: 'Track gallery image event',
   description: 'Increments a tracking counter on a gallery image (view, download, like, etc.).',

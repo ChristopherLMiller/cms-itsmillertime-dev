@@ -19,6 +19,7 @@ import {
   type ProductSummary,
 } from '@/lib/medusa/client';
 import { readStoredUpload } from '@/utilities/readStoredUpload';
+import { notifyPendingProductRequests } from '@/utilities/notifyProductRequests';
 
 /**
  * Admin-only endpoints that let the gallery-image "Store" panel drive Medusa.
@@ -554,6 +555,17 @@ export async function medusaProductSetStatusHandler(req: PayloadRequest): Promis
     const env = getMedusaEnv();
     await setProductStatus(env, image.medusaProductId, status);
     const product = await getProduct(env, image.medusaProductId);
+    if (status === 'published') {
+      try {
+        await notifyPendingProductRequests(req.payload, id);
+      } catch (err) {
+        req.payload.logger.error(
+          `[product-request] failed to queue waitlist emails for gallery-image ${id}: ${
+            err instanceof Error ? err.message : String(err)
+          }`,
+        );
+      }
+    }
     return Response.json({ ok: true, product });
   } catch (err) {
     return logAndFail('product/status (set)', err);
