@@ -7,6 +7,7 @@ import * as migration_20260731_restore_models_related_posts from './20260731_res
 import * as migration_20260805_gallery_albums_default_sort from './20260805_gallery_albums_default_sort';
 import * as migration_20260805_upload_collection_prefixes from './20260805_upload_collection_prefixes';
 import * as migration_20260817_gallery_masters from './20260817_gallery_masters';
+import * as migration_20260818_210234_galleryProductRequests from './20260818_210234_galleryProductRequests';
 
 export const migrations = [
   {
@@ -53,5 +54,10 @@ export const migrations = [
     up: migration_20260817_gallery_masters.up,
     down: migration_20260817_gallery_masters.down,
     name: '20260817_gallery_masters',
+  },
+  {
+    up: migration_20260818_210234_galleryProductRequests.up,
+    down: migration_20260818_210234_galleryProductRequests.down,
+    name: '20260818_210234_galleryProductRequests',
   },
 ];

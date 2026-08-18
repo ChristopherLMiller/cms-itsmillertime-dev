@@ -78,6 +78,7 @@ export interface Config {
     'gallery-albums': GalleryAlbum;
     'gallery-images': GalleryImage;
     'gallery-masters': GalleryMaster;
+    'gallery-product-requests': GalleryProductRequest;
     'gallery-tags': GalleryTag;
     'gallery-categories': GalleryCategory;
     gardens: Garden;
@@ -116,6 +117,9 @@ export interface Config {
       relatedPosts: 'posts';
       images: 'gallery-images';
     };
+    'gallery-images': {
+      productRequests: 'gallery-product-requests';
+    };
     kits: {
       models: 'models';
     };
@@ -134,6 +138,7 @@ export interface Config {
     'gallery-albums': GalleryAlbumsSelect<false> | GalleryAlbumsSelect<true>;
     'gallery-images': GalleryImagesSelect<false> | GalleryImagesSelect<true>;
     'gallery-masters': GalleryMastersSelect<false> | GalleryMastersSelect<true>;
+    'gallery-product-requests': GalleryProductRequestsSelect<false> | GalleryProductRequestsSelect<true>;
     'gallery-tags': GalleryTagsSelect<false> | GalleryTagsSelect<true>;
     'gallery-categories': GalleryCategoriesSelect<false> | GalleryCategoriesSelect<true>;
     gardens: GardensSelect<false> | GardensSelect<true>;
@@ -192,6 +197,8 @@ export interface Config {
       sendResetPasswordEmail: TaskSendResetPasswordEmail;
       sendVerificationEmail: TaskSendVerificationEmail;
       sendContactFormEmail: TaskSendContactFormEmail;
+      sendProductRequestAdminEmail: TaskSendProductRequestAdminEmail;
+      sendProductRequestAvailableEmail: TaskSendProductRequestAvailableEmail;
       schedulePublish: TaskSchedulePublish;
       inline: {
         input: unknown;
@@ -838,6 +845,14 @@ export interface GalleryImage {
      */
     image?: (number | null) | GalleryImage;
   };
+  /**
+   * People who asked to be notified when this image is listed in the shop.
+   */
+  productRequests?: {
+    docs?: (number | GalleryProductRequest)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -931,6 +946,41 @@ export interface GalleryMaster {
   filesize?: number | null;
   width?: number | null;
   height?: number | null;
+}
+/**
+ * People waiting to buy a gallery image that is not listed yet.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "gallery-product-requests".
+ */
+export interface GalleryProductRequest {
+  id: number;
+  /**
+   * The gallery image they want listed in the shop.
+   */
+  galleryImage: number | GalleryImage;
+  name: string;
+  email: string;
+  status: 'pending' | 'notified' | 'cancelled';
+  /**
+   * Album slug at request time, used to deep-link the lightbox.
+   */
+  albumSlug?: string | null;
+  /**
+   * Snapshot of the image alt/title for emails.
+   */
+  imageTitle?: string | null;
+  /**
+   * Public thumbnail URL snapshot for emails.
+   */
+  imageUrl?: string | null;
+  notifiedAt?: string | null;
+  /**
+   * Set when the requester was logged in.
+   */
+  user?: (number | null) | User;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * Singular dynamic page of the front end
@@ -1403,6 +1453,24 @@ export interface PayloadMcpApiKey {
      */
     delete?: boolean | null;
   };
+  galleryProductRequests?: {
+    /**
+     * Allow clients to find gallery-product-requests.
+     */
+    find?: boolean | null;
+    /**
+     * Allow clients to create gallery-product-requests.
+     */
+    create?: boolean | null;
+    /**
+     * Allow clients to update gallery-product-requests.
+     */
+    update?: boolean | null;
+    /**
+     * Allow clients to delete gallery-product-requests.
+     */
+    delete?: boolean | null;
+  };
   galleryCategories?: {
     /**
      * Allow clients to find gallery-categories.
@@ -1685,6 +1753,8 @@ export interface PayloadJob {
           | 'sendResetPasswordEmail'
           | 'sendVerificationEmail'
           | 'sendContactFormEmail'
+          | 'sendProductRequestAdminEmail'
+          | 'sendProductRequestAvailableEmail'
           | 'schedulePublish';
         taskID: string;
         input?:
@@ -1726,6 +1796,8 @@ export interface PayloadJob {
         | 'sendResetPasswordEmail'
         | 'sendVerificationEmail'
         | 'sendContactFormEmail'
+        | 'sendProductRequestAdminEmail'
+        | 'sendProductRequestAvailableEmail'
         | 'schedulePublish'
       )
     | null;
@@ -1790,6 +1862,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'gallery-masters';
         value: number | GalleryMaster;
+      } | null)
+    | ({
+        relationTo: 'gallery-product-requests';
+        value: number | GalleryProductRequest;
       } | null)
     | ({
         relationTo: 'gallery-tags';
@@ -2277,6 +2353,7 @@ export interface GalleryImagesSelect<T extends boolean = true> {
         description?: T;
         image?: T;
       };
+  productRequests?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -2380,6 +2457,23 @@ export interface GalleryMastersSelect<T extends boolean = true> {
   filesize?: T;
   width?: T;
   height?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "gallery-product-requests_select".
+ */
+export interface GalleryProductRequestsSelect<T extends boolean = true> {
+  galleryImage?: T;
+  name?: T;
+  email?: T;
+  status?: T;
+  albumSlug?: T;
+  imageTitle?: T;
+  imageUrl?: T;
+  notifiedAt?: T;
+  user?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -2752,6 +2846,14 @@ export interface PayloadMcpApiKeysSelect<T extends boolean = true> {
         update?: T;
         delete?: T;
       };
+  galleryProductRequests?:
+    | T
+    | {
+        find?: T;
+        create?: T;
+        update?: T;
+        delete?: T;
+      };
   galleryCategories?:
     | T
     | {
@@ -3043,6 +3145,7 @@ export interface Webhook {
           | 'gallery-albums'
           | 'gallery-images'
           | 'gallery-masters'
+          | 'gallery-product-requests'
           | 'gallery-tags'
           | 'gallery-categories'
           | 'gardens'
@@ -3287,6 +3390,36 @@ export interface TaskSendContactFormEmail {
     senderName: string;
     senderEmail: string;
     message: string;
+  };
+  output?: unknown;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TaskSendProductRequestAdminEmail".
+ */
+export interface TaskSendProductRequestAdminEmail {
+  input: {
+    requesterName: string;
+    requesterEmail: string;
+    imageTitle: string;
+    imageId: number;
+    imageUrl?: string | null;
+    galleryUrl?: string | null;
+    cmsUrl: string;
+  };
+  output?: unknown;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TaskSendProductRequestAvailableEmail".
+ */
+export interface TaskSendProductRequestAvailableEmail {
+  input: {
+    requestId: number;
+    requesterName: string;
+    requesterEmail: string;
+    imageTitle: string;
+    galleryUrl: string;
   };
   output?: unknown;
 }
