@@ -7,6 +7,7 @@ import {
 } from '@/collections/shared/imageFields';
 import { baseUploadConfig } from '@/collections/shared/uploadConfig';
 import { removeMedusaProduct } from '@/collections/Gallery/Image/hooks/commerceDelete';
+import { notifyProductWaitlist } from '@/collections/Gallery/Image/hooks/notifyProductWaitlist';
 import { PayloadRequest, slugField } from 'payload';
 import {
   MetaDescriptionField,
@@ -292,13 +293,25 @@ export const GalleryImages: CollectionConfig<'gallery-images'> = {
                 },
               },
             },
+            {
+              name: 'productRequests',
+              type: 'join',
+              collection: 'gallery-product-requests',
+              on: 'galleryImage',
+              label: 'Purchase requests',
+              admin: {
+                description:
+                  'People who asked to be notified when this image is listed in the shop.',
+                allowCreate: false,
+              },
+            },
           ],
         },
       ],
     },
   ],
   hooks: {
-    afterChange: [generateEXIF],
+    afterChange: [generateEXIF, notifyProductWaitlist],
     afterDelete: [removeMedusaProduct],
     beforeChange: [ensureUploadPrefix('gallery-images'), sanitizeIncomingExif],
     beforeValidate: [defaultAltText, generateBlurHash],

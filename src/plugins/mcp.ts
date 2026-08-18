@@ -18,6 +18,10 @@ export function mcpPlugin() {
         enabled: true,
         description: 'Gallery Tags',
       },
+      'gallery-product-requests': {
+        enabled: true,
+        description: 'Gallery product waitlist requests',
+      },
       'gallery-categories': {
         enabled: true,
         description: 'Gallery Categories',
