@@ -1,5 +1,11 @@
 # cms-itsmillertime-dev
 
+## 3.24.1
+
+### Patch Changes
+
+- Build Authentik `redirect_uri` from the browser host so www login returns to www instead of cms
+
 ## 3.24.0
 
 ### Minor Changes
