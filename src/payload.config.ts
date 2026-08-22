@@ -35,6 +35,8 @@ import { SiteMeta } from './globals/site-meta';
 import { SiteNavigation } from './globals/site-navigation';
 import { plugins } from './plugins';
 import { bggCollectionHandler } from './endpoints/bgg-collection';
+import { frontendOauthContinueHandler } from './endpoints/frontend-oauth-continue';
+import { frontendOauthExchangeHandler } from './endpoints/frontend-oauth-exchange';
 import { frontendOauthStartHandler } from './endpoints/frontend-oauth-start';
 import {
   clockifyProjectsHandler,
@@ -151,6 +153,16 @@ export default buildConfig({
       path: '/frontend-oauth-start',
       method: 'get',
       handler: frontendOauthStartHandler,
+    },
+    {
+      path: '/frontend-oauth-continue',
+      method: 'get',
+      handler: frontendOauthContinueHandler,
+    },
+    {
+      path: '/frontend-oauth-exchange',
+      method: 'post',
+      handler: frontendOauthExchangeHandler,
     },
     {
       path: '/gallery-image-tracking',
