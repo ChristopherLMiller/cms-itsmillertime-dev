@@ -16,9 +16,10 @@ export type AuthentikOAuthConfig = {
  * break-glass login still works before the Authentik app is created.
  *
  * redirect_uri is left unset so Better Auth uses BETTER_AUTH_URL
- * (cms.itsmillertime.dev). Shared Domain=.itsmillertime.dev cookies keep the
- * session available on www after callback. Forcing a www redirect_uri breaks
- * Payload admin login (oauth state starts on cms, callback must match).
+ * (cms.itsmillertime.dev). www login then lands on /api/frontend-oauth-continue
+ * (same origin) and exchanges a short-lived ticket so www can set a first-party
+ * session cookie — mobile Chrome/Safari drop Domain=.itsmillertime.dev cookies
+ * on the cms → www 302. Forcing a www redirect_uri breaks Payload admin login.
  */
 export function getAuthentikOAuthConfig(): AuthentikOAuthConfig | null {
   const clientId = process.env.AUTHENTIK_CLIENT_ID?.trim();
