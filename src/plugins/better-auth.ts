@@ -1,5 +1,9 @@
 import { createBetterAuthOptions } from '@/lib/auth/config';
-import { getBaseUrl } from '@/lib/auth/getBaseUrl';
+import {
+  crossSubDomainForBaseUrl,
+  getDynamicAuthBaseURL,
+  resolveAuthBaseUrl,
+} from '@/lib/auth/baseURL';
 import { betterAuth } from 'better-auth';
 import {
   betterAuthCollections,
@@ -19,21 +23,6 @@ const userLinkedCollections: { collection: CollectionSlug; field: string }[] = [
   { collection: 'twoFactors', field: 'user' },
   { collection: 'passkeys', field: 'user' },
 ];
-
-function resolveAuthBaseUrl(): string {
-  return getBaseUrl().replace(/\/+$/, '');
-}
-
-function crossSubDomainForBaseUrl(baseUrl: string): string | null {
-  try {
-    const host = new URL(baseUrl).hostname;
-    return host === 'itsmillertime.dev' || host.endsWith('.itsmillertime.dev')
-      ? '.itsmillertime.dev'
-      : null;
-  } catch {
-    return null;
-  }
-}
 
 export function betterAuthPlugin() {
   return [
@@ -71,8 +60,8 @@ export function betterAuthPlugin() {
       autoRegisterEndpoints: true,
       createAuth: (payload) => {
         // Resolve at auth-init time (not module load) so Coolify runtime env is used.
-        const baseUrl = resolveAuthBaseUrl();
-        const crossSubDomain = crossSubDomainForBaseUrl(baseUrl);
+        const fallbackBaseUrl = resolveAuthBaseUrl();
+        const crossSubDomain = crossSubDomainForBaseUrl(fallbackBaseUrl);
 
         return betterAuth({
           ...createBetterAuthOptions(payload),
@@ -95,7 +84,9 @@ export function betterAuthPlugin() {
                 }
               : {}),
           },
-          baseURL: baseUrl,
+          // Static BETTER_AUTH_URL always won over X-Forwarded-Host, so Authentik
+          // authorize used the CMS callback even when login started on www.
+          baseURL: getDynamicAuthBaseURL(),
           secret: process.env.BETTER_AUTH_SECRET,
           user: {
             deleteUser: {
