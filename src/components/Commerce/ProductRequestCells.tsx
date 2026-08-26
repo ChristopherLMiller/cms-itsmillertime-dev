@@ -44,7 +44,7 @@ export const ProductRequestStatusCell: React.FC<CellProps> = ({ cellData }) => {
   const status = typeof cellData === 'string' ? cellData : '';
   return (
     <Pill pillStyle={STATUS_PILL[status] ?? 'light-gray'} size="small">
-      {STATUS_LABEL[status] ?? status || '—'}
+      {STATUS_LABEL[status] ?? (status || '—')}
     </Pill>
   );
 };
