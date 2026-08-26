@@ -77,6 +77,10 @@ interface MedusaShippingProfile {
   isDefault: boolean;
 }
 
+function usd(amount: number): string {
+  return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(amount);
+}
+
 function defaultShippingProfileId(profiles: MedusaShippingProfile[]): string {
   return (profiles.find((p) => p.isDefault) ?? profiles[0])?.id ?? '';
 }

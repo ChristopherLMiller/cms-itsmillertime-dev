@@ -1,8 +1,8 @@
-import type { Payload } from 'payload';
+import type { Payload, Where } from 'payload';
 import { frontendBaseUrl, galleryImagePublicUrl } from './productRequestUrls';
 
-const pendingWhere = (galleryImageId: number) => ({
-  and: [{ galleryImage: { equals: galleryImageId } }, { status: { equals: 'pending' as const } }],
+const pendingWhere = (galleryImageId: number): Where => ({
+  and: [{ galleryImage: { equals: galleryImageId } }, { status: { equals: 'pending' } }],
 });
 
 export async function countPendingProductRequests(
