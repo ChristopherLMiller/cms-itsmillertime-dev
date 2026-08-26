@@ -11,7 +11,9 @@ export const notifyProductWaitlist: CollectionAfterChangeHook = async ({
   doc,
   previousDoc,
   operation,
+  context,
 }) => {
+  if (context?.skipWaitlistNotify) return doc;
   if (operation !== 'update') return doc;
 
   const previousId =
@@ -21,7 +23,7 @@ export const notifyProductWaitlist: CollectionAfterChangeHook = async ({
   if (!nextId || previousId === nextId) return doc;
 
   try {
-    await notifyPendingProductRequests(req.payload, doc.id);
+    await notifyPendingProductRequests(req.payload, Number(doc.id));
   } catch (err) {
     req.payload.logger.error(
       `[product-request] failed to queue waitlist emails for gallery-image ${doc.id}: ${

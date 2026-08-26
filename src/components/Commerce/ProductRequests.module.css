@@ -1,0 +1,110 @@
+.intro {
+  margin: 0 0 var(--base);
+  padding: calc(var(--base) * 0.75);
+  border: 1px solid var(--theme-elevation-150);
+  border-radius: var(--style-radius-m);
+  background: var(--theme-elevation-50);
+  max-width: 52rem;
+}
+
+.intro p {
+  margin: 0 0 0.5rem;
+  color: var(--theme-elevation-800);
+}
+
+.intro ol {
+  margin: 0;
+  padding-left: 1.25rem;
+  color: var(--theme-elevation-700);
+  font-size: 0.9rem;
+}
+
+.intro li + li {
+  margin-top: 0.25rem;
+}
+
+.thumbCell {
+  display: flex;
+  align-items: center;
+}
+
+.thumb {
+  width: 48px;
+  height: 48px;
+  object-fit: cover;
+  border-radius: var(--style-radius-s);
+  background: var(--theme-elevation-100);
+  border: 1px solid var(--theme-elevation-150);
+}
+
+.thumbFallback {
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--style-radius-s);
+  background: var(--theme-elevation-100);
+  border: 1px solid var(--theme-elevation-150);
+  color: var(--theme-elevation-400);
+  font-size: 0.7rem;
+}
+
+.summary {
+  display: flex;
+  gap: var(--base);
+  align-items: flex-start;
+  margin-bottom: var(--base);
+  padding: calc(var(--base) * 0.75);
+  border: 1px solid var(--theme-elevation-150);
+  border-radius: var(--style-radius-m);
+  background: var(--theme-elevation-50);
+}
+
+.summaryThumb {
+  width: 120px;
+  height: 120px;
+  object-fit: cover;
+  border-radius: var(--style-radius-s);
+  background: var(--theme-elevation-100);
+  border: 1px solid var(--theme-elevation-150);
+  flex-shrink: 0;
+}
+
+.summaryMeta {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  min-width: 0;
+}
+
+.summaryTitle {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 600;
+}
+
+.summaryLine {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--theme-elevation-700);
+}
+
+.summaryHint {
+  margin: 0.25rem 0 0;
+  font-size: 0.8rem;
+  color: var(--theme-elevation-500);
+}
+
+.summaryActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.35rem;
+}
+
+.openLink {
+  font-size: 0.85rem;
+  color: var(--theme-text);
+  text-decoration: underline;
+}
