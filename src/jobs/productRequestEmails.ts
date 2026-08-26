@@ -7,6 +7,7 @@ import {
   safeProductRequestAdminSubject,
   safeProductRequestAvailableSubject,
 } from '../utilities/sanitizeProductRequest';
+import { emailFrom } from '../utilities/emailFrom';
 
 export const sendProductRequestAdminEmailTask = {
   slug: 'sendProductRequestAdminEmail',
@@ -60,6 +61,7 @@ export const sendProductRequestAdminEmailTask = {
       );
 
       await emailAdapter.sendEmail({
+        from: emailFrom.site,
         to: toEmail,
         replyTo: requesterEmail,
         subject: safeProductRequestAdminSubject(imageTitle, requesterName),
@@ -133,6 +135,7 @@ export const sendProductRequestAvailableEmailTask = {
       );
 
       await emailAdapter.sendEmail({
+        from: emailFrom.site,
         to: requesterEmail,
         subject: safeProductRequestAvailableSubject(imageTitle),
         html,

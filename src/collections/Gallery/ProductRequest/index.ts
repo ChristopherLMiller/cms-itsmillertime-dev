@@ -14,11 +14,17 @@ export const GalleryProductRequests: CollectionConfig<'gallery-product-requests'
     singular: 'Product request',
     plural: 'Product requests',
   },
+  defaultSort: '-createdAt',
   admin: {
     group: Groups.galleries,
-    description: 'People waiting to buy a gallery image that is not listed yet.',
-    useAsTitle: 'name',
-    defaultColumns: ['galleryImage', 'name', 'email', 'status', 'createdAt'],
+    description:
+      'People waiting to buy a gallery image. Listing the image on the Store tab emails them.',
+    useAsTitle: 'imageTitle',
+    defaultColumns: ['imageUrl', 'imageTitle', 'name', 'email', 'status', 'galleryImage', 'createdAt'],
+    listSearchableFields: ['name', 'email', 'imageTitle'],
+    components: {
+      beforeListTable: ['@/components/Commerce/ProductRequestsListIntro#ProductRequestsListIntro'],
+    },
   },
   access: {
     read: RBAC(allowedRoles(['admin']), [], 'gallery-product-requests', 'read'),
@@ -31,26 +37,30 @@ export const GalleryProductRequests: CollectionConfig<'gallery-product-requests'
   },
   fields: [
     {
-      name: 'galleryImage',
-      type: 'relationship',
-      relationTo: 'gallery-images',
-      required: true,
-      index: true,
+      name: 'summary',
+      type: 'ui',
       admin: {
-        description: 'The gallery image they want listed in the shop.',
+        components: {
+          Field: '@/components/Commerce/ProductRequestSummary#ProductRequestSummary',
+        },
       },
     },
     {
-      name: 'name',
-      type: 'text',
-      required: true,
-      maxLength: 200,
-    },
-    {
-      name: 'email',
-      type: 'email',
-      required: true,
-      index: true,
+      type: 'row',
+      fields: [
+        {
+          name: 'name',
+          type: 'text',
+          required: true,
+          maxLength: 200,
+        },
+        {
+          name: 'email',
+          type: 'email',
+          required: true,
+          index: true,
+        },
+      ],
     },
     {
       name: 'status',
@@ -59,17 +69,38 @@ export const GalleryProductRequests: CollectionConfig<'gallery-product-requests'
       defaultValue: 'pending',
       index: true,
       options: [
-        { label: 'Pending', value: 'pending' },
-        { label: 'Notified', value: 'notified' },
-        { label: 'Cancelled', value: 'cancelled' },
+        { label: 'Pending — waiting for listing', value: 'pending' },
+        { label: 'Notified — email sent', value: 'notified' },
+        { label: 'Cancelled — will not list', value: 'cancelled' },
       ],
+      admin: {
+        description:
+          'Flips to Notified automatically after the waitlist email is sent. Use Cancelled only if you will not list this photo.',
+        components: {
+          Cell: '@/components/Commerce/ProductRequestCells#ProductRequestStatusCell',
+        },
+      },
     },
     {
-      name: 'albumSlug',
-      type: 'text',
-      maxLength: 200,
+      name: 'notifiedAt',
+      type: 'date',
       admin: {
-        description: 'Album slug at request time, used to deep-link the lightbox.',
+        date: { pickerAppearance: 'dayAndTime' },
+        readOnly: true,
+        condition: (data) => data?.status === 'notified',
+      },
+    },
+    {
+      name: 'galleryImage',
+      type: 'relationship',
+      relationTo: 'gallery-images',
+      required: true,
+      index: true,
+      admin: {
+        description: 'The gallery image they want listed.',
+        components: {
+          Cell: '@/components/Commerce/ProductRequestCells#ProductRequestImageLinkCell',
+        },
       },
     },
     {
@@ -84,18 +115,23 @@ export const GalleryProductRequests: CollectionConfig<'gallery-product-requests'
     {
       name: 'imageUrl',
       type: 'text',
+      label: 'Image',
       admin: {
-        description: 'Public thumbnail URL snapshot for emails.',
+        description: 'Public thumbnail used in emails.',
         readOnly: true,
+        components: {
+          Field: '@/components/Commerce/ProductRequestCells#HiddenOnEdit',
+          Cell: '@/components/Commerce/ProductRequestCells#ProductRequestImageCell',
+        },
       },
     },
     {
-      name: 'notifiedAt',
-      type: 'date',
+      name: 'albumSlug',
+      type: 'text',
+      maxLength: 200,
       admin: {
-        date: { pickerAppearance: 'dayAndTime' },
+        description: 'Album slug at request time, used to deep-link the lightbox.',
         readOnly: true,
-        condition: (data) => data?.status === 'notified',
       },
     },
     {
@@ -104,6 +140,7 @@ export const GalleryProductRequests: CollectionConfig<'gallery-product-requests'
       relationTo: 'users',
       admin: {
         description: 'Set when the requester was logged in.',
+        readOnly: true,
       },
     },
   ],

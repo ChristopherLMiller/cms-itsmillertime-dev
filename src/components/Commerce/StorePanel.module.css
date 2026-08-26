@@ -316,6 +316,12 @@
   min-width: 0;
 }
 
+.previewActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
 .previewImg {
   width: 96px;
   height: 96px;
@@ -337,4 +343,63 @@
   background: var(--theme-elevation-100);
   border: 1px solid var(--theme-elevation-150);
   flex-shrink: 0;
+}
+
+.waitlist {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  padding-top: calc(var(--base) * 0.25);
+  border-top: 1px solid var(--theme-elevation-150);
+}
+
+.waitlistHead {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.waitlistTitle {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.waitlistList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.waitlistItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.6rem 0.75rem;
+  border: 1px solid var(--theme-elevation-150);
+  border-radius: var(--style-radius-m);
+  background: var(--theme-elevation-50);
+}
+
+.waitlistMeta {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 0;
+}
+
+.waitlistMeta a {
+  font-size: 0.85rem;
+  color: var(--theme-text);
+  word-break: break-all;
+}
+
+.waitlistDate {
+  font-size: 0.75rem;
+  color: var(--theme-elevation-500);
 }

@@ -300,8 +300,8 @@ export const GalleryImages: CollectionConfig<'gallery-images'> = {
               on: 'galleryImage',
               label: 'Purchase requests',
               admin: {
-                description:
-                  'People who asked to be notified when this image is listed in the shop.',
+                hidden: true,
+                disableListColumn: true,
                 allowCreate: false,
               },
             },

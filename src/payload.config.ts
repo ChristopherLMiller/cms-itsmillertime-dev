@@ -54,6 +54,7 @@ import {
   medusaOfferingSetsHandler,
   medusaProductCreateHandler,
   medusaProductDeleteHandler,
+  medusaProductNotifyWaitlistHandler,
   medusaProductSetStatusHandler,
   medusaProductStatusHandler,
   medusaProductUpdateHandler,
@@ -76,6 +77,7 @@ import {
   openapiMedusaOfferingSets,
   openapiMedusaProductCreate,
   openapiMedusaProductDelete,
+  openapiMedusaProductNotifyWaitlist,
   openapiMedusaProductStatusGet,
   openapiMedusaProductStatusPost,
   openapiMedusaProductUpdate,
@@ -95,14 +97,15 @@ import {
 } from './jobs/productRequestEmails';
 import { trustedOriginsArray } from './lib/auth/trustedOrigins';
 import { sanitizeExifForStorage } from './utilities/sanitizeExif';
+import { DEFAULT_FROM_ADDRESS, DEFAULT_FROM_NAME, emailFrom } from './utilities/emailFrom';
 
 const filename = fileURLToPath(import.meta.url);
 const dirname = path.dirname(filename);
 
 export default buildConfig({
   email: resendAdapter({
-    defaultFromAddress: 'support@itsmillertime.dev',
-    defaultFromName: 'Payload CMS',
+    defaultFromAddress: DEFAULT_FROM_ADDRESS,
+    defaultFromName: DEFAULT_FROM_NAME,
     apiKey: process.env.RESEND_API_KEY || '',
   }),
   endpoints: [
@@ -181,6 +184,12 @@ export default buildConfig({
       method: 'post',
       handler: medusaProductSetStatusHandler,
       custom: { openapi: openapiMedusaProductStatusPost },
+    },
+    {
+      path: '/medusa/product/notify-waitlist',
+      method: 'post',
+      handler: medusaProductNotifyWaitlistHandler,
+      custom: { openapi: openapiMedusaProductNotifyWaitlist },
     },
     {
       path: '/medusa/product/create',
@@ -715,6 +724,7 @@ export default buildConfig({
               }),
             );
             await emailAdapter.sendEmail({
+              from: emailFrom.cms,
               to: user.email,
               subject: 'Reset your password',
               html,
@@ -754,6 +764,7 @@ export default buildConfig({
               }),
             );
             await emailAdapter.sendEmail({
+              from: emailFrom.cms,
               to: user.email,
               subject: 'Verify your email',
               html,
@@ -818,6 +829,7 @@ export default buildConfig({
               }),
             );
             await emailAdapter.sendEmail({
+              from: emailFrom.site,
               to: toEmail,
               replyTo: senderEmail,
               subject: safeEmailSubjectLine(senderName),
