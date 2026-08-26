@@ -19,7 +19,10 @@ import {
   type ProductSummary,
 } from '@/lib/medusa/client';
 import { readStoredUpload } from '@/utilities/readStoredUpload';
-import { notifyPendingProductRequests } from '@/utilities/notifyProductRequests';
+import {
+  countPendingProductRequests,
+  notifyPendingProductRequests,
+} from '@/utilities/notifyProductRequests';
 
 /**
  * Admin-only endpoints that let the gallery-image "Store" panel drive Medusa.
@@ -185,14 +188,28 @@ async function persistPointer(
   req: PayloadRequest,
   id: number,
   productId: string | null,
-): Promise<void> {
+): Promise<number> {
   await req.payload.update({
     collection: 'gallery-images',
     id,
     depth: 0,
     overrideAccess: true,
+    context: { skipWaitlistNotify: true },
     data: { medusaProductId: productId },
   });
+
+  if (!productId) return 0;
+
+  try {
+    return await notifyPendingProductRequests(req.payload, id);
+  } catch (err) {
+    req.payload.logger.error(
+      `[product-request] failed to queue waitlist emails for gallery-image ${id}: ${
+        err instanceof Error ? err.message : String(err)
+      }`,
+    );
+    return 0;
+  }
 }
 
 interface DecodedUpload {
@@ -347,9 +364,11 @@ export async function medusaProductStatusHandler(req: PayloadRequest): Promise<R
   const audience = isPrivateImage(image) ? 'private' : 'public';
   const privateChannelConfigured = Boolean(process.env.MEDUSA_PRIVATE_SALES_CHANNEL_ID);
   const master = await loadMaster(req, image);
+  const pendingRequestCount = await countPendingProductRequests(req.payload, id);
   const masterInfo = {
     hasMaster: Boolean(master?.filename),
     masterFilename: master?.filename ?? null,
+    pendingRequestCount,
   };
 
   if (!image.medusaProductId) {
@@ -451,9 +470,9 @@ export async function medusaProductCreateHandler(req: PayloadRequest): Promise<R
       shippingProfileId: shippingProfileFromBody(body),
       status: 'published',
     });
-    await persistPointer(req, id, product.productId);
+    const waitlistQueued = await persistPointer(req, id, product.productId);
     console.info(`[medusa] product/create: done galleryImageId=${id} product=${product.productId}`);
-    return Response.json({ ok: true, product });
+    return Response.json({ ok: true, product, waitlistQueued });
   } catch (err) {
     return logAndFail('product/create', err);
   }
@@ -499,7 +518,7 @@ export async function medusaProductUpdateHandler(req: PayloadRequest): Promise<R
       env,
       image,
       body,
-      !existing.downloadUrl,
+      body.useAttachedMaster === true || !existing.downloadUrl,
     );
     const downloadUrl = download?.url ?? existing.downloadUrl ?? undefined;
 
@@ -555,9 +574,10 @@ export async function medusaProductSetStatusHandler(req: PayloadRequest): Promis
     const env = getMedusaEnv();
     await setProductStatus(env, image.medusaProductId, status);
     const product = await getProduct(env, image.medusaProductId);
+    let waitlistQueued = 0;
     if (status === 'published') {
       try {
-        await notifyPendingProductRequests(req.payload, id);
+        waitlistQueued = await notifyPendingProductRequests(req.payload, id);
       } catch (err) {
         req.payload.logger.error(
           `[product-request] failed to queue waitlist emails for gallery-image ${id}: ${
@@ -566,9 +586,35 @@ export async function medusaProductSetStatusHandler(req: PayloadRequest): Promis
         );
       }
     }
-    return Response.json({ ok: true, product });
+    return Response.json({ ok: true, product, waitlistQueued });
   } catch (err) {
     return logAndFail('product/status (set)', err);
+  }
+}
+
+// ---------------------------------------------------------------------------
+// POST /api/medusa/product/notify-waitlist  { galleryImageId }
+// ---------------------------------------------------------------------------
+export async function medusaProductNotifyWaitlistHandler(req: PayloadRequest): Promise<Response> {
+  if (!(await requireAdmin(req))) {
+    return Response.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+  const body = await readJson(req);
+  if (!body) return Response.json({ error: 'Invalid JSON body' }, { status: 400 });
+
+  const id = num(body.galleryImageId);
+  if (id == null) return Response.json({ error: 'galleryImageId is required' }, { status: 400 });
+
+  const image = await loadImage(req, id);
+  if (!image?.medusaProductId) {
+    return Response.json({ error: 'This image is not listed yet.' }, { status: 409 });
+  }
+
+  try {
+    const queued = await notifyPendingProductRequests(req.payload, id);
+    return Response.json({ ok: true, queued });
+  } catch (err) {
+    return logAndFail('product/notify-waitlist', err);
   }
 }
 

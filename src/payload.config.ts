@@ -54,6 +54,7 @@ import {
   medusaOfferingSetsHandler,
   medusaProductCreateHandler,
   medusaProductDeleteHandler,
+  medusaProductNotifyWaitlistHandler,
   medusaProductSetStatusHandler,
   medusaProductStatusHandler,
   medusaProductUpdateHandler,
@@ -76,6 +77,7 @@ import {
   openapiMedusaOfferingSets,
   openapiMedusaProductCreate,
   openapiMedusaProductDelete,
+  openapiMedusaProductNotifyWaitlist,
   openapiMedusaProductStatusGet,
   openapiMedusaProductStatusPost,
   openapiMedusaProductUpdate,
@@ -102,7 +104,7 @@ const dirname = path.dirname(filename);
 export default buildConfig({
   email: resendAdapter({
     defaultFromAddress: 'support@itsmillertime.dev',
-    defaultFromName: 'Payload CMS',
+    defaultFromName: 'ItsMillerTime',
     apiKey: process.env.RESEND_API_KEY || '',
   }),
   endpoints: [
@@ -181,6 +183,12 @@ export default buildConfig({
       method: 'post',
       handler: medusaProductSetStatusHandler,
       custom: { openapi: openapiMedusaProductStatusPost },
+    },
+    {
+      path: '/medusa/product/notify-waitlist',
+      method: 'post',
+      handler: medusaProductNotifyWaitlistHandler,
+      custom: { openapi: openapiMedusaProductNotifyWaitlist },
     },
     {
       path: '/medusa/product/create',

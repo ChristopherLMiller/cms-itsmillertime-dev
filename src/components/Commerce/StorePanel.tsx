@@ -108,10 +108,12 @@ interface StatusResponse {
   privateChannelConfigured?: boolean;
   hasMaster?: boolean;
   masterFilename?: string | null;
+  pendingRequestCount?: number;
   error?: string;
 }
 
 type ImageSource = 'gallery' | 'upload' | 'keep';
+type DownloadSource = 'master' | 'keep' | 'upload';
 type DrawerTab = 'general' | 'digital' | 'prints';
 
 const DRAWER_TABS: Array<{ id: DrawerTab; label: string }> = [
@@ -133,6 +135,7 @@ interface FormState {
   shippingProfileId: string;
   imageSource: ImageSource;
   imageFile: File | null;
+  downloadSource: DownloadSource;
   downloadFile: File | null;
 }
 
@@ -149,11 +152,31 @@ const EMPTY_FORM: FormState = {
   shippingProfileId: '',
   imageSource: 'gallery',
   imageFile: null,
+  downloadSource: 'master',
   downloadFile: null,
 };
 
-const usd = (n: number) =>
-  new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(n);
+interface WaitlistRequest {
+  id: number;
+  name: string;
+  email: string;
+  status: 'pending' | 'notified' | 'cancelled';
+  createdAt: string;
+  albumSlug?: string | null;
+}
+
+const WAITLIST_STATUS_PILL: Record<WaitlistRequest['status'], 'success' | 'warning' | 'light-gray'> =
+  {
+    pending: 'warning',
+    notified: 'success',
+    cancelled: 'light-gray',
+  };
+
+function formatRequestDate(iso: string): string {
+  const date = new Date(iso);
+  if (Number.isNaN(date.getTime())) return '';
+  return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+}
 
 function fileToDataUrl(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -257,6 +280,8 @@ export const StorePanel: React.FC = () => {
   const [statusError, setStatusError] = useState<string | null>(null);
   const [hasMaster, setHasMaster] = useState(false);
   const [masterFilename, setMasterFilename] = useState<string | null>(null);
+  const [pendingRequestCount, setPendingRequestCount] = useState(0);
+  const [waitlist, setWaitlist] = useState<WaitlistRequest[]>([]);
 
   const [form, setForm] = useState<FormState>(EMPTY_FORM);
   const [busy, setBusy] = useState(false);
@@ -281,8 +306,13 @@ export const StorePanel: React.FC = () => {
     setLoading(true);
     setStatusError(null);
     try {
-      const res = await fetch(`/api/medusa/product/status?galleryImageId=${galleryImageId}`);
-      const data = (await res.json()) as StatusResponse;
+      const [statusRes, waitlistRes] = await Promise.all([
+        fetch(`/api/medusa/product/status?galleryImageId=${galleryImageId}`),
+        fetch(
+          `/api/gallery-product-requests?where[galleryImage][equals]=${galleryImageId}&limit=50&sort=-createdAt&depth=0`,
+        ),
+      ]);
+      const data = (await statusRes.json()) as StatusResponse;
       setConfigured(data.configured !== false);
       setProduct(data.linked && data.product ? data.product : null);
       setAdminUrl(data.adminUrl ?? null);
@@ -291,6 +321,18 @@ export const StorePanel: React.FC = () => {
       setHasMaster(data.hasMaster === true);
       setMasterFilename(data.masterFilename ?? null);
       if (data.error) setStatusError(data.error);
+
+      try {
+        const waitlistData = waitlistRes.ok
+          ? ((await waitlistRes.json()) as { docs?: WaitlistRequest[] })
+          : { docs: [] };
+        const docs = Array.isArray(waitlistData.docs) ? waitlistData.docs : [];
+        setWaitlist(docs);
+        setPendingRequestCount(docs.filter((d) => d.status === 'pending').length);
+      } catch {
+        setWaitlist([]);
+        setPendingRequestCount(data.pendingRequestCount ?? 0);
+      }
     } catch (err) {
       setStatusError(err instanceof Error ? err.message : 'Failed to load store status');
     } finally {
@@ -360,6 +402,7 @@ export const StorePanel: React.FC = () => {
       offeringSetIds: offeringSets.filter((s) => s.isDefault).map((s) => s.id),
       salesChannelId: defaultSalesChannelId(galleryVisibility, salesChannels),
       shippingProfileId: defaultShippingProfileId(shippingProfiles),
+      downloadSource: hasMaster ? 'master' : 'upload',
     });
     openModal(DRAWER_SLUG);
   };
@@ -386,6 +429,7 @@ export const StorePanel: React.FC = () => {
         product.shippingProfileId ?? defaultShippingProfileId(shippingProfiles),
       imageSource: 'keep',
       imageFile: null,
+      downloadSource: product.downloadFilename ? 'keep' : hasMaster ? 'master' : 'upload',
       downloadFile: null,
     });
     openModal(DRAWER_SLUG);
@@ -464,14 +508,20 @@ export const StorePanel: React.FC = () => {
       setFormError('Enter a valid digital download price.');
       return;
     }
-    if (
-      form.mode === 'create' &&
-      (form.sellsDigital || form.offeringSetIds.length > 0) &&
-      !form.downloadFile &&
-      !hasMaster
-    ) {
+    const needsMaster = form.sellsDigital || form.offeringSetIds.length > 0;
+    const hasDownloadFile =
+      form.downloadSource === 'upload'
+        ? Boolean(form.downloadFile)
+        : form.downloadSource === 'master'
+          ? hasMaster
+          : Boolean(product?.downloadUrl || product?.downloadFilename);
+    if (needsMaster && !hasDownloadFile) {
       setActiveTab('general');
-      setFormError('This image has no master file. Re-upload with piu or drop a high-res file here.');
+      setFormError(
+        hasMaster
+          ? 'Choose the attached master or upload a high-res file.'
+          : 'This image has no master file. Re-upload with piu or drop a high-res file here.',
+      );
       return;
     }
 
@@ -490,6 +540,7 @@ export const StorePanel: React.FC = () => {
         salesChannelId: form.salesChannelId,
         shippingProfileId: form.shippingProfileId,
         imageSource: form.imageSource,
+        useAttachedMaster: form.downloadSource === 'master',
       };
 
       if (form.imageSource === 'upload' && form.imageFile) {
@@ -497,7 +548,7 @@ export const StorePanel: React.FC = () => {
         payload.imageFilename = form.imageFile.name;
         payload.imageContentType = form.imageFile.type;
       }
-      if (form.downloadFile) {
+      if (form.downloadSource === 'upload' && form.downloadFile) {
         payload.downloadBase64 = await fileToDataUrl(form.downloadFile);
         payload.downloadFilename = form.downloadFile.name;
         payload.downloadContentType = form.downloadFile.type;
@@ -532,6 +583,26 @@ export const StorePanel: React.FC = () => {
         body: JSON.stringify({ galleryImageId, status }),
       });
       const data = (await res.json()) as { ok?: boolean; error?: string };
+      if (!res.ok || !data.ok) throw new Error(data.error || 'Request failed');
+      await refresh();
+    } catch (err) {
+      setStatusError(err instanceof Error ? err.message : 'Request failed');
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const notifyWaitlist = async () => {
+    if (!galleryImageId) return;
+    setBusy(true);
+    setStatusError(null);
+    try {
+      const res = await fetch('/api/medusa/product/notify-waitlist', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ galleryImageId }),
+      });
+      const data = (await res.json()) as { ok?: boolean; error?: string; queued?: number };
       if (!res.ok || !data.ok) throw new Error(data.error || 'Request failed');
       await refresh();
     } catch (err) {
@@ -610,6 +681,14 @@ export const StorePanel: React.FC = () => {
             saved as a hidden draft with no sales channel until you configure one.
           </Banner>
         ))}
+
+      {pendingRequestCount > 0 && !product && (
+        <Banner type="info">
+          {pendingRequestCount === 1
+            ? '1 person asked to be emailed when this is listed. Selling this image sends that email.'
+            : `${pendingRequestCount} people asked to be emailed when this is listed. Selling this image sends those emails.`}
+        </Banner>
+      )}
 
       {!product ? (
         <>
@@ -702,6 +781,11 @@ export const StorePanel: React.FC = () => {
             >
               {isPublished ? 'Unpublish' : 'Publish'}
             </Button>
+            {pendingRequestCount > 0 && isPublished && (
+              <Button buttonStyle="primary" size="small" onClick={notifyWaitlist} disabled={busy}>
+                Email waitlist ({pendingRequestCount})
+              </Button>
+            )}
             <Button buttonStyle="error" size="small" onClick={remove} disabled={busy}>
               Delete
             </Button>
@@ -713,6 +797,51 @@ export const StorePanel: React.FC = () => {
           </div>
         </div>
       )}
+
+      <div className={styles.waitlist}>
+        <div className={styles.waitlistHead}>
+          <h4 className={styles.waitlistTitle}>Purchase requests</h4>
+          {pendingRequestCount > 0 && (
+            <Pill pillStyle="warning" size="small">
+              {pendingRequestCount} pending
+            </Pill>
+          )}
+        </div>
+        {waitlist.length === 0 ? (
+          <p className={styles.muted}>
+            Nobody has asked to be notified yet. When someone requests this photo from the
+            gallery, they show up here.
+          </p>
+        ) : (
+          <ul className={styles.waitlistList}>
+            {waitlist.map((request) => (
+              <li className={styles.waitlistItem} key={request.id}>
+                <div className={styles.waitlistMeta}>
+                  <strong>{request.name}</strong>
+                  <a href={`mailto:${request.email}`}>{request.email}</a>
+                  <span className={styles.waitlistDate}>{formatRequestDate(request.createdAt)}</span>
+                </div>
+                <Pill pillStyle={WAITLIST_STATUS_PILL[request.status]} size="small">
+                  {request.status === 'pending'
+                    ? 'Pending'
+                    : request.status === 'notified'
+                      ? 'Notified'
+                      : 'Cancelled'}
+                </Pill>
+              </li>
+            ))}
+          </ul>
+        )}
+        {pendingRequestCount > 0 && (
+          <p className={styles.hint}>
+            {product
+              ? isPublished
+                ? 'Pending people should get an email when you listed this. Use Email waitlist if they are still waiting.'
+                : 'Publish the listing to email everyone still pending.'
+              : 'Click Sell this image to list it — they will be emailed automatically.'}
+          </p>
+        )}
+      </div>
 
       <Drawer slug={DRAWER_SLUG} title={form.mode === 'create' ? 'Sell this image' : 'Edit listing'}>
         <div className={styles.form}>
@@ -897,33 +1026,138 @@ export const StorePanel: React.FC = () => {
                 <p className={styles.dt} style={{ marginBottom: '0.4rem' }}>
                   Master file (high-res, no watermark)
                 </p>
-                {form.downloadFile ? (
-                  <FilePreview
-                    file={form.downloadFile}
-                    onClear={() => setForm((f) => ({ ...f, downloadFile: null }))}
-                  />
-                ) : (
-                  <>
-                    <FileChooser
-                      accept="image/*"
-                      label="Drag the high-res source file here, or"
-                      onSelect={(file) => setForm((f) => ({ ...f, downloadFile: file }))}
-                    />
-                    {product?.downloadFilename && (
-                      <p className={styles.fileInfo}>
-                        Current: {product.downloadFilename} (leave blank to keep)
-                      </p>
+                {form.downloadSource === 'master' && hasMaster && (
+                  <div className={styles.previewWrap}>
+                    {galleryThumb ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        className={styles.previewImg}
+                        src={galleryThumb}
+                        alt={masterFilename ?? 'Attached master'}
+                      />
+                    ) : (
+                      <div className={styles.previewFile}>📄</div>
                     )}
-                    {!product?.downloadFilename && hasMaster && masterFilename && (
-                      <p className={styles.fileInfo}>
-                        Using attached master: {masterFilename}
+                    <div className={styles.previewMeta}>
+                      <span className={styles.fileInfo}>
+                        Attached master{masterFilename ? `: ${masterFilename}` : ''}
+                      </span>
+                      <p className={styles.hint} style={{ margin: 0 }}>
+                        This private original will be used for downloads and prints. Preview is the
+                        gallery image — the master itself is not loaded here.
                       </p>
-                    )}
-                  </>
+                      <Button
+                        buttonStyle="secondary"
+                        size="small"
+                        onClick={() =>
+                          setForm((f) => ({ ...f, downloadSource: 'upload', downloadFile: null }))
+                        }
+                      >
+                        Use a different file
+                      </Button>
+                    </div>
+                  </div>
                 )}
+                {form.downloadSource === 'keep' && (
+                  <div className={styles.previewWrap}>
+                    {galleryThumb ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        className={styles.previewImg}
+                        src={galleryThumb}
+                        alt={product?.downloadFilename ?? 'Current master'}
+                      />
+                    ) : (
+                      <div className={styles.previewFile}>📄</div>
+                    )}
+                    <div className={styles.previewMeta}>
+                      <span className={styles.fileInfo}>
+                        Current product file
+                        {product?.downloadFilename ? `: ${product.downloadFilename}` : ''}
+                      </span>
+                      <div className={styles.previewActions}>
+                        {hasMaster && (
+                          <Button
+                            buttonStyle="secondary"
+                            size="small"
+                            onClick={() =>
+                              setForm((f) => ({
+                                ...f,
+                                downloadSource: 'master',
+                                downloadFile: null,
+                              }))
+                            }
+                          >
+                            Use attached master
+                            {masterFilename ? ` (${masterFilename})` : ''}
+                          </Button>
+                        )}
+                        <Button
+                          buttonStyle="secondary"
+                          size="small"
+                          onClick={() =>
+                            setForm((f) => ({ ...f, downloadSource: 'upload', downloadFile: null }))
+                          }
+                        >
+                          Use a different file
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+                {(form.downloadSource === 'upload' ||
+                  (form.downloadSource === 'master' && !hasMaster)) &&
+                  (form.downloadFile ? (
+                    <FilePreview
+                      file={form.downloadFile}
+                      onClear={() =>
+                        setForm((f) => ({
+                          ...f,
+                          downloadFile: null,
+                          downloadSource: hasMaster
+                            ? 'master'
+                            : product?.downloadFilename
+                              ? 'keep'
+                              : 'upload',
+                        }))
+                      }
+                    />
+                  ) : (
+                    <>
+                      {!hasMaster && (
+                        <Banner type="error">
+                          No master file is attached to this image. Upload a high-res original here,
+                          or re-upload the photo with piu so a master is stored privately.
+                        </Banner>
+                      )}
+                      <FileChooser
+                        accept="image/*"
+                        label="Drag the high-res source file here, or"
+                        onSelect={(file) =>
+                          setForm((f) => ({ ...f, downloadSource: 'upload', downloadFile: file }))
+                        }
+                      />
+                      {hasMaster && (
+                        <Button
+                          buttonStyle="secondary"
+                          size="small"
+                          onClick={() =>
+                            setForm((f) => ({
+                              ...f,
+                              downloadSource: 'master',
+                              downloadFile: null,
+                            }))
+                          }
+                        >
+                          Use attached master
+                          {masterFilename ? ` (${masterFilename})` : ''}
+                        </Button>
+                      )}
+                    </>
+                  ))}
                 <p className={styles.hint}>
                   Used for the digital download <em>and</em> as the print file sent to the
-                  print-on-demand service. Leave blank to use the private master attached at ingest.
+                  print-on-demand service.
                 </p>
               </div>
             </div>

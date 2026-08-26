@@ -317,6 +317,33 @@ export const openapiMedusaProductUpdate = {
   },
 };
 
+export const openapiMedusaProductNotifyWaitlist = {
+  summary: 'Email pending purchase-request waitlist',
+  description:
+    'Admin-only. Queues “now available” emails for pending product requests on this gallery image. Safe to retry; already-notified rows are skipped.',
+  tags: ['Medusa'],
+  security: adminSecurity,
+  requestBody: {
+    required: true,
+    content: {
+      'application/json': {
+        schema: {
+          type: 'object',
+          required: ['galleryImageId'],
+          properties: {
+            galleryImageId: { type: 'integer', minimum: 1 },
+          },
+        },
+      },
+    },
+  },
+  responses: {
+    '200': { description: 'Waitlist emails queued' },
+    '401': { description: 'Unauthorized' },
+    '409': { description: 'Image is not listed yet' },
+  },
+};
+
 export const openapiMedusaProductDelete = {
   summary: 'Delete Medusa product for a gallery image',
   description: 'Admin-only. Deletes the Medusa product and clears the Payload pointer.',
