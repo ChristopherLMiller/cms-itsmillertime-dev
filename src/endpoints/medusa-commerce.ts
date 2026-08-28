@@ -15,6 +15,7 @@ import {
   updateProduct,
   uploadImageBuffer,
   uploadImageFromUrl,
+  type GalleryAlbumRef,
   type MedusaEnv,
   type ProductSummary,
 } from '@/lib/medusa/client';
@@ -23,6 +24,7 @@ import {
   countPendingProductRequests,
   notifyPendingProductRequests,
 } from '@/utilities/notifyProductRequests';
+import { resolveGalleryAlbums } from '@/utilities/resolveGalleryAlbums';
 
 /**
  * Admin-only endpoints that let the gallery-image "Store" panel drive Medusa.
@@ -39,6 +41,7 @@ interface GalleryImageDoc {
   alt?: string | null;
   url?: string | null;
   medusaProductId?: string | null;
+  albums?: (number | { id: number; slug?: string | null; title?: string | null })[] | null;
   master?:
     | number
     | {
@@ -50,6 +53,14 @@ interface GalleryImageDoc {
     | null;
   sizes?: Record<string, { url?: string | null } | undefined> | null;
   settings?: { visibility?: string | null } | null;
+}
+
+/** Album membership for Medusa metadata, resolved from the CMS image doc. */
+async function albumsForImage(
+  req: PayloadRequest,
+  image: GalleryImageDoc,
+): Promise<GalleryAlbumRef[]> {
+  return resolveGalleryAlbums(req.payload, image.albums, req);
 }
 
 interface MasterDoc {
@@ -454,6 +465,7 @@ export async function medusaProductCreateHandler(req: PayloadRequest): Promise<R
       return Response.json({ error: MASTER_REQUIRED }, { status: 400 });
     }
 
+    const albums = await albumsForImage(req, image);
     const product: ProductSummary = await createProduct(env, {
       galleryImageId: id,
       title,
@@ -469,6 +481,7 @@ export async function medusaProductCreateHandler(req: PayloadRequest): Promise<R
       salesChannelId: salesChannelFromBody(body, env, image),
       shippingProfileId: shippingProfileFromBody(body),
       status: 'published',
+      albums,
     });
     const waitlistQueued = await persistPointer(req, id, product.productId);
     console.info(`[medusa] product/create: done galleryImageId=${id} product=${product.productId}`);
@@ -526,6 +539,7 @@ export async function medusaProductUpdateHandler(req: PayloadRequest): Promise<R
       return Response.json({ error: MASTER_REQUIRED }, { status: 400 });
     }
 
+    const albums = await albumsForImage(req, image);
     const product = await updateProduct(env, existing.productId, existing, {
       galleryImageId: id,
       title,
@@ -541,6 +555,8 @@ export async function medusaProductUpdateHandler(req: PayloadRequest): Promise<R
       collectionId: 'collectionId' in body ? str(body.collectionId) ?? null : undefined,
       salesChannelId: salesChannelFromBody(body, env, image),
       shippingProfileId: shippingProfileFromBody(body),
+      // Always rebuild album metadata so Store saves don't wipe membership keys.
+      albums,
     });
     return Response.json({ ok: true, product });
   } catch (err) {

@@ -4,7 +4,9 @@
  * Medusa is the source of truth for all product data (title, price, image,
  * inventory). Payload only sends commands here and stores a single pointer
  * (`medusaProductId`) back on the gallery image so we can look the product up
- * again. Nothing else about the product is duplicated in Payload.
+ * again. Gallery album membership is mirrored into product metadata
+ * (`album_ids` / `albums`) for storefront set promotions — nothing else about
+ * the product is duplicated in Payload.
  *
  * Server-only. Authenticates with a Medusa *secret* API key using HTTP Basic
  * auth (key as the username, empty password) which is how Medusa v2 admin API
@@ -223,6 +225,13 @@ export async function uploadImageFromUrl(
 // Products
 // ---------------------------------------------------------------------------
 
+/** Gallery album membership mirrored onto Medusa product metadata. */
+export interface GalleryAlbumRef {
+  id: string;
+  slug: string;
+  title: string;
+}
+
 export interface ProductInput {
   galleryImageId: number;
   title: string;
@@ -257,6 +266,11 @@ export interface ProductInput {
    * profile). Prints and digital both default to the store's default profile.
    */
   shippingProfileId?: string | null;
+  /**
+   * Gallery albums this image belongs to. Written into product metadata so the
+   * storefront can offer album/set promotions later.
+   */
+  albums?: GalleryAlbumRef[];
 }
 
 /** A Medusa product collection (used to group products on the storefront). */
@@ -383,11 +397,32 @@ function metaString(meta: Record<string, unknown> | null | undefined, key: strin
 }
 
 /**
+ * Album membership keys for Medusa product metadata.
+ *
+ * - `album_ids` — stable string ids for filtering / promotions.
+ * - `albums` — enriched `{ id, slug, title }` for storefront display without
+ *   another CMS round-trip.
+ *
+ * Always include both (even as empty arrays) so a Store panel save that
+ * rebuilds metadata does not leave stale album keys behind.
+ */
+export function buildAlbumMetadata(
+  albums: GalleryAlbumRef[] | undefined,
+): { album_ids: string[]; albums: GalleryAlbumRef[] } {
+  const list = albums ?? [];
+  return {
+    album_ids: list.map((a) => a.id),
+    albums: list,
+  };
+}
+
+/**
  * Product-level metadata using the Medusa backend's conventions:
  * - `print_asset_url` is the file sent to Prodigi as the print master.
  * - `digital_download_files` is what the buyer downloads after purchase.
  * - `sells_digital` tells the offering-set workflows to (re)create the
  *   digital variant when a set is applied.
+ * - `album_ids` / `albums` mirror gallery album membership for set pricing.
  * The same high-res master file backs both print and digital.
  */
 function buildProductMetadata(input: ProductInput): Record<string, unknown> {
@@ -395,6 +430,7 @@ function buildProductMetadata(input: ProductInput): Record<string, unknown> {
     gallery_image_id: String(input.galleryImageId),
     payload_collection: 'gallery-images',
     sells_digital: input.sellsDigital,
+    ...buildAlbumMetadata(input.albums),
     ...(input.downloadUrl
       ? {
           print_asset_url: input.downloadUrl,
@@ -885,6 +921,38 @@ export async function setProductStatus(
   await adminFetch(env, `/admin/products/${productId}`, {
     method: 'POST',
     body: JSON.stringify({ status }),
+  });
+}
+
+/**
+ * Merge keys into an existing product's metadata.
+ *
+ * Medusa replaces `metadata` wholesale on update, so we GET first, merge, then
+ * POST the full object. Use this for album-membership sync that must not wipe
+ * commerce keys (`sells_digital`, download files, etc.).
+ */
+export async function patchProductMetadata(
+  env: MedusaEnv,
+  productId: string,
+  patch: Record<string, unknown>,
+): Promise<void> {
+  const { product } = await adminFetch<{ product: MedusaProduct }>(
+    env,
+    `/admin/products/${productId}?fields=id,metadata`,
+  );
+  const current =
+    product.metadata && typeof product.metadata === 'object' && !Array.isArray(product.metadata)
+      ? { ...product.metadata }
+      : {};
+
+  await adminFetch(env, `/admin/products/${productId}`, {
+    method: 'POST',
+    body: JSON.stringify({
+      metadata: {
+        ...current,
+        ...patch,
+      },
+    }),
   });
 }
 
