@@ -20,6 +20,7 @@ import {
 import { CollectionConfig, PayloadRequest } from 'payload';
 import { allowAll } from '@/access/methods/allowAll';
 import { allowedRoles } from '@/access/methods/allowedRoles';
+import { syncAlbumLabelToMedusaProducts } from '@/collections/Gallery/Album/hooks/syncAlbumMetadataToMedusa';
 
 export const GalleryAlbums: CollectionConfig<'gallery-albums'> = {
   slug: 'gallery-albums',
@@ -307,4 +308,7 @@ export const GalleryAlbums: CollectionConfig<'gallery-albums'> = {
       ],
     },
   ],
+  hooks: {
+    afterChange: [syncAlbumLabelToMedusaProducts],
+  },
 };

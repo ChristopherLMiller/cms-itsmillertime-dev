@@ -8,6 +8,7 @@ import {
 import { baseUploadConfig } from '@/collections/shared/uploadConfig';
 import { removeMedusaProduct } from '@/collections/Gallery/Image/hooks/commerceDelete';
 import { notifyProductWaitlist } from '@/collections/Gallery/Image/hooks/notifyProductWaitlist';
+import { syncAlbumMetadataToMedusa } from '@/collections/Gallery/Image/hooks/syncAlbumMetadataToMedusa';
 import { PayloadRequest, slugField } from 'payload';
 import {
   MetaDescriptionField,
@@ -311,7 +312,7 @@ export const GalleryImages: CollectionConfig<'gallery-images'> = {
     },
   ],
   hooks: {
-    afterChange: [generateEXIF, notifyProductWaitlist],
+    afterChange: [generateEXIF, notifyProductWaitlist, syncAlbumMetadataToMedusa],
     afterDelete: [removeMedusaProduct],
     beforeChange: [ensureUploadPrefix('gallery-images'), sanitizeIncomingExif],
     beforeValidate: [defaultAltText, generateBlurHash],
