@@ -73,7 +73,11 @@ export const syncAlbumLabelToMedusaProducts: CollectionAfterChangeHook = async (
           // Ensure the just-saved album title/slug wins even if depth-0 ids only.
           const withFreshLabel = albums.map((album) =>
             album.id === String(albumId)
-              ? { id: album.id, slug: nextSlug, title: nextTitle }
+              ? {
+                  ...album,
+                  slug: nextSlug,
+                  title: nextTitle,
+                }
               : album,
           )
           await patchProductMetadata(env, productId, buildAlbumMetadata(withFreshLabel))
