@@ -468,16 +468,56 @@ function formatFor(variant: MedusaVariant): string {
   return format ?? variant.options?.[0]?.value ?? variant.title ?? 'Default';
 }
 
+function optionValues(variant: MedusaVariant): string[] {
+  return (variant.options ?? [])
+    .map((o) => o.value)
+    .filter((v): v is string => typeof v === 'string' && v.length > 0);
+}
+
+/**
+ * Digital vs print, matching the Medusa backend + storefront.
+ *
+ * Offering-set print variants are made-to-order (`manage_inventory: false`)
+ * with `fulfillment_type: "prodigi"` (current) or `"print"` (legacy). Using
+ * `manage_inventory === false` as the primary signal mislabels those prints
+ * as digital — which also makes updateProduct stamp digital metadata onto
+ * the first print variant.
+ */
 function isDigital(variant: MedusaVariant): boolean {
-  const fulfillmentType = variant.metadata?.fulfillment_type;
-  if (typeof fulfillmentType === 'string') {
-    return fulfillmentType === 'digital';
+  const meta = variant.metadata;
+  const fulfillmentType = meta?.fulfillment_type;
+  if (fulfillmentType === 'digital' || meta?.is_digital === true) {
+    return true;
   }
-  if (typeof variant.metadata?.is_digital === 'boolean') {
-    return variant.metadata.is_digital;
+  if (
+    fulfillmentType === 'prodigi' ||
+    fulfillmentType === 'print' ||
+    meta?.is_digital === false ||
+    typeof meta?.print_offering_id === 'string' ||
+    typeof meta?.prodigi_sku === 'string'
+  ) {
+    return false;
   }
-  // Legacy single-variant products created before fulfillment_type existed.
-  return variant.manage_inventory === false;
+
+  const paper = optionValue(variant, PAPER_OPTION);
+  const format = optionValue(variant, FORMAT_OPTION);
+  if (paper === DIGITAL_PAPER || format === DIGITAL_FORMAT) {
+    return true;
+  }
+  if (paper || format) {
+    return false;
+  }
+
+  const values = optionValues(variant).map((v) => v.toLowerCase());
+  if (values.includes(DIGITAL_FORMAT.toLowerCase())) {
+    return true;
+  }
+  if (values.some((v) => /\d+\s*[x×]\s*\d+/.test(v))) {
+    return false;
+  }
+
+  // Legacy single-SKU products created before Paper/Format options existed.
+  return values.length === 0 && variant.manage_inventory === false;
 }
 
 function summarizeVariant(env: MedusaEnv, variant: MedusaVariant): VariantSummary {
