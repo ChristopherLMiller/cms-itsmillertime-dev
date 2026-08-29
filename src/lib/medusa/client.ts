@@ -6,7 +6,8 @@
  * (`medusaProductId`) back on the gallery image so we can look the product up
  * again. Gallery album membership is mirrored into product metadata
  * (`album_ids` / `albums`) for storefront set promotions — nothing else about
- * the product is duplicated in Payload.
+ * the product is duplicated in Payload. The Medusa backend assigns those
+ * public albums to product categories under Prints on product create/update.
  *
  * Server-only. Authenticates with a Medusa *secret* API key using HTTP Basic
  * auth (key as the username, empty password) which is how Medusa v2 admin API
@@ -230,6 +231,9 @@ export interface GalleryAlbumRef {
   id: string;
   slug: string;
   title: string;
+  /** Payload album visibility. Medusa skips anything other than ALL. */
+  visibility?: string;
+  isNsfw?: boolean;
 }
 
 export interface ProductInput {
@@ -268,7 +272,8 @@ export interface ProductInput {
   shippingProfileId?: string | null;
   /**
    * Gallery albums this image belongs to. Written into product metadata so the
-   * storefront can offer album/set promotions later.
+   * Medusa backend can assign Prints child categories (and later set promotions).
+   * Only public albums should be included.
    */
   albums?: GalleryAlbumRef[];
 }
