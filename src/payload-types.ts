@@ -173,12 +173,14 @@ export interface Config {
   globals: {
     'site-meta': SiteMeta;
     'site-navigation': SiteNavigation;
+    'site-settings': SiteSetting;
     webhooks: Webhook;
     'payload-jobs-stats': PayloadJobsStat;
   };
   globalsSelect: {
     'site-meta': SiteMetaSelect<false> | SiteMetaSelect<true>;
     'site-navigation': SiteNavigationSelect<false> | SiteNavigationSelect<true>;
+    'site-settings': SiteSettingsSelect<false> | SiteSettingsSelect<true>;
     webhooks: WebhooksSelect<false> | WebhooksSelect<true>;
     'payload-jobs-stats': PayloadJobsStatsSelect<false> | PayloadJobsStatsSelect<true>;
   };
@@ -845,9 +847,6 @@ export interface GalleryImage {
      */
     image?: (number | null) | GalleryImage;
   };
-  /**
-   * People who asked to be notified when this image is listed in the shop.
-   */
   productRequests?: {
     docs?: (number | GalleryProductRequest)[];
     hasNextPage?: boolean;
@@ -948,33 +947,36 @@ export interface GalleryMaster {
   height?: number | null;
 }
 /**
- * People waiting to buy a gallery image that is not listed yet.
+ * People waiting to buy a gallery image. Listing the image on the Store tab emails them.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "gallery-product-requests".
  */
 export interface GalleryProductRequest {
   id: number;
-  /**
-   * The gallery image they want listed in the shop.
-   */
-  galleryImage: number | GalleryImage;
   name: string;
   email: string;
-  status: 'pending' | 'notified' | 'cancelled';
   /**
-   * Album slug at request time, used to deep-link the lightbox.
+   * Flips to Notified automatically after the waitlist email is sent. Use Cancelled only if you will not list this photo.
    */
-  albumSlug?: string | null;
+  status: 'pending' | 'notified' | 'cancelled';
+  notifiedAt?: string | null;
+  /**
+   * The gallery image they want listed.
+   */
+  galleryImage: number | GalleryImage;
   /**
    * Snapshot of the image alt/title for emails.
    */
   imageTitle?: string | null;
   /**
-   * Public thumbnail URL snapshot for emails.
+   * Public thumbnail used in emails.
    */
   imageUrl?: string | null;
-  notifiedAt?: string | null;
+  /**
+   * Album slug at request time, used to deep-link the lightbox.
+   */
+  albumSlug?: string | null;
   /**
    * Set when the requester was logged in.
    */
@@ -2463,14 +2465,14 @@ export interface GalleryMastersSelect<T extends boolean = true> {
  * via the `definition` "gallery-product-requests_select".
  */
 export interface GalleryProductRequestsSelect<T extends boolean = true> {
-  galleryImage?: T;
   name?: T;
   email?: T;
   status?: T;
-  albumSlug?: T;
+  notifiedAt?: T;
+  galleryImage?: T;
   imageTitle?: T;
   imageUrl?: T;
-  notifiedAt?: T;
+  albumSlug?: T;
   user?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -3120,6 +3122,57 @@ export interface SiteNavigation {
   createdAt?: string | null;
 }
 /**
+ * Integration keys and prompts. API keys are encrypted at rest. Prefer the www /admin editors to view plaintext keys.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "site-settings".
+ */
+export interface SiteSetting {
+  id: number;
+  ai?: {
+    provider?: ('anthropic' | 'openai') | null;
+    /**
+     * Provider model id. Leave blank to use the frontend default for that provider.
+     */
+    model?: string | null;
+    /**
+     * Encrypted at rest. After save this field shows ciphertext here. Use www /admin to view the plaintext key.
+     */
+    apiKey?: string | null;
+    /**
+     * Looked up by slug (e.g. image-alt). Add rows for new AI tasks without a schema change.
+     */
+    prompts?:
+      | {
+          /**
+           * Stable id used in code, e.g. image-alt
+           */
+          slug: string;
+          label: string;
+          body: string;
+          id?: string | null;
+        }[]
+      | null;
+  };
+  lastfm?: {
+    username?: string | null;
+    /**
+     * Encrypted at rest. Env LASTFM_API_KEY is used until this is set.
+     */
+    apiKey?: string | null;
+  };
+  email?: {
+    /**
+     * Encrypted at rest. Env RESEND_API_KEY is used until this is set.
+     */
+    resendApiKey?: string | null;
+    fromAddress?: string | null;
+    fromName?: string | null;
+  };
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
  * Configure which collections and CRUD operations should emit webhook events.
  *
  * This interface was referenced by `Config`'s JSON-Schema
@@ -3243,6 +3296,43 @@ export interface SiteNavigationSelect<T extends boolean = true> {
         permittedRoles?: T;
         allowedUsers?: T;
         id?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "site-settings_select".
+ */
+export interface SiteSettingsSelect<T extends boolean = true> {
+  ai?:
+    | T
+    | {
+        provider?: T;
+        model?: T;
+        apiKey?: T;
+        prompts?:
+          | T
+          | {
+              slug?: T;
+              label?: T;
+              body?: T;
+              id?: T;
+            };
+      };
+  lastfm?:
+    | T
+    | {
+        username?: T;
+        apiKey?: T;
+      };
+  email?:
+    | T
+    | {
+        resendApiKey?: T;
+        fromAddress?: T;
+        fromName?: T;
       };
   updatedAt?: T;
   createdAt?: T;

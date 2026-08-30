@@ -8,6 +8,7 @@ import * as migration_20260805_gallery_albums_default_sort from './20260805_gall
 import * as migration_20260805_upload_collection_prefixes from './20260805_upload_collection_prefixes';
 import * as migration_20260817_gallery_masters from './20260817_gallery_masters';
 import * as migration_20260818_210234_galleryProductRequests from './20260818_210234_galleryProductRequests';
+import * as migration_20260830_102053_site_settings from './20260830_102053_site_settings';
 
 export const migrations = [
   {
@@ -21,14 +22,14 @@ export const migrations = [
     name: '20260727_article_relations',
   },
   {
-    up: migration_20260727_twofactor_lockout.up,
-    down: migration_20260727_twofactor_lockout.down,
-    name: '20260727_twofactor_lockout',
-  },
-  {
     up: migration_20260727_article_relations_repair.up,
     down: migration_20260727_article_relations_repair.down,
     name: '20260727_article_relations_repair',
+  },
+  {
+    up: migration_20260727_twofactor_lockout.up,
+    down: migration_20260727_twofactor_lockout.down,
+    name: '20260727_twofactor_lockout',
   },
   {
     up: migration_20260731_models_related_posts_join.up,
@@ -59,5 +60,10 @@ export const migrations = [
     up: migration_20260818_210234_galleryProductRequests.up,
     down: migration_20260818_210234_galleryProductRequests.down,
     name: '20260818_210234_galleryProductRequests',
+  },
+  {
+    up: migration_20260830_102053_site_settings.up,
+    down: migration_20260830_102053_site_settings.down,
+    name: '20260830_102053_site_settings',
   },
 ];
