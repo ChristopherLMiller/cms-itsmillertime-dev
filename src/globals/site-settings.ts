@@ -81,6 +81,11 @@ export const SiteSettings: GlobalConfig = {
                 description:
                   'Looked up by slug (e.g. image-alt). Add rows for new AI tasks without a schema change.',
                 initCollapsed: true,
+                components: {
+                  RowLabel: {
+                    path: '@/components/RowLabel#RowLabel',
+                  },
+                },
               },
               defaultValue: [
                 {
