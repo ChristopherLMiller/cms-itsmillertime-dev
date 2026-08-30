@@ -128,6 +128,7 @@ export const plugins: Plugin[] = [
       roles: 'users',
       'site-meta': 'layout',
       'site-navigation': 'globe',
+      'site-settings': 'settings',
       'map-markers': 'map',
       gardenss: 'book',
     },
