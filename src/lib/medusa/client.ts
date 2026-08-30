@@ -1,13 +1,12 @@
 /**
  * Medusa Admin API control client for managing storefront products from Payload.
  *
- * Medusa is the source of truth for all product data (title, price, image,
- * inventory). Payload only sends commands here and stores a single pointer
- * (`medusaProductId`) back on the gallery image so we can look the product up
- * again. Gallery album membership is mirrored into product metadata
- * (`album_ids` / `albums`) for storefront set promotions — nothing else about
- * the product is duplicated in Payload. The Medusa backend assigns those
- * public albums to product categories under Prints on product create/update.
+ * Medusa is the source of truth for product data (price, image, inventory).
+ * Payload stores a pointer (`medusaProductId`) and pushes a few gallery fields
+ * onto the product so the storefront stays in sync: album membership
+ * (`album_ids` / `albums`) and the image alt text (product title — the
+ * storefront uses title as image alt). The Medusa backend assigns those public
+ * albums to product categories under Prints on product create/update.
  *
  * Server-only. Authenticates with a Medusa *secret* API key using HTTP Basic
  * auth (key as the username, empty password) which is how Medusa v2 admin API
@@ -966,6 +965,23 @@ export async function setProductStatus(
   await adminFetch(env, `/admin/products/${productId}`, {
     method: 'POST',
     body: JSON.stringify({ status }),
+  });
+}
+
+/**
+ * Update a product's title without touching commerce fields.
+ *
+ * Used when a listed gallery image's alt text changes later — the storefront
+ * renders `product.title` as image alt, so this is what keeps those in sync.
+ */
+export async function patchProductTitle(
+  env: MedusaEnv,
+  productId: string,
+  title: string,
+): Promise<void> {
+  await adminFetch(env, `/admin/products/${productId}`, {
+    method: 'POST',
+    body: JSON.stringify({ title }),
   });
 }
 
