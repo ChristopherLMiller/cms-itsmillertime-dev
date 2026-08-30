@@ -33,6 +33,7 @@ import { Users } from './collections/Users';
 import { defaultLexical } from './fields/defaultLexical';
 import { SiteMeta } from './globals/site-meta';
 import { SiteNavigation } from './globals/site-navigation';
+import { SiteSettings } from './globals/site-settings';
 import { plugins } from './plugins';
 import { bggCollectionHandler } from './endpoints/bgg-collection';
 import { frontendOauthContinueHandler } from './endpoints/frontend-oauth-continue';
@@ -48,6 +49,7 @@ import { contactFormHandler } from './endpoints/contact-form';
 import { galleryProductRequestHandler } from './endpoints/gallery-product-request';
 import { galleryImageTrackingHandler } from './endpoints/gallery-image-tracking';
 import { lastfmNowPlayingHandler } from './endpoints/lastfm-now-playing';
+import { emailPreviewHandler } from './endpoints/email-preview';
 import {
   medusaCollectionCreateHandler,
   medusaCollectionsHandler,
@@ -72,6 +74,7 @@ import {
   openapiGalleryImageTracking,
   openapiHealth,
   openapiLastfmNowPlaying,
+  openapiEmailPreview,
   openapiMedusaCollectionsGet,
   openapiMedusaCollectionsPost,
   openapiMedusaOfferingSets,
@@ -275,6 +278,12 @@ export default buildConfig({
       handler: lastfmNowPlayingHandler,
       custom: { openapi: openapiLastfmNowPlaying },
     },
+    {
+      path: '/email-preview',
+      method: 'get',
+      handler: emailPreviewHandler,
+      custom: { openapi: openapiEmailPreview },
+    },
   ],
   kv: redisKVAdapter({
     keyPrefix: 'payload:',
@@ -388,7 +397,7 @@ export default buildConfig({
     collectionSpecific: true,
     browseByFolder: false,
   },
-  globals: [SiteMeta, SiteNavigation],
+  globals: [SiteMeta, SiteNavigation, SiteSettings],
   collections: [
     MapMarkers,
     Users,

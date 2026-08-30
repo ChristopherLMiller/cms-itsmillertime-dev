@@ -137,6 +137,10 @@ CLOUDFLARE_REGION=auto
 
 # Email
 RESEND_API_KEY=your-resend-key
+
+# Site settings secrets (AES-256-GCM). Same value on www. 32 bytes as 64 hex chars:
+#   node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+SETTINGS_ENCRYPTION_KEY=
 # Inbound address for www contact form (see docs on the frontend repo)
 CONTACT_EMAIL=you@example.com
 

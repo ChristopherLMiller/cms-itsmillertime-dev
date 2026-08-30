@@ -562,6 +562,29 @@ export const openapiBggCollection = {
   },
 };
 
+export const openapiEmailPreview = {
+  summary: 'Render email templates with example data',
+  description:
+    'Admin only. Omit `template` to list ids. Pass `template` to render HTML with PreviewProps.',
+  tags: ['Admin'],
+  security: adminSecurity,
+  parameters: [
+    {
+      name: 'template',
+      in: 'query',
+      required: false,
+      schema: { type: 'string' },
+      description:
+        'Template id: contact-form, reset-password, verify-account, product-request-admin, product-request-available',
+    },
+  ],
+  responses: {
+    '200': { description: 'Template list or rendered HTML' },
+    '401': { description: 'Unauthorized' },
+    '404': { description: 'Unknown template' },
+  },
+};
+
 export const openapiLastfmNowPlaying = {
   summary: 'Last.fm now playing',
   description: 'Public. Returns the current/last scrobbled track with Redis KV caching.',
