@@ -6,6 +6,10 @@ import { passkey } from '@better-auth/passkey';
 import { getAuthentikOAuthConfig } from './authentik';
 import { AUTHENTIK_PROVIDER_ID } from './authentik-constants';
 import { createAuthentikRoleSyncAfterHook } from './authentik-role-sync';
+import {
+  SESSION_EXPIRES_IN_SECONDS,
+  SESSION_UPDATE_AGE_SECONDS,
+} from './session-policy';
 import { getBaseUrl } from './getBaseUrl';
 import { getTrustedOrigins } from './trustedOrigins';
 
@@ -30,7 +34,8 @@ export function createBetterAuthOptions(payload?: BasePayload): Partial<BetterAu
       },
     },
     session: {
-      expiresIn: 60 * 60 * 24 * 30, // 30 days
+      expiresIn: SESSION_EXPIRES_IN_SECONDS,
+      updateAge: SESSION_UPDATE_AGE_SECONDS,
     },
     account: {
       accountLinking: {
