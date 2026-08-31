@@ -40,11 +40,15 @@ import { PreviewComponent as PreviewComponent_a8a977ebc872c5d5ea7ee689724c0860 }
 import { PreviewButton as PreviewButton_79203ba44a9a04c09693f7622ccf249a } from '@/components/PreviewButton'
 import { MetaImageComponent as MetaImageComponent_a8a977ebc872c5d5ea7ee689724c0860 } from '@payloadcms/plugin-seo/client'
 import { StorePanel as StorePanel_ae72b44eec281615e2e5d18fd060264d } from '@/components/Commerce/StorePanel'
+import { ProductRequestSummary as ProductRequestSummary_53e69a37db136916266afc850c4995cf } from '@/components/Commerce/ProductRequestSummary'
+import { ProductRequestStatusCell as ProductRequestStatusCell_341a80da575fa264987d5f4900cfe0d2 } from '@/components/Commerce/ProductRequestCells'
+import { ProductRequestImageLinkCell as ProductRequestImageLinkCell_341a80da575fa264987d5f4900cfe0d2 } from '@/components/Commerce/ProductRequestCells'
+import { ProductRequestImageCell as ProductRequestImageCell_341a80da575fa264987d5f4900cfe0d2 } from '@/components/Commerce/ProductRequestCells'
+import { HiddenOnEdit as HiddenOnEdit_341a80da575fa264987d5f4900cfe0d2 } from '@/components/Commerce/ProductRequestCells'
+import { ProductRequestsListIntro as ProductRequestsListIntro_bd07b75754a46fd2b465076f8a271152 } from '@/components/Commerce/ProductRequestsListIntro'
 import { ClockifyProjectSelect as ClockifyProjectSelect_b8bb1889944a5b33eae5b7c527a1ff0a } from '@/components/ClockifyProjectSelect'
 import { LinkToDoc as LinkToDoc_aead06e4cbf6b2620c5c51c9ab283634 } from '@payloadcms/plugin-search/client'
 import { ReindexButton as ReindexButton_aead06e4cbf6b2620c5c51c9ab283634 } from '@payloadcms/plugin-search/client'
-import { ApiKeyCell as ApiKeyCell_fcb2dafdf0f59a6c3a11842622e2d1b2 } from 'payload-plugin-webhooks/client'
-import { ApiKeyField as ApiKeyField_fcb2dafdf0f59a6c3a11842622e2d1b2 } from 'payload-plugin-webhooks/client'
 import { FolderTypeField as FolderTypeField_2b8867833a34864a02ddf429b0728a40 } from '@payloadcms/next/client'
 import { QueryPresetsAccessCell as QueryPresetsAccessCell_2b8867833a34864a02ddf429b0728a40 } from '@payloadcms/next/client'
 import { QueryPresetsWhereCell as QueryPresetsWhereCell_2b8867833a34864a02ddf429b0728a40 } from '@payloadcms/next/client'
@@ -115,11 +119,15 @@ export const importMap = {
   "@/components/PreviewButton#PreviewButton": PreviewButton_79203ba44a9a04c09693f7622ccf249a,
   "@payloadcms/plugin-seo/client#MetaImageComponent": MetaImageComponent_a8a977ebc872c5d5ea7ee689724c0860,
   "@/components/Commerce/StorePanel#StorePanel": StorePanel_ae72b44eec281615e2e5d18fd060264d,
+  "@/components/Commerce/ProductRequestSummary#ProductRequestSummary": ProductRequestSummary_53e69a37db136916266afc850c4995cf,
+  "@/components/Commerce/ProductRequestCells#ProductRequestStatusCell": ProductRequestStatusCell_341a80da575fa264987d5f4900cfe0d2,
+  "@/components/Commerce/ProductRequestCells#ProductRequestImageLinkCell": ProductRequestImageLinkCell_341a80da575fa264987d5f4900cfe0d2,
+  "@/components/Commerce/ProductRequestCells#ProductRequestImageCell": ProductRequestImageCell_341a80da575fa264987d5f4900cfe0d2,
+  "@/components/Commerce/ProductRequestCells#HiddenOnEdit": HiddenOnEdit_341a80da575fa264987d5f4900cfe0d2,
+  "@/components/Commerce/ProductRequestsListIntro#ProductRequestsListIntro": ProductRequestsListIntro_bd07b75754a46fd2b465076f8a271152,
   "@/components/ClockifyProjectSelect#ClockifyProjectSelect": ClockifyProjectSelect_b8bb1889944a5b33eae5b7c527a1ff0a,
   "@payloadcms/plugin-search/client#LinkToDoc": LinkToDoc_aead06e4cbf6b2620c5c51c9ab283634,
   "@payloadcms/plugin-search/client#ReindexButton": ReindexButton_aead06e4cbf6b2620c5c51c9ab283634,
-  "payload-plugin-webhooks/client#ApiKeyCell": ApiKeyCell_fcb2dafdf0f59a6c3a11842622e2d1b2,
-  "payload-plugin-webhooks/client#ApiKeyField": ApiKeyField_fcb2dafdf0f59a6c3a11842622e2d1b2,
   "@payloadcms/next/client#FolderTypeField": FolderTypeField_2b8867833a34864a02ddf429b0728a40,
   "@payloadcms/next/client#QueryPresetsAccessCell": QueryPresetsAccessCell_2b8867833a34864a02ddf429b0728a40,
   "@payloadcms/next/client#QueryPresetsWhereCell": QueryPresetsWhereCell_2b8867833a34864a02ddf429b0728a40,

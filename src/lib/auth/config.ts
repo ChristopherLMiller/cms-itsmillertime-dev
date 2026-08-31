@@ -5,6 +5,7 @@ import { apiKey } from '@better-auth/api-key';
 import { passkey } from '@better-auth/passkey';
 import { getAuthentikOAuthConfig } from './authentik';
 import { AUTHENTIK_PROVIDER_ID } from './authentik-constants';
+import { createAuthentikRoleSyncAfterHook } from './authentik-role-sync';
 import { getBaseUrl } from './getBaseUrl';
 import { getTrustedOrigins } from './trustedOrigins';
 
@@ -98,7 +99,6 @@ export function createBetterAuthOptions(payload?: BasePayload): Partial<BetterAu
           where: { id: { equals: userId } },
           data: {
             emailVerified: true,
-            role: ['user'],
           },
           overrideAccess: true,
         });
@@ -122,6 +122,13 @@ export function createBetterAuthOptions(payload?: BasePayload): Partial<BetterAu
         });
       },
     },
+    ...(payload
+      ? {
+          hooks: {
+            after: createAuthentikRoleSyncAfterHook(payload),
+          },
+        }
+      : {}),
     plugins: [
       admin(),
       twoFactor(),
