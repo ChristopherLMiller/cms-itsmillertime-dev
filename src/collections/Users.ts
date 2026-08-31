@@ -42,6 +42,11 @@ export const Users: CollectionConfig = {
       hasMany: true,
       defaultValue: 'user',
       required: true,
+      admin: {
+        readOnly: true,
+        description:
+          'Managed by Authentik group membership on sign-in. Sign in again via Authentik to refresh.',
+      },
     },
     {
       type: 'text',
