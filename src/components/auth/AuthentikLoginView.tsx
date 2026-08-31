@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { LoginView, type LoginViewProps } from '@delmaredigital/payload-better-auth/components';
 import { AUTHENTIK_PROVIDER_ID } from '@/lib/auth/authentik-constants';
 import { authClient } from '@/lib/auth/auth-client';
+import { fetchMergedSessionUser } from '@/lib/auth/mergePayloadUser';
 
 type AuthentikLoginViewProps = Omit<LoginViewProps, 'authClient' | 'logo' | 'socialProviders'> & {
   authentikEnabled: boolean;
@@ -109,10 +110,9 @@ export function AuthentikLoginView({
 
     async function checkSession() {
       try {
-        const result = await authClient.getSession();
+        const user = await fetchMergedSessionUser();
         if (ignore) return;
-        if (result.data?.user) {
-          const user = result.data.user as { role?: unknown };
+        if (user) {
           if (checkUserRoles(user, requiredRole, requireAllRoles)) {
             router.push(afterLoginPath);
             router.refresh();
@@ -310,7 +310,8 @@ export function AuthentikLoginView({
             }}
           >
             You signed in with Authentik, but this account does not have admin
-            access. Promote the user to <code>admin</code> in Payload, then try again.
+            access in Payload. Ensure your Authentik user is in the{' '}
+            <code>admin</code> group, then sign in again.
           </p>
           <button
             type="button"

@@ -13,10 +13,14 @@ export const AUTHENTIK_PARENT_GROUP = 'www-users';
 
 const AUTHENTIK_GROUP_TO_PAYLOAD_ROLE = {
   admin: 'admin',
+  admins: 'admin',
   clients: 'client',
+  client: 'client',
   family: 'family',
   friends: 'friend',
+  friend: 'friend',
   users: 'user',
+  user: 'user',
 } as const satisfies Record<string, PayloadRole>;
 
 type AuthentikGroupSlug = keyof typeof AUTHENTIK_GROUP_TO_PAYLOAD_ROLE;
@@ -142,16 +146,17 @@ export async function fetchAuthentikOAuthUserInfo(
     profile = profileFromIdToken(tokens.idToken);
   }
 
-  if (!profile?.email) {
-    const userInfoUrl = await resolveAuthentikUserInfoUrl(discoveryUrl);
-    if (userInfoUrl && tokens.accessToken) {
-      const response = await fetch(userInfoUrl, {
-        method: 'GET',
-        headers: { Authorization: `Bearer ${tokens.accessToken}` },
-      });
-      if (response.ok) {
-        profile = (await response.json()) as Record<string, unknown>;
-      }
+  // Always fetch userinfo when possible — Authentik group claims from scope mappings
+  // often appear here but not in the id_token.
+  const userInfoUrl = await resolveAuthentikUserInfoUrl(discoveryUrl);
+  if (userInfoUrl && tokens.accessToken) {
+    const response = await fetch(userInfoUrl, {
+      method: 'GET',
+      headers: { Authorization: `Bearer ${tokens.accessToken}` },
+    });
+    if (response.ok) {
+      const userinfo = (await response.json()) as Record<string, unknown>;
+      profile = { ...profile, ...userinfo };
     }
   }
 
