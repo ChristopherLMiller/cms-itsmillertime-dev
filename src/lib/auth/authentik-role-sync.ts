@@ -13,10 +13,14 @@ export const AUTHENTIK_PARENT_GROUP = 'www-users';
 
 const AUTHENTIK_GROUP_TO_PAYLOAD_ROLE = {
   admin: 'admin',
+  admins: 'admin',
   clients: 'client',
+  client: 'client',
   family: 'family',
   friends: 'friend',
+  friend: 'friend',
   users: 'user',
+  user: 'user',
 } as const satisfies Record<string, PayloadRole>;
 
 type AuthentikGroupSlug = keyof typeof AUTHENTIK_GROUP_TO_PAYLOAD_ROLE;
