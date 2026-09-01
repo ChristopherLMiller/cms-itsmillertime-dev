@@ -9,6 +9,7 @@ import * as migration_20260805_upload_collection_prefixes from './20260805_uploa
 import * as migration_20260817_gallery_masters from './20260817_gallery_masters';
 import * as migration_20260818_210234_galleryProductRequests from './20260818_210234_galleryProductRequests';
 import * as migration_20260830_102053_site_settings from './20260830_102053_site_settings';
+import * as migration_20260901_account_link_user_fields from './20260901_account_link_user_fields';
 
 export const migrations = [
   {
@@ -65,5 +66,10 @@ export const migrations = [
     up: migration_20260830_102053_site_settings.up,
     down: migration_20260830_102053_site_settings.down,
     name: '20260830_102053_site_settings',
+  },
+  {
+    up: migration_20260901_account_link_user_fields.up,
+    down: migration_20260901_account_link_user_fields.down,
+    name: '20260901_account_link_user_fields',
   },
 ];
