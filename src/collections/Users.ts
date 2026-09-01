@@ -80,6 +80,35 @@ export const Users: CollectionConfig = {
     },
     {
       type: 'text',
+      name: 'medusaCustomerId',
+      label: 'Medusa customer ID',
+      admin: {
+        readOnly: true,
+        description: 'Linked shop customer id (set by account linking).',
+        position: 'sidebar',
+      },
+    },
+    {
+      type: 'email',
+      name: 'medusaCustomerEmail',
+      label: 'Medusa customer email',
+      admin: {
+        readOnly: true,
+        description: 'Shop account email at the time of linking (may differ from this user email).',
+        position: 'sidebar',
+      },
+    },
+    {
+      type: 'date',
+      name: 'accountLinkedAt',
+      label: 'Shop account linked at',
+      admin: {
+        readOnly: true,
+        position: 'sidebar',
+      },
+    },
+    {
+      type: 'text',
       name: 'bggUsername',
       admin: {
         position: 'sidebar',
