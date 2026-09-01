@@ -399,6 +399,18 @@ export interface User {
    * Should NSFW content be hidden, blurred initially, or just shown?
    */
   nsfwFiltering?: ('hide' | 'blur' | 'show') | null;
+  /**
+   * Linked shop customer id (set by account linking).
+   */
+  medusaCustomerId?: string | null;
+  /**
+   * Shop account email at the time of linking (may differ from this user email).
+   */
+  medusaCustomerEmail?: string | null;
+  /**
+   * Shop account linked at
+   */
+  accountLinkedAt?: string | null;
   bggUsername?: string | null;
   /**
    * Auto-added by Better Auth (name)
@@ -2085,6 +2097,9 @@ export interface UsersSelect<T extends boolean = true> {
   displayName?: T;
   albums?: T;
   nsfwFiltering?: T;
+  medusaCustomerId?: T;
+  medusaCustomerEmail?: T;
+  accountLinkedAt?: T;
   bggUsername?: T;
   name?: T;
   image?: T;
