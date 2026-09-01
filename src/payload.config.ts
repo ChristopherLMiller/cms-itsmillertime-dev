@@ -36,6 +36,15 @@ import { SiteNavigation } from './globals/site-navigation';
 import { SiteSettings } from './globals/site-settings';
 import { plugins } from './plugins';
 import { bggCollectionHandler } from './endpoints/bgg-collection';
+import {
+  accountLinkMedusaCompleteHandler,
+  accountLinkMedusaLookupHandler,
+  accountLinkMedusaUnlinkHandler,
+  accountLinkShopConfirmHandler,
+  accountLinkShopStartHandler,
+  accountLinkShopStatusHandler,
+  accountLinkShopUnlinkHandler,
+} from './endpoints/account-link';
 import { frontendOauthContinueHandler } from './endpoints/frontend-oauth-continue';
 import { frontendOauthExchangeHandler } from './endpoints/frontend-oauth-exchange';
 import { frontendOauthStartHandler } from './endpoints/frontend-oauth-start';
@@ -148,6 +157,41 @@ export default buildConfig({
       method: 'post',
       handler: contactFormHandler,
       custom: { openapi: openapiContactForm },
+    },
+    {
+      path: '/account-link/medusa/lookup',
+      method: 'post',
+      handler: accountLinkMedusaLookupHandler,
+    },
+    {
+      path: '/account-link/medusa/complete',
+      method: 'post',
+      handler: accountLinkMedusaCompleteHandler,
+    },
+    {
+      path: '/account-link/medusa/unlink',
+      method: 'post',
+      handler: accountLinkMedusaUnlinkHandler,
+    },
+    {
+      path: '/account-link/shop/status',
+      method: 'get',
+      handler: accountLinkShopStatusHandler,
+    },
+    {
+      path: '/account-link/shop/start',
+      method: 'post',
+      handler: accountLinkShopStartHandler,
+    },
+    {
+      path: '/account-link/shop/confirm',
+      method: 'post',
+      handler: accountLinkShopConfirmHandler,
+    },
+    {
+      path: '/account-link/shop/unlink',
+      method: 'post',
+      handler: accountLinkShopUnlinkHandler,
     },
     {
       path: '/gallery-product-request',
