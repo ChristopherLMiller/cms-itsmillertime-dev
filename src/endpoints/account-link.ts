@@ -139,7 +139,7 @@ export const accountLinkMedusaCompleteHandler: Endpoint['handler'] = async (req)
       accountLinkedAt: new Date().toISOString(),
     },
     overrideAccess: true,
-  })) as LinkUserDoc
+  })) as unknown as LinkUserDoc
 
   return Response.json({ user: toLinkUser(updated) })
 }
