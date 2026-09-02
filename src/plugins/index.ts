@@ -72,20 +72,20 @@ export const plugins: Plugin[] = [
 
       try {
         const result = await req.payload.find({
-          collection: 'api-keys',
+          collection: 'apikeys',
           where: {
             key: {
               equals: apiKey,
             },
-            active: { equals: true },
+            enabled: { equals: true },
           },
           limit: 1,
         });
         if (result.docs.length > 0) {
           await req.payload.update({
-            collection: 'api-keys',
+            collection: 'apikeys',
             id: result.docs[0].id,
-            data: { lastUsed: new Date().toISOString() },
+            data: { lastRequest: new Date().toISOString() },
           });
           return true;
         }

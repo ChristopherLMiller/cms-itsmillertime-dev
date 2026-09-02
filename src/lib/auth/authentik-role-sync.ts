@@ -197,8 +197,8 @@ export async function fetchAuthentikOAuthUserInfo(
 export function createAuthentikRoleSyncAfterHook(payload: BasePayload) {
   return createAuthMiddleware(async (ctx) => {
     const path = ctx.path ?? '';
-    if (!path.startsWith('/oauth2/callback/')) return;
-    if (ctx.params?.providerId !== AUTHENTIK_PROVIDER_ID) return;
+    if (!path.startsWith('/callback/')) return;
+    if (ctx.params?.id !== AUTHENTIK_PROVIDER_ID) return;
 
     const sessionUser = ctx.context.newSession?.user;
     const email = sessionUser?.email?.trim().toLowerCase();

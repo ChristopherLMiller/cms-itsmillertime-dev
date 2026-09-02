@@ -160,8 +160,8 @@ export function AuthentikLoginView({
       typeof window !== 'undefined' ? window.location.href.split('?')[0]! : '/admin/login';
 
     try {
-      const result = await authClient.signIn.oauth2({
-        providerId: AUTHENTIK_PROVIDER_ID,
+      const result = await authClient.signIn.social({
+        provider: AUTHENTIK_PROVIDER_ID,
         callbackURL: loginUrl,
         errorCallbackURL: loginUrl,
       });
