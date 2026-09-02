@@ -97,7 +97,6 @@ export interface Config {
     passkeys: Passkey;
     apikeys: Apikey;
     search: Search;
-    'api-keys': ApiKey;
     'payload-mcp-api-keys': PayloadMcpApiKey;
     'payload-jobs': PayloadJob;
     'payload-folders': FolderInterface;
@@ -157,7 +156,6 @@ export interface Config {
     passkeys: PasskeysSelect<false> | PasskeysSelect<true>;
     apikeys: ApikeysSelect<false> | ApikeysSelect<true>;
     search: SearchSelect<false> | SearchSelect<true>;
-    'api-keys': ApiKeysSelect<false> | ApiKeysSelect<true>;
     'payload-mcp-api-keys': PayloadMcpApiKeysSelect<false> | PayloadMcpApiKeysSelect<true>;
     'payload-jobs': PayloadJobsSelect<false> | PayloadJobsSelect<true>;
     'payload-folders': PayloadFoldersSelect<false> | PayloadFoldersSelect<true>;
@@ -385,6 +383,9 @@ export interface User {
   id: number;
   email: string;
   emailVerified?: boolean | null;
+  /**
+   * Managed by Authentik group membership on sign-in. Sign in again via Authentik to refresh.
+   */
   role: ('family' | 'friend' | 'client' | 'user' | 'admin')[];
   displayName?: string | null;
   /**
@@ -407,9 +408,6 @@ export interface User {
    * Shop account email at the time of linking (may differ from this user email).
    */
   medusaCustomerEmail?: string | null;
-  /**
-   * Shop account linked at
-   */
   accountLinkedAt?: string | null;
   bggUsername?: string | null;
   /**
@@ -1224,6 +1222,7 @@ export interface Session {
  */
 export interface Account {
   id: number;
+  issuer: string;
   accountId: string;
   providerId: string;
   user: number | User;
@@ -1345,33 +1344,6 @@ export interface Search {
         relationTo: 'gardens';
         value: number | Garden;
       };
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * Manage API keys for webhook stream authentication.
- *
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "api-keys".
- */
-export interface ApiKey {
-  id: number;
-  /**
-   * The user this API key belongs to
-   */
-  user: number | User;
-  /**
-   * The API key value. Keep this secret!
-   */
-  key: string;
-  /**
-   * Disable this to temporarily deactivate the API key without deleting it
-   */
-  active?: boolean | null;
-  /**
-   * Last time this API key was used
-   */
-  lastUsed?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1952,10 +1924,6 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'search';
         value: number | Search;
-      } | null)
-    | ({
-        relationTo: 'api-keys';
-        value: number | ApiKey;
       } | null)
     | ({
         relationTo: 'payload-mcp-api-keys';
@@ -2718,6 +2686,7 @@ export interface SessionsSelect<T extends boolean = true> {
  * via the `definition` "accounts_select".
  */
 export interface AccountsSelect<T extends boolean = true> {
+  issuer?: T;
   accountId?: T;
   providerId?: T;
   user?: T;
@@ -2808,18 +2777,6 @@ export interface SearchSelect<T extends boolean = true> {
   title?: T;
   priority?: T;
   doc?: T;
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "api-keys_select".
- */
-export interface ApiKeysSelect<T extends boolean = true> {
-  user?: T;
-  key?: T;
-  active?: T;
-  lastUsed?: T;
   updatedAt?: T;
   createdAt?: T;
 }
