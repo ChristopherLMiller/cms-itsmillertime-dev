@@ -134,6 +134,7 @@ export async function fetchAuthentikOAuthUserInfo(
   tokens: AuthentikOAuthTokens,
   discoveryUrl: string,
 ): Promise<{
+  sub: string;
   id: string;
   email: string;
   emailVerified: boolean;
@@ -186,6 +187,7 @@ export async function fetchAuthentikOAuthUserInfo(
     email;
 
   return {
+    sub: id,
     id,
     email,
     emailVerified: profile.email_verified === true || profile.email_verified === 'true',
