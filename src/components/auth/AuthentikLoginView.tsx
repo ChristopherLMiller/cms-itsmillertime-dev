@@ -24,6 +24,8 @@ function humanizeOAuthError(code: string): string {
     user_info_is_missing: 'Authentik did not return user information.',
     email_is_missing: 'Authentik did not share an email address.',
     name_is_missing: 'Authentik did not share a display name.',
+    unable_to_get_user_info:
+      'Authentik returned a profile Better Auth could not use (missing subject or failed token checks). Please try again or use local login.',
     unable_to_link_account: 'Could not link this Authentik account to an existing user.',
     unable_to_create_session: 'Signed in with Authentik, but creating a session failed.',
   };

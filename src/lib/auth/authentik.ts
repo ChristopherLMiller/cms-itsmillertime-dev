@@ -31,6 +31,17 @@ export function getAuthentikOAuthConfig(): AuthentikOAuthConfig | null {
     discoveryUrl,
     scopes: ['openid', 'profile', 'email'],
     pkce: true,
+    // Better Auth 1.7 binds OIDC id_tokens to a nonce by default; Authentik often
+    // omits the nonce claim, which makes verifyProviderIdToken fail before getUserInfo runs.
+    disableIdTokenNonceBinding: true,
+    accountSubject: ({ profile }) => {
+      const subject =
+        (typeof profile.sub === 'string' && profile.sub) ||
+        (typeof profile.id === 'string' && profile.id) ||
+        (typeof profile.id === 'number' && String(profile.id)) ||
+        '';
+      return subject;
+    },
     getUserInfo: async (tokens) => fetchAuthentikOAuthUserInfo(tokens, discoveryUrl),
     // Do not set requireIssuerValidation: Authentik often omits RFC 9207 `iss`
     // on the authorization response, which Better Auth would reject as issuer_missing.
