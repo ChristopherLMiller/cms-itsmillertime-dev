@@ -10,6 +10,7 @@ import * as migration_20260817_gallery_masters from './20260817_gallery_masters'
 import * as migration_20260818_210234_galleryProductRequests from './20260818_210234_galleryProductRequests';
 import * as migration_20260830_102053_site_settings from './20260830_102053_site_settings';
 import * as migration_20260901_account_link_user_fields from './20260901_account_link_user_fields';
+import * as migration_20260902_better_auth_1_7 from './20260902_better_auth_1_7';
 
 export const migrations = [
   {
@@ -71,5 +72,10 @@ export const migrations = [
     up: migration_20260901_account_link_user_fields.up,
     down: migration_20260901_account_link_user_fields.down,
     name: '20260901_account_link_user_fields',
+  },
+  {
+    up: migration_20260902_better_auth_1_7.up,
+    down: migration_20260902_better_auth_1_7.down,
+    name: '20260902_better_auth_1_7',
   },
 ];

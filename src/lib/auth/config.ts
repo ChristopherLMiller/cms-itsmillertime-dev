@@ -1,4 +1,5 @@
 import type { BasePayload } from 'payload';
+import type { BetterAuthPlugin } from 'better-auth';
 import { BetterAuthOptions } from 'better-auth';
 import { admin, genericOAuth, twoFactor } from 'better-auth/plugins';
 import { apiKey } from '@better-auth/api-key';
@@ -149,7 +150,7 @@ export function createBetterAuthOptions(payload?: BasePayload): Partial<BetterAu
           timeWindow: 1000 * 60 * 60,
           maxRequests: 10_000,
         },
-      }),
+      }) as BetterAuthPlugin,
       ...(authentik
         ? [
             genericOAuth({
