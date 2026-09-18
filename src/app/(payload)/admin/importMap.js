@@ -38,6 +38,7 @@ import { MetaTitleComponent as MetaTitleComponent_a8a977ebc872c5d5ea7ee689724c08
 import { MetaDescriptionComponent as MetaDescriptionComponent_a8a977ebc872c5d5ea7ee689724c0860 } from '@payloadcms/plugin-seo/client'
 import { PreviewComponent as PreviewComponent_a8a977ebc872c5d5ea7ee689724c0860 } from '@payloadcms/plugin-seo/client'
 import { PreviewButton as PreviewButton_79203ba44a9a04c09693f7622ccf249a } from '@/components/PreviewButton'
+import { AnnounceButton as AnnounceButton_de64ad581039622671c9b5e77b0156b8 } from '@/components/AnnounceButton'
 import { MetaImageComponent as MetaImageComponent_a8a977ebc872c5d5ea7ee689724c0860 } from '@payloadcms/plugin-seo/client'
 import { StorePanel as StorePanel_ae72b44eec281615e2e5d18fd060264d } from '@/components/Commerce/StorePanel'
 import { ProductRequestSummary as ProductRequestSummary_53e69a37db136916266afc850c4995cf } from '@/components/Commerce/ProductRequestSummary'
@@ -116,6 +117,7 @@ export const importMap = {
   "@payloadcms/plugin-seo/client#MetaDescriptionComponent": MetaDescriptionComponent_a8a977ebc872c5d5ea7ee689724c0860,
   "@payloadcms/plugin-seo/client#PreviewComponent": PreviewComponent_a8a977ebc872c5d5ea7ee689724c0860,
   "@/components/PreviewButton#PreviewButton": PreviewButton_79203ba44a9a04c09693f7622ccf249a,
+  "@/components/AnnounceButton#AnnounceButton": AnnounceButton_de64ad581039622671c9b5e77b0156b8,
   "@payloadcms/plugin-seo/client#MetaImageComponent": MetaImageComponent_a8a977ebc872c5d5ea7ee689724c0860,
   "@/components/Commerce/StorePanel#StorePanel": StorePanel_ae72b44eec281615e2e5d18fd060264d,
   "@/components/Commerce/ProductRequestSummary#ProductRequestSummary": ProductRequestSummary_53e69a37db136916266afc850c4995cf,

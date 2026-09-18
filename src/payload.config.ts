@@ -34,6 +34,7 @@ import { defaultLexical } from './fields/defaultLexical';
 import { SiteMeta } from './globals/site-meta';
 import { SiteNavigation } from './globals/site-navigation';
 import { SiteSettings } from './globals/site-settings';
+import { SocialDestinations } from './globals/social-destinations';
 import { plugins } from './plugins';
 import { bggCollectionHandler } from './endpoints/bgg-collection';
 import {
@@ -107,6 +108,12 @@ import {
   sendProductRequestAdminEmailTask,
   sendProductRequestAvailableEmailTask,
 } from './jobs/productRequestEmails';
+import { sendPublishAnnounceTask } from './jobs/sendPublishAnnounce';
+import {
+  publishAnnounceDestinationsHandler,
+  publishAnnounceSendHandler,
+  publishAnnounceSkipHandler,
+} from './endpoints/publish-announce';
 import { trustedOriginsArray } from './lib/auth/trustedOrigins';
 import { sanitizeExifForStorage } from './utilities/sanitizeExif';
 import { DEFAULT_FROM_ADDRESS, DEFAULT_FROM_NAME, emailFrom } from './utilities/emailFrom';
@@ -157,6 +164,21 @@ export default buildConfig({
       method: 'post',
       handler: contactFormHandler,
       custom: { openapi: openapiContactForm },
+    },
+    {
+      path: '/publish-announce/destinations',
+      method: 'get',
+      handler: publishAnnounceDestinationsHandler,
+    },
+    {
+      path: '/publish-announce',
+      method: 'post',
+      handler: publishAnnounceSendHandler,
+    },
+    {
+      path: '/publish-announce/skip',
+      method: 'post',
+      handler: publishAnnounceSkipHandler,
     },
     {
       path: '/account-link/medusa/lookup',
@@ -441,7 +463,7 @@ export default buildConfig({
     collectionSpecific: true,
     browseByFolder: false,
   },
-  globals: [SiteMeta, SiteNavigation, SiteSettings],
+  globals: [SiteMeta, SiteNavigation, SiteSettings, SocialDestinations],
   collections: [
     MapMarkers,
     Users,
@@ -898,6 +920,7 @@ export default buildConfig({
       },
       sendProductRequestAdminEmailTask,
       sendProductRequestAvailableEmailTask,
+      sendPublishAnnounceTask,
     ],
     autoRun: [
       {
