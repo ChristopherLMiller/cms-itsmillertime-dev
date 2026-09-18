@@ -7,17 +7,17 @@ function whenType(...types: string[]) {
 }
 
 /** Text field that masks encrypted secrets and decrypts on eye-toggle reveal. */
-function secretField(
-  field: Omit<TextField, 'type'> & { type?: 'text'; admin?: TextField['admin'] },
-): TextField {
-  const { admin, ...rest } = field;
+function secretField(field: {
+  name: string;
+  admin?: TextField['admin'];
+}): TextField {
   return {
-    ...rest,
+    name: field.name,
     type: 'text',
     admin: {
-      ...admin,
+      ...field.admin,
       components: {
-        ...admin?.components,
+        ...field.admin?.components,
         Field: '@/components/EncryptedSecretField#EncryptedSecretField',
       },
     },
