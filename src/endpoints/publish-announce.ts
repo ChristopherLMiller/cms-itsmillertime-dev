@@ -1,16 +1,18 @@
 import { allowedRoles } from '@/access/methods/allowedRoles';
 import {
+  buildAnnounceContent,
   docPublicUrl,
   docTitle,
   isAnnounceEligible,
 } from '@/utilities/publishAnnounce';
+import { frontendBaseUrl } from '@/utilities/productRequestUrls';
 import {
   isAnnounceCollection,
   platformLabel,
   type AnnounceCollection,
 } from '@/utilities/socialPlatforms';
 import type { SocialDestinationRow } from '@/utilities/socialAdapters';
-import { isImplementedPlatform } from '@/utilities/socialAdapters';
+import { isImplementedPlatform, sendToDestination } from '@/utilities/socialAdapters';
 import type { PayloadRequest } from 'payload';
 
 async function requireAdmin(req: PayloadRequest): Promise<boolean> {
@@ -272,6 +274,99 @@ export async function publishAnnounceSendHandler(req: PayloadRequest): Promise<R
     notifiedAt,
     url,
     queued,
+  });
+}
+
+/** POST /api/publish-announce/test — send a live test message to one saved destination. */
+export async function publishAnnounceTestHandler(req: PayloadRequest): Promise<Response> {
+  if (req.method !== 'POST') {
+    return Response.json({ error: 'Method not allowed' }, { status: 405 });
+  }
+  if (!(await requireAdmin(req))) {
+    return Response.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
+  const body = await readJson(req);
+  if (!body) {
+    return Response.json({ error: 'Invalid JSON body' }, { status: 400 });
+  }
+
+  const destinationId =
+    typeof body.destinationId === 'string' ? body.destinationId.trim() : '';
+  if (!destinationId) {
+    return Response.json(
+      { error: 'destinationId is required (save the destination row first)' },
+      { status: 400 },
+    );
+  }
+
+  const globalDoc = await req.payload.findGlobal({
+    slug: 'social-destinations',
+    overrideAccess: true,
+    depth: 0,
+  });
+  const destinations = Array.isArray(globalDoc?.destinations)
+    ? (globalDoc.destinations as SocialDestinationRow[])
+    : [];
+  const destination = destinations.find((row) => row?.id === destinationId);
+  if (!destination) {
+    return Response.json(
+      {
+        error:
+          'Destination not found. Save Social Destinations first so this row has an id, then test.',
+      },
+      { status: 404 },
+    );
+  }
+
+  const type = typeof destination.type === 'string' ? destination.type.trim() : '';
+  if (!type) {
+    return Response.json({ error: 'Destination has no platform type' }, { status: 400 });
+  }
+  if (!isImplementedPlatform(type)) {
+    return Response.json(
+      { error: `Platform type “${type}” is not implemented` },
+      { status: 400 },
+    );
+  }
+
+  const url = frontendBaseUrl();
+  const title = 'Connection test';
+  const message =
+    typeof body.message === 'string' && body.message.trim()
+      ? body.message.trim()
+      : `Connection test from ItsMillerTime CMS (${destination.label || platformLabel(type)}). You can ignore or delete this.`;
+  const content = buildAnnounceContent(message, url);
+
+  const result = await sendToDestination({
+    destination,
+    content,
+    url,
+    title,
+    collection: 'test',
+  });
+
+  if (!result.ok) {
+    return Response.json(
+      {
+        success: false,
+        error: result.error || 'Test failed',
+        destinationId,
+        destinationLabel: destination.label || platformLabel(type),
+        destinationType: type,
+        status: result.status ?? null,
+        skipped: Boolean(result.skipped),
+      },
+      { status: 502 },
+    );
+  }
+
+  return Response.json({
+    success: true,
+    destinationId,
+    destinationLabel: destination.label || platformLabel(type),
+    destinationType: type,
+    status: result.status ?? null,
   });
 }
 

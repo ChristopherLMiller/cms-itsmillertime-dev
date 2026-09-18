@@ -228,4 +228,13 @@ export const socialDestinationFields: Field[] = [
       description: 'Private notes about this destination (not posted).',
     },
   },
+  {
+    name: 'testConnection',
+    type: 'ui',
+    admin: {
+      components: {
+        Field: '@/components/DestinationTestButton#DestinationTestButton',
+      },
+    },
+  },
 ];
