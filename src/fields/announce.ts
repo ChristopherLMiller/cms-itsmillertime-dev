@@ -73,7 +73,16 @@ export const socialDestinationFields: Field[] = [
     options: [...SOCIAL_PLATFORM_TYPES],
     admin: {
       description:
-        'Discord/Slack: webhook URL. Reddit: subreddit + OAuth app. X: bearer or OAuth1. Bluesky: handle + app password. Mastodon: instance + token. Facebook/Instagram/Threads: page/user id + token. LinkedIn: author URN + token. Telegram: bot + chat. Tumblr: blog + OAuth1. Pinterest: board + token (+ og:image).',
+        'Pick a platform to see setup steps below. Discord/Slack use webhooks; others use tokens or OAuth Authorize where available.',
+    },
+  },
+  {
+    name: 'setupGuide',
+    type: 'ui',
+    admin: {
+      components: {
+        Field: '@/components/DestinationSetupGuide#DestinationSetupGuide',
+      },
     },
   },
   {
