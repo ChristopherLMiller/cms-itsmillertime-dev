@@ -10,6 +10,7 @@ import {
   type AnnounceCollection,
 } from '@/utilities/socialPlatforms';
 import type { SocialDestinationRow } from '@/utilities/socialAdapters';
+import { isImplementedPlatform } from '@/utilities/socialAdapters';
 import type { PayloadRequest } from 'payload';
 
 async function requireAdmin(req: PayloadRequest): Promise<boolean> {
@@ -154,7 +155,7 @@ export async function publishAnnounceDestinationsHandler(
       type: row.type || 'custom_webhook',
       typeLabel: platformLabel(String(row.type || '')),
       defaultSelected: Boolean(row.defaultSelected),
-      implemented: ['discord', 'slack', 'custom_webhook'].includes(String(row.type)),
+      implemented: isImplementedPlatform(String(row.type || '')),
     }));
 
   return Response.json({ destinations });
@@ -234,14 +235,9 @@ export async function publishAnnounceSendHandler(req: PayloadRequest): Promise<R
 
   const title = docTitle(doc);
   const queued: string[] = [];
-  const unimplemented: string[] = [];
 
   for (const dest of selected) {
     const type = String(dest.type || '');
-    if (!['discord', 'slack', 'custom_webhook'].includes(type)) {
-      unimplemented.push(dest.label || dest.id || type);
-      continue;
-    }
     await req.payload.jobs.queue({
       task: 'sendPublishAnnounce',
       input: {
@@ -259,17 +255,6 @@ export async function publishAnnounceSendHandler(req: PayloadRequest): Promise<R
     queued.push(dest.label || dest.id || type);
   }
 
-  if (queued.length === 0) {
-    return Response.json(
-      {
-        error:
-          'None of the selected destinations have a working adapter yet. Use Discord, Slack, or Custom webhook.',
-        unimplemented,
-      },
-      { status: 400 },
-    );
-  }
-
   const notifiedAt = new Date().toISOString();
   await markAnnounce(req, collection, id, { notifiedAt });
 
@@ -278,7 +263,6 @@ export async function publishAnnounceSendHandler(req: PayloadRequest): Promise<R
     notifiedAt,
     url,
     queued,
-    unimplemented,
   });
 }
 

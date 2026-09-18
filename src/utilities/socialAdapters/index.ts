@@ -1,127 +1,62 @@
-import { decryptSecret } from '@/lib/settings-encryption';
 import type { SocialPlatformType } from '@/utilities/socialPlatforms';
+import { postBluesky } from './bluesky';
+import { postFacebook } from './facebook';
+import { postInstagram } from './instagram';
+import { postLinkedIn } from './linkedin';
+import { postMastodon } from './mastodon';
+import { postPinterest } from './pinterest';
+import { postReddit } from './reddit';
+import { postTelegram } from './telegram';
+import { postThreads } from './threads';
+import { postTumblr } from './tumblr';
+import {
+  type AnnounceAdapterResult,
+  type AnnouncePayload,
+  type SocialDestinationRow,
+} from './types';
+import { postCustomWebhook, postDiscord, postSlack } from './webhooks';
+import { postX } from './x';
 
-export type SocialDestinationRow = {
-  id?: string | null;
-  label?: string | null;
-  type?: string | null;
-  enabled?: boolean | null;
-  defaultSelected?: boolean | null;
-  webhookUrl?: string | null;
-  subreddit?: string | null;
-  instanceUrl?: string | null;
-  handle?: string | null;
-  pageId?: string | null;
-  boardId?: string | null;
-  chatId?: string | null;
-  blogName?: string | null;
-  clientId?: string | null;
-  clientSecret?: string | null;
-  accessToken?: string | null;
-  refreshToken?: string | null;
-  apiKey?: string | null;
-  apiSecret?: string | null;
-  appPassword?: string | null;
-  botToken?: string | null;
-  bearerToken?: string | null;
-  notes?: string | null;
+export type { AnnounceAdapterResult, AnnouncePayload, SocialDestinationRow };
+
+type AdapterFn = (args: AnnouncePayload) => Promise<AnnounceAdapterResult>;
+
+const ADAPTERS: Record<SocialPlatformType, AdapterFn> = {
+  discord: postDiscord,
+  slack: postSlack,
+  reddit: postReddit,
+  x: postX,
+  bluesky: postBluesky,
+  mastodon: postMastodon,
+  facebook: postFacebook,
+  instagram: postInstagram,
+  linkedin: postLinkedIn,
+  threads: postThreads,
+  telegram: postTelegram,
+  tumblr: postTumblr,
+  pinterest: postPinterest,
+  custom_webhook: postCustomWebhook,
 };
 
-export type AnnounceAdapterResult = {
-  ok: boolean;
-  skipped?: boolean;
-  error?: string;
-  status?: number;
-};
+export const IMPLEMENTED_PLATFORM_TYPES = Object.keys(ADAPTERS) as SocialPlatformType[];
 
-function secret(value: string | null | undefined): string {
-  if (!value || typeof value !== 'string') return '';
+export function isImplementedPlatform(type: string | null | undefined): boolean {
+  return Boolean(type && type in ADAPTERS);
+}
+
+export async function sendToDestination(args: AnnouncePayload): Promise<AnnounceAdapterResult> {
+  const type = (args.destination.type || '') as SocialPlatformType;
+  const adapter = ADAPTERS[type];
+  if (!adapter) {
+    return {
+      ok: false,
+      error: `Unknown destination type “${type || '(empty)'}”`,
+    };
+  }
   try {
-    return decryptSecret(value.trim());
-  } catch {
-    return value.trim();
-  }
-}
-
-async function postDiscordOrSlack(
-  webhookUrl: string,
-  content: string,
-): Promise<AnnounceAdapterResult> {
-  const res = await fetch(webhookUrl, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ content }),
-  });
-  if (!res.ok) {
-    const body = await res.text().catch(() => '');
-    return {
-      ok: false,
-      status: res.status,
-      error: `Webhook failed (${res.status}): ${body.slice(0, 300)}`,
-    };
-  }
-  return { ok: true, status: res.status };
-}
-
-async function postCustomWebhook(
-  webhookUrl: string,
-  bearerToken: string,
-  payload: { content: string; url: string; title: string; collection: string },
-): Promise<AnnounceAdapterResult> {
-  const headers: Record<string, string> = { 'Content-Type': 'application/json' };
-  if (bearerToken) headers.Authorization = `Bearer ${bearerToken}`;
-  const res = await fetch(webhookUrl, {
-    method: 'POST',
-    headers,
-    body: JSON.stringify(payload),
-  });
-  if (!res.ok) {
-    const body = await res.text().catch(() => '');
-    return {
-      ok: false,
-      status: res.status,
-      error: `Custom webhook failed (${res.status}): ${body.slice(0, 300)}`,
-    };
-  }
-  return { ok: true, status: res.status };
-}
-
-export async function sendToDestination(args: {
-  destination: SocialDestinationRow;
-  content: string;
-  url: string;
-  title: string;
-  collection: string;
-}): Promise<AnnounceAdapterResult> {
-  const { destination, content, url, title, collection } = args;
-  const type = (destination.type || '') as SocialPlatformType;
-
-  switch (type) {
-    case 'discord':
-    case 'slack': {
-      const webhookUrl = secret(destination.webhookUrl);
-      if (!webhookUrl) {
-        return { ok: false, error: `${type} destination is missing webhookUrl` };
-      }
-      return postDiscordOrSlack(webhookUrl, content);
-    }
-    case 'custom_webhook': {
-      const webhookUrl = secret(destination.webhookUrl);
-      if (!webhookUrl) {
-        return { ok: false, error: 'custom_webhook destination is missing webhookUrl' };
-      }
-      return postCustomWebhook(webhookUrl, secret(destination.bearerToken), {
-        content,
-        url,
-        title,
-        collection,
-      });
-    }
-    default:
-      return {
-        ok: false,
-        skipped: true,
-        error: `Adapter for “${type}” is not implemented yet. Configure Discord, Slack, or a custom webhook for now.`,
-      };
+    return await adapter(args);
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    return { ok: false, error: `${type} adapter threw: ${message}` };
   }
 }

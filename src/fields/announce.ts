@@ -53,6 +53,10 @@ export const socialDestinationFields: Field[] = [
     type: 'select',
     required: true,
     options: [...SOCIAL_PLATFORM_TYPES],
+    admin: {
+      description:
+        'Discord/Slack: webhook URL. Reddit: subreddit + OAuth app. X: bearer or OAuth1. Bluesky: handle + app password. Mastodon: instance + token. Facebook/Instagram/Threads: page/user id + token. LinkedIn: author URN + token. Telegram: bot + chat. Tumblr: blog + OAuth1. Pinterest: board + token (+ og:image).',
+    },
   },
   {
     name: 'enabled',
@@ -71,7 +75,7 @@ export const socialDestinationFields: Field[] = [
     name: 'webhookUrl',
     type: 'text',
     admin: {
-      description: 'Encrypted at rest. Incoming webhook URL.',
+      description: 'Encrypted at rest. Incoming webhook URL (Discord, Slack, or custom).',
       condition: whenType('discord', 'slack', 'custom_webhook'),
     },
   },
@@ -95,6 +99,7 @@ export const socialDestinationFields: Field[] = [
     name: 'handle',
     type: 'text',
     admin: {
+      description: 'Bluesky handle (user.bsky.social). Optional for Threads if pageId is set.',
       condition: whenType('bluesky', 'mastodon', 'x', 'threads'),
     },
   },
@@ -102,13 +107,16 @@ export const socialDestinationFields: Field[] = [
     name: 'pageId',
     type: 'text',
     admin: {
-      condition: whenType('facebook', 'linkedin', 'instagram'),
+      description:
+        'Facebook Page ID, Instagram business account ID, Threads user ID, or LinkedIn author URN / org id.',
+      condition: whenType('facebook', 'linkedin', 'instagram', 'threads'),
     },
   },
   {
     name: 'boardId',
     type: 'text',
     admin: {
+      description: 'Pinterest board id',
       condition: whenType('pinterest'),
     },
   },
@@ -116,6 +124,7 @@ export const socialDestinationFields: Field[] = [
     name: 'chatId',
     type: 'text',
     admin: {
+      description: 'Telegram chat / channel id (e.g. @channel or -100…)',
       condition: whenType('telegram'),
     },
   },
@@ -123,6 +132,7 @@ export const socialDestinationFields: Field[] = [
     name: 'blogName',
     type: 'text',
     admin: {
+      description: 'Tumblr blog name (without .tumblr.com)',
       condition: whenType('tumblr'),
     },
   },
@@ -130,6 +140,7 @@ export const socialDestinationFields: Field[] = [
     name: 'clientId',
     type: 'text',
     admin: {
+      description: 'OAuth client / app id (Reddit, etc.)',
       condition: whenType('reddit', 'x', 'linkedin', 'tumblr', 'pinterest'),
     },
   },
@@ -137,7 +148,7 @@ export const socialDestinationFields: Field[] = [
     name: 'clientSecret',
     type: 'text',
     admin: {
-      description: 'Encrypted at rest.',
+      description: 'Encrypted at rest. OAuth client secret.',
       condition: whenType('reddit', 'x', 'linkedin', 'tumblr', 'pinterest'),
     },
   },
@@ -145,7 +156,8 @@ export const socialDestinationFields: Field[] = [
     name: 'accessToken',
     type: 'text',
     admin: {
-      description: 'Encrypted at rest.',
+      description:
+        'Encrypted at rest. API access token / OAuth 2 bearer (or OAuth 1 access token for X/Tumblr).',
       condition: whenType(
         'reddit',
         'x',
@@ -164,7 +176,8 @@ export const socialDestinationFields: Field[] = [
     name: 'refreshToken',
     type: 'text',
     admin: {
-      description: 'Encrypted at rest.',
+      description:
+        'Encrypted at rest. OAuth refresh token (Reddit) or OAuth 1.0a token secret (X / Tumblr).',
       condition: whenType('reddit', 'x', 'linkedin', 'tumblr', 'pinterest'),
     },
   },
@@ -172,16 +185,16 @@ export const socialDestinationFields: Field[] = [
     name: 'apiKey',
     type: 'text',
     admin: {
-      description: 'Encrypted at rest.',
-      condition: whenType('x', 'custom_webhook'),
+      description: 'Encrypted at rest. Consumer / API key (X, Tumblr).',
+      condition: whenType('x', 'tumblr', 'custom_webhook'),
     },
   },
   {
     name: 'apiSecret',
     type: 'text',
     admin: {
-      description: 'Encrypted at rest.',
-      condition: whenType('x'),
+      description: 'Encrypted at rest. Consumer / API secret (X, Tumblr).',
+      condition: whenType('x', 'tumblr'),
     },
   },
   {
@@ -196,7 +209,7 @@ export const socialDestinationFields: Field[] = [
     name: 'botToken',
     type: 'text',
     admin: {
-      description: 'Encrypted at rest.',
+      description: 'Encrypted at rest. Telegram bot token from BotFather.',
       condition: whenType('telegram'),
     },
   },
@@ -204,8 +217,8 @@ export const socialDestinationFields: Field[] = [
     name: 'bearerToken',
     type: 'text',
     admin: {
-      description: 'Encrypted at rest. Optional auth for custom webhooks.',
-      condition: whenType('custom_webhook', 'mastodon'),
+      description: 'Encrypted at rest. Optional auth for custom webhooks / Mastodon alternate.',
+      condition: whenType('custom_webhook', 'mastodon', 'x'),
     },
   },
   {

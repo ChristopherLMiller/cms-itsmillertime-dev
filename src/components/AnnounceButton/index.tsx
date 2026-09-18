@@ -119,7 +119,7 @@ export const AnnounceButton = () => {
       setDestinations(rows);
       const next: Record<string, boolean> = {};
       for (const row of rows) {
-        next[row.id] = Boolean(row.defaultSelected && row.implemented);
+        next[row.id] = Boolean(row.defaultSelected);
       }
       setSelected(next);
     } catch (err) {
@@ -151,8 +151,7 @@ export const AnnounceButton = () => {
     openDrawer();
   }, [eligible, hasId, settled, autoOpenKey, openDrawer]);
 
-  const toggleDestination = (destId: string, implemented: boolean) => {
-    if (!implemented) return;
+  const toggleDestination = (destId: string) => {
     setSelected((prev) => ({ ...prev, [destId]: !prev[destId] }));
   };
 
@@ -184,15 +183,11 @@ export const AnnounceButton = () => {
       const json = (await res.json()) as {
         error?: string;
         queued?: string[];
-        unimplemented?: string[];
       };
       if (!res.ok) throw new Error(json.error || 'Announce failed');
 
       const queued = json.queued?.join(', ') || 'destinations';
       toast.success(`Queued announce to ${queued}`);
-      if (json.unimplemented?.length) {
-        toast.info(`Skipped unimplemented: ${json.unimplemented.join(', ')}`);
-      }
       closeModal(DRAWER_SLUG);
       // Soft refresh so sidebar announce fields update
       window.location.reload();
@@ -286,24 +281,16 @@ export const AnnounceButton = () => {
               </Banner>
             )}
             {destinations.map((dest) => (
-              <label
-                key={dest.id}
-                className={styles.destinationRow}
-                data-disabled={!dest.implemented || undefined}
-              >
+              <label key={dest.id} className={styles.destinationRow}>
                 <CheckboxInput
                   id={`announce-dest-${dest.id}`}
                   name={`announce-dest-${dest.id}`}
                   checked={Boolean(selected[dest.id])}
-                  onToggle={() => toggleDestination(dest.id, dest.implemented)}
-                  readOnly={!dest.implemented}
+                  onToggle={() => toggleDestination(dest.id)}
                 />
                 <span>
                   <strong>{dest.label}</strong>
-                  <span className={styles.meta}>
-                    {dest.typeLabel}
-                    {!dest.implemented ? ' · adapter not implemented yet' : ''}
-                  </span>
+                  <span className={styles.meta}>{dest.typeLabel}</span>
                 </span>
               </label>
             ))}

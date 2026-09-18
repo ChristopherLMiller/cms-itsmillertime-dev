@@ -75,9 +75,19 @@ export const sendPublishAnnounceTask = {
     }
 
     if (!result.ok) {
-      throw new Error(
-        `sendPublishAnnounce failed for ${destination.label || destinationId}: ${result.error}`,
-      );
+      const message = `sendPublishAnnounce failed for ${destination.label || destinationId}: ${result.error}`;
+      if (result.retryable === false) {
+        return {
+          output: {
+            sent: false,
+            skipped: true,
+            reason: message,
+            destinationLabel: destination.label,
+            destinationType: destination.type,
+          },
+        };
+      }
+      throw new Error(message);
     }
 
     return {
