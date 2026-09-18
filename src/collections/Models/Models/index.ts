@@ -4,6 +4,7 @@ import { allowedRoles } from '@/access/methods/allowedRoles';
 import { Groups } from '@/collections/shared/groups';
 import { clockifyProjectField } from '@/fields/clockifyProject';
 import { slugField } from '@/fields/slug';
+import { announceFields } from '@/fields/announce';
 import {
   MetaDescriptionField,
   MetaImageField,
@@ -44,6 +45,9 @@ export const Models: CollectionConfig<'models'> = {
         beforeDocumentControls: [
           {
             path: '@/components/PreviewButton#PreviewButton',
+          },
+          {
+            path: '@/components/AnnounceButton#AnnounceButton',
           },
         ],
       },
@@ -95,6 +99,7 @@ export const Models: CollectionConfig<'models'> = {
       },
     },
     ...slugField('title'),
+    announceFields,
     clockifyProjectField,
     {
       type: 'group',

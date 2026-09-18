@@ -172,6 +172,7 @@ export interface Config {
     'site-meta': SiteMeta;
     'site-navigation': SiteNavigation;
     'site-settings': SiteSetting;
+    'social-destinations': SocialDestination;
     webhooks: Webhook;
     'payload-jobs-stats': PayloadJobsStat;
   };
@@ -179,6 +180,7 @@ export interface Config {
     'site-meta': SiteMetaSelect<false> | SiteMetaSelect<true>;
     'site-navigation': SiteNavigationSelect<false> | SiteNavigationSelect<true>;
     'site-settings': SiteSettingsSelect<false> | SiteSettingsSelect<true>;
+    'social-destinations': SocialDestinationsSelect<false> | SocialDestinationsSelect<true>;
     webhooks: WebhooksSelect<false> | WebhooksSelect<true>;
     'payload-jobs-stats': PayloadJobsStatsSelect<false> | PayloadJobsStatsSelect<true>;
   };
@@ -199,6 +201,7 @@ export interface Config {
       sendContactFormEmail: TaskSendContactFormEmail;
       sendProductRequestAdminEmail: TaskSendProductRequestAdminEmail;
       sendProductRequestAvailableEmail: TaskSendProductRequestAvailableEmail;
+      sendPublishAnnounce: TaskSendPublishAnnounce;
       schedulePublish: TaskSchedulePublish;
       inline: {
         input: unknown;
@@ -284,6 +287,19 @@ export interface GalleryAlbum {
   id: number;
   slug?: string | null;
   slugLock?: boolean | null;
+  /**
+   * Tracks whether this document was announced to social destinations. Use the Announce button to post.
+   */
+  announce?: {
+    /**
+     * Set automatically after a successful announce.
+     */
+    notifiedAt?: string | null;
+    /**
+     * Set when announce was skipped so it will not prompt again.
+     */
+    skippedAt?: string | null;
+  };
   settings: {
     isNsfw?: boolean | null;
     /**
@@ -446,7 +462,23 @@ export interface User {
  */
 export interface Post {
   id: number;
+  /**
+   * Set once on first publish. Later publishes do not change this.
+   */
   originalPublicationDate?: string | null;
+  /**
+   * Tracks whether this document was announced to social destinations. Use the Announce button to post.
+   */
+  announce?: {
+    /**
+     * Set automatically after a successful announce.
+     */
+    notifiedAt?: string | null;
+    /**
+     * Set when announce was skipped so it will not prompt again.
+     */
+    skippedAt?: string | null;
+  };
   slug?: string | null;
   slugLock?: boolean | null;
   word_count?: number | null;
@@ -528,6 +560,19 @@ export interface Model {
   title: string;
   slug?: string | null;
   slugLock?: boolean | null;
+  /**
+   * Tracks whether this document was announced to social destinations. Use the Announce button to post.
+   */
+  announce?: {
+    /**
+     * Set automatically after a successful announce.
+     */
+    notifiedAt?: string | null;
+    /**
+     * Set when announce was skipped so it will not prompt again.
+     */
+    skippedAt?: string | null;
+  };
   /**
    * Select a Clockify Project from your workspace
    */
@@ -1741,6 +1786,7 @@ export interface PayloadJob {
           | 'sendContactFormEmail'
           | 'sendProductRequestAdminEmail'
           | 'sendProductRequestAvailableEmail'
+          | 'sendPublishAnnounce'
           | 'schedulePublish';
         taskID: string;
         input?:
@@ -1784,6 +1830,7 @@ export interface PayloadJob {
         | 'sendContactFormEmail'
         | 'sendProductRequestAdminEmail'
         | 'sendProductRequestAvailableEmail'
+        | 'sendPublishAnnounce'
         | 'schedulePublish'
       )
     | null;
@@ -2182,6 +2229,12 @@ export interface MediaSelect<T extends boolean = true> {
  */
 export interface PostsSelect<T extends boolean = true> {
   originalPublicationDate?: T;
+  announce?:
+    | T
+    | {
+        notifiedAt?: T;
+        skippedAt?: T;
+      };
   slug?: T;
   slugLock?: T;
   word_count?: T;
@@ -2263,6 +2316,12 @@ export interface PagesSelect<T extends boolean = true> {
 export interface GalleryAlbumsSelect<T extends boolean = true> {
   slug?: T;
   slugLock?: T;
+  announce?:
+    | T
+    | {
+        notifiedAt?: T;
+        skippedAt?: T;
+      };
   settings?:
     | T
     | {
@@ -2561,6 +2620,12 @@ export interface ModelsSelect<T extends boolean = true> {
   title?: T;
   slug?: T;
   slugLock?: T;
+  announce?:
+    | T
+    | {
+        notifiedAt?: T;
+        skippedAt?: T;
+      };
   clockify_project?: T;
   model_meta?:
     | T
@@ -3145,6 +3210,100 @@ export interface SiteSetting {
   createdAt?: string | null;
 }
 /**
+ * Configure social platforms for first-publish announcements. Multiple rows of the same type are allowed (e.g. several Discords or Reddit subs). Secrets are encrypted at rest.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "social-destinations".
+ */
+export interface SocialDestination {
+  id: number;
+  destinations?:
+    | {
+        /**
+         * Shown in the announce dialog, e.g. “Discord – #blog”.
+         */
+        label: string;
+        type:
+          | 'discord'
+          | 'slack'
+          | 'reddit'
+          | 'x'
+          | 'bluesky'
+          | 'mastodon'
+          | 'facebook'
+          | 'instagram'
+          | 'linkedin'
+          | 'threads'
+          | 'telegram'
+          | 'tumblr'
+          | 'pinterest'
+          | 'custom_webhook';
+        enabled?: boolean | null;
+        /**
+         * Pre-check this destination in the announce dialog.
+         */
+        defaultSelected?: boolean | null;
+        /**
+         * Encrypted at rest. Incoming webhook URL.
+         */
+        webhookUrl?: string | null;
+        /**
+         * Subreddit name without r/
+         */
+        subreddit?: string | null;
+        /**
+         * e.g. https://mastodon.social
+         */
+        instanceUrl?: string | null;
+        handle?: string | null;
+        pageId?: string | null;
+        boardId?: string | null;
+        chatId?: string | null;
+        blogName?: string | null;
+        clientId?: string | null;
+        /**
+         * Encrypted at rest.
+         */
+        clientSecret?: string | null;
+        /**
+         * Encrypted at rest.
+         */
+        accessToken?: string | null;
+        /**
+         * Encrypted at rest.
+         */
+        refreshToken?: string | null;
+        /**
+         * Encrypted at rest.
+         */
+        apiKey?: string | null;
+        /**
+         * Encrypted at rest.
+         */
+        apiSecret?: string | null;
+        /**
+         * Encrypted at rest. Bluesky app password.
+         */
+        appPassword?: string | null;
+        /**
+         * Encrypted at rest.
+         */
+        botToken?: string | null;
+        /**
+         * Encrypted at rest. Optional auth for custom webhooks.
+         */
+        bearerToken?: string | null;
+        /**
+         * Private notes about this destination (not posted).
+         */
+        notes?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
  * Configure which collections and CRUD operations should emit webhook events.
  *
  * This interface was referenced by `Config`'s JSON-Schema
@@ -3305,6 +3464,42 @@ export interface SiteSettingsSelect<T extends boolean = true> {
         resendApiKey?: T;
         fromAddress?: T;
         fromName?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "social-destinations_select".
+ */
+export interface SocialDestinationsSelect<T extends boolean = true> {
+  destinations?:
+    | T
+    | {
+        label?: T;
+        type?: T;
+        enabled?: T;
+        defaultSelected?: T;
+        webhookUrl?: T;
+        subreddit?: T;
+        instanceUrl?: T;
+        handle?: T;
+        pageId?: T;
+        boardId?: T;
+        chatId?: T;
+        blogName?: T;
+        clientId?: T;
+        clientSecret?: T;
+        accessToken?: T;
+        refreshToken?: T;
+        apiKey?: T;
+        apiSecret?: T;
+        appPassword?: T;
+        botToken?: T;
+        bearerToken?: T;
+        notes?: T;
+        id?: T;
       };
   updatedAt?: T;
   createdAt?: T;
@@ -3482,6 +3677,23 @@ export interface TaskSendProductRequestAvailableEmail {
     requesterEmail: string;
     imageTitle: string;
     galleryUrl: string;
+  };
+  output?: unknown;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TaskSendPublishAnnounce".
+ */
+export interface TaskSendPublishAnnounce {
+  input: {
+    destinationId: string;
+    destinationLabel?: string | null;
+    destinationType: string;
+    message: string;
+    url: string;
+    title: string;
+    collection: string;
+    documentId: number;
   };
   output?: unknown;
 }
