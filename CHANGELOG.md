@@ -1,5 +1,13 @@
 # cms-itsmillertime-dev
 
+## 3.30.0
+
+### Minor Changes
+
+- Add first-publish social announce with a Social Destinations global and announce drawer
+- Support posting to Discord, Slack, Reddit, X, Bluesky, Mastodon, Facebook, Instagram, LinkedIn, Threads, Telegram, Tumblr, Pinterest, and custom webhooks
+- Additive migration for announce tracking on articles, models, and public gallery albums
+
 ## 3.24.1
 
 ### Patch Changes

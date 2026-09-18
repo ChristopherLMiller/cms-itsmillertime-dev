@@ -4,6 +4,7 @@ import { allowedRoles } from '@/access/methods/allowedRoles';
 import { Groups } from '@/collections/shared/groups';
 import { slugField } from '@/fields/slug';
 import { lexicalToText } from '@/utilities/lexicalToText';
+import { announceFields } from '@/fields/announce';
 import {
   MetaDescriptionField,
   MetaImageField,
@@ -58,6 +59,9 @@ export const Posts: CollectionConfig<'posts'> = {
           {
             path: '@/components/PreviewButton#PreviewButton',
           },
+          {
+            path: '@/components/AnnounceButton#AnnounceButton',
+          },
         ],
       },
     },
@@ -71,10 +75,12 @@ export const Posts: CollectionConfig<'posts'> = {
           pickerAppearance: 'dayAndTime',
         },
         position: 'sidebar',
+        description: 'Set once on first publish. Later publishes do not change this.',
       },
       hooks: {
         beforeChange: [
           ({ siblingData, value }) => {
+            // Set-once: only fill when publishing and the field is still empty.
             if (siblingData._status === 'published' && !value) {
               return new Date();
             }
@@ -83,6 +89,7 @@ export const Posts: CollectionConfig<'posts'> = {
         ],
       },
     },
+    announceFields,
     ...slugField('title'),
     {
       name: 'word_count',

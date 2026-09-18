@@ -11,6 +11,7 @@ import * as migration_20260818_210234_galleryProductRequests from './20260818_21
 import * as migration_20260830_102053_site_settings from './20260830_102053_site_settings';
 import * as migration_20260901_account_link_user_fields from './20260901_account_link_user_fields';
 import * as migration_20260902_better_auth_1_7 from './20260902_better_auth_1_7';
+import * as migration_20260918_publish_announce_social from './20260918_publish_announce_social';
 
 export const migrations = [
   {
@@ -77,5 +78,10 @@ export const migrations = [
     up: migration_20260902_better_auth_1_7.up,
     down: migration_20260902_better_auth_1_7.down,
     name: '20260902_better_auth_1_7',
+  },
+  {
+    up: migration_20260918_publish_announce_social.up,
+    down: migration_20260918_publish_announce_social.down,
+    name: '20260918_publish_announce_social',
   },
 ];

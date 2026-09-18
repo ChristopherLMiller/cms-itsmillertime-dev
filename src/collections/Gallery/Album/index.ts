@@ -3,6 +3,7 @@ import { RBAC } from '@/access/RBAC';
 import { visibilityFilter } from '@/access/filters/visibilityFilter';
 import { Groups } from '@/collections/shared/groups';
 import { slugField } from '@/fields/slug';
+import { announceFields } from '@/fields/announce';
 import {
   MetaDescriptionField,
   MetaImageField,
@@ -47,12 +48,16 @@ export const GalleryAlbums: CollectionConfig<'gallery-albums'> = {
           {
             path: '@/components/PreviewButton#PreviewButton',
           },
+          {
+            path: '@/components/AnnounceButton#AnnounceButton',
+          },
         ],
       },
     },
   },
   fields: [
     ...slugField('title'),
+    announceFields,
     {
       type: 'group',
       name: 'settings',
