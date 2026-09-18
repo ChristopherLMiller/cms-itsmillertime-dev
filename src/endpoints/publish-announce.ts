@@ -227,7 +227,17 @@ export async function publishAnnounceSendHandler(req: PayloadRequest): Promise<R
     : [];
   const selected = destinationIds
     .map((destId) => allDestinations.find((row) => row?.id === destId))
-    .filter((row): row is SocialDestinationRow => Boolean(row && row.enabled !== false));
+    .filter(
+      (row): row is SocialDestinationRow & { id: string; type: string } =>
+        Boolean(
+          row &&
+            row.enabled !== false &&
+            typeof row.id === 'string' &&
+            row.id.length > 0 &&
+            typeof row.type === 'string' &&
+            row.type.length > 0,
+        ),
+    );
 
   if (selected.length === 0) {
     return Response.json({ error: 'No matching enabled destinations found' }, { status: 400 });
@@ -237,12 +247,11 @@ export async function publishAnnounceSendHandler(req: PayloadRequest): Promise<R
   const queued: string[] = [];
 
   for (const dest of selected) {
-    const type = String(dest.type || '');
     await req.payload.jobs.queue({
       task: 'sendPublishAnnounce',
       input: {
         destinationId: dest.id,
-        destinationLabel: dest.label,
+        destinationLabel: dest.label ?? null,
         destinationType: dest.type,
         message,
         url,
@@ -252,7 +261,7 @@ export async function publishAnnounceSendHandler(req: PayloadRequest): Promise<R
       },
       queue: 'default',
     });
-    queued.push(dest.label || dest.id || type);
+    queued.push(dest.label || dest.id);
   }
 
   const notifiedAt = new Date().toISOString();
