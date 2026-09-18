@@ -54,7 +54,7 @@ export const SocialDestinations: GlobalConfig = {
   admin: {
     group: Groups.global,
     description:
-      'Configure social platforms for first-publish announcements. Multiple rows of the same type are allowed (e.g. several Discords or Reddit subs). Secrets are encrypted at rest.',
+      'Configure social platforms for first-publish announcements. Each row shows a setup guide with links; Reddit, Mastodon, X, LinkedIn, and Pinterest support Authorize when client credentials (or instance URL) are saved. Secrets are encrypted at rest.',
   },
   access: {
     read: RBAC(allowedRoles(['admin']), [], 'social-destinations', 'read'),

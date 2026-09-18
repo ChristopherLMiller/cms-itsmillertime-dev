@@ -1,0 +1,117 @@
+.guide {
+  margin: 0.75rem 0 1rem;
+  padding: 0.9rem 1rem;
+  border: 1px solid var(--theme-elevation-150);
+  border-radius: var(--style-radius-s, 4px);
+  background: var(--theme-elevation-50);
+}
+
+.header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.title {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.summary {
+  margin: 0 0 0.75rem;
+  opacity: 0.85;
+  font-size: 0.9rem;
+  line-height: 1.45;
+}
+
+.steps {
+  margin: 0;
+  padding-left: 1.2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.steps li {
+  line-height: 1.4;
+}
+
+.stepTitle {
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.stepBody {
+  margin: 0.15rem 0 0;
+  opacity: 0.85;
+  font-size: 0.875rem;
+}
+
+.links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 0.85rem;
+  margin-top: 0.75rem;
+}
+
+.links a {
+  font-size: 0.875rem;
+}
+
+.oauth {
+  margin-top: 0.9rem;
+  padding-top: 0.85rem;
+  border-top: 1px solid var(--theme-elevation-150);
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+
+.oauthHint {
+  margin: 0;
+  opacity: 0.8;
+  font-size: 0.85rem;
+  line-height: 1.4;
+}
+
+.callbackRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  align-items: center;
+}
+
+.callbackLabel {
+  font-size: 0.8rem;
+  opacity: 0.75;
+  flex: 0 0 auto;
+}
+
+.callbackValue {
+  flex: 1 1 12rem;
+  min-width: 0;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.75rem;
+  padding: 0.35rem 0.5rem;
+  border: 1px solid var(--theme-elevation-150);
+  border-radius: var(--style-radius-s, 3px);
+  background: var(--theme-input-bg, var(--theme-elevation-0));
+  color: var(--theme-elevation-800);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.empty {
+  margin: 0.5rem 0;
+  opacity: 0.7;
+  font-size: 0.9rem;
+}
