@@ -1,21 +1,22 @@
 import { createCipheriv, createDecipheriv, createHash, randomBytes } from 'node:crypto';
+import {
+  SETTINGS_ENC_PREFIX,
+  isEncryptedSecret,
+} from '@/lib/settings-encryption-shared';
+
+export { SETTINGS_ENC_PREFIX, isEncryptedSecret } from '@/lib/settings-encryption-shared';
 
 /**
- * AES-256-GCM for site-settings secrets.
+ * AES-256-GCM for site-settings / social-destination secrets.
  * Shared with www via the same SETTINGS_ENCRYPTION_KEY (server-only on both).
  * Format: enc:v1:<iv>.<ciphertext>.<tag>  (base64url, no padding)
  */
-export const SETTINGS_ENC_PREFIX = 'enc:v1:';
 
 export class SettingsEncryptionError extends Error {
   constructor(message: string) {
     super(message);
     this.name = 'SettingsEncryptionError';
   }
-}
-
-export function isEncryptedSecret(value: string): boolean {
-  return value.startsWith(SETTINGS_ENC_PREFIX);
 }
 
 function keyFromEnv(): Buffer {
