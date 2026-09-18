@@ -116,6 +116,11 @@ import {
   publishAnnounceTestHandler,
 } from './endpoints/publish-announce';
 import { secretsDecryptHandler } from './endpoints/secrets-decrypt';
+import {
+  socialOauthCallbackHandler,
+  socialOauthCallbackUrlHandler,
+  socialOauthStartHandler,
+} from './endpoints/social-destination-oauth';
 import { trustedOriginsArray } from './lib/auth/trustedOrigins';
 import { sanitizeExifForStorage } from './utilities/sanitizeExif';
 import { DEFAULT_FROM_ADDRESS, DEFAULT_FROM_NAME, emailFrom } from './utilities/emailFrom';
@@ -191,6 +196,21 @@ export default buildConfig({
       path: '/secrets/decrypt',
       method: 'post',
       handler: secretsDecryptHandler,
+    },
+    {
+      path: '/social-destinations/oauth/callback-url',
+      method: 'get',
+      handler: socialOauthCallbackUrlHandler,
+    },
+    {
+      path: '/social-destinations/oauth/start',
+      method: 'get',
+      handler: socialOauthStartHandler,
+    },
+    {
+      path: '/social-destinations/oauth/callback',
+      method: 'get',
+      handler: socialOauthCallbackHandler,
     },
     {
       path: '/account-link/medusa/lookup',
