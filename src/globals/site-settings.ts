@@ -29,7 +29,7 @@ export const SiteSettings: GlobalConfig = {
   admin: {
     group: Groups.global,
     description:
-      'Integration keys and prompts. API keys are encrypted at rest. Prefer the www /admin editors to view plaintext keys.',
+      'Integration keys and prompts. API keys are encrypted at rest. Use the eye icon on each secret field to reveal plaintext.',
   },
   access: {
     read: RBAC(allowedRoles(['admin']), [], 'site-settings', 'read'),
@@ -69,8 +69,10 @@ export const SiteSettings: GlobalConfig = {
               name: 'apiKey',
               type: 'text',
               admin: {
-                description:
-                  'Encrypted at rest. After save this field shows ciphertext here. Use www /admin to view the plaintext key.',
+                description: 'Encrypted at rest. Reveal with the eye icon to view the plaintext key.',
+                components: {
+                  Field: '@/components/EncryptedSecretField#EncryptedSecretField',
+                },
               },
             },
             {
@@ -147,6 +149,9 @@ export const SiteSettings: GlobalConfig = {
               type: 'text',
               admin: {
                 description: 'Encrypted at rest. Env LASTFM_API_KEY is used until this is set.',
+                components: {
+                  Field: '@/components/EncryptedSecretField#EncryptedSecretField',
+                },
               },
             },
           ],
@@ -160,6 +165,9 @@ export const SiteSettings: GlobalConfig = {
               type: 'text',
               admin: {
                 description: 'Encrypted at rest. Env RESEND_API_KEY is used until this is set.',
+                components: {
+                  Field: '@/components/EncryptedSecretField#EncryptedSecretField',
+                },
               },
             },
             {

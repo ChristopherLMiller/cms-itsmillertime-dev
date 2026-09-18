@@ -115,6 +115,7 @@ import {
   publishAnnounceSkipHandler,
   publishAnnounceTestHandler,
 } from './endpoints/publish-announce';
+import { secretsDecryptHandler } from './endpoints/secrets-decrypt';
 import { trustedOriginsArray } from './lib/auth/trustedOrigins';
 import { sanitizeExifForStorage } from './utilities/sanitizeExif';
 import { DEFAULT_FROM_ADDRESS, DEFAULT_FROM_NAME, emailFrom } from './utilities/emailFrom';
@@ -185,6 +186,11 @@ export default buildConfig({
       path: '/publish-announce/test',
       method: 'post',
       handler: publishAnnounceTestHandler,
+    },
+    {
+      path: '/secrets/decrypt',
+      method: 'post',
+      handler: secretsDecryptHandler,
     },
     {
       path: '/account-link/medusa/lookup',

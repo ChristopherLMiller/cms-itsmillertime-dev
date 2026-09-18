@@ -58,6 +58,7 @@ import { QueryPresetsColumnsCell as QueryPresetsColumnsCell_2b8867833a34864a02dd
 import { QueryPresetsColumnField as QueryPresetsColumnField_2b8867833a34864a02ddf429b0728a40 } from '@payloadcms/next/client'
 import { QueryPresetsGroupByCell as QueryPresetsGroupByCell_2b8867833a34864a02ddf429b0728a40 } from '@payloadcms/next/client'
 import { QueryPresetsGroupByField as QueryPresetsGroupByField_2b8867833a34864a02ddf429b0728a40 } from '@payloadcms/next/client'
+import { EncryptedSecretField as EncryptedSecretField_63fa05ec1482d71b9d8696907173bdbc } from '@/components/EncryptedSecretField'
 import { DestinationTestButton as DestinationTestButton_ecc63452858d694f98396e1beee7874b } from '@/components/DestinationTestButton'
 import { WebhookCollectionRowLabel as WebhookCollectionRowLabel_fcb2dafdf0f59a6c3a11842622e2d1b2 } from 'payload-plugin-webhooks/client'
 import { CustomNav as CustomNav_7a25bf58b9bf0789c79437d44273b9e5 } from 'payload-sidebar-plugin/rsc'
@@ -138,6 +139,7 @@ export const importMap = {
   "@payloadcms/next/client#QueryPresetsColumnField": QueryPresetsColumnField_2b8867833a34864a02ddf429b0728a40,
   "@payloadcms/next/client#QueryPresetsGroupByCell": QueryPresetsGroupByCell_2b8867833a34864a02ddf429b0728a40,
   "@payloadcms/next/client#QueryPresetsGroupByField": QueryPresetsGroupByField_2b8867833a34864a02ddf429b0728a40,
+  "@/components/EncryptedSecretField#EncryptedSecretField": EncryptedSecretField_63fa05ec1482d71b9d8696907173bdbc,
   "@/components/DestinationTestButton#DestinationTestButton": DestinationTestButton_ecc63452858d694f98396e1beee7874b,
   "payload-plugin-webhooks/client#WebhookCollectionRowLabel": WebhookCollectionRowLabel_fcb2dafdf0f59a6c3a11842622e2d1b2,
   "payload-sidebar-plugin/rsc#CustomNav": CustomNav_7a25bf58b9bf0789c79437d44273b9e5,

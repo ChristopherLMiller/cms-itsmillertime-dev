@@ -1,9 +1,27 @@
-import type { Field } from 'payload';
+import type { Field, TextField } from 'payload';
 import { SOCIAL_PLATFORM_TYPES } from '@/utilities/socialPlatforms';
 
 function whenType(...types: string[]) {
   return (_: unknown, siblingData: { type?: string } | undefined) =>
     Boolean(siblingData?.type && types.includes(siblingData.type));
+}
+
+/** Text field that masks encrypted secrets and decrypts on eye-toggle reveal. */
+function secretField(
+  field: Omit<TextField, 'type'> & { type?: 'text'; admin?: TextField['admin'] },
+): TextField {
+  const { admin, ...rest } = field;
+  return {
+    ...rest,
+    type: 'text',
+    admin: {
+      ...admin,
+      components: {
+        ...admin?.components,
+        Field: '@/components/EncryptedSecretField#EncryptedSecretField',
+      },
+    },
+  };
 }
 
 /** Shared announce tracking group — set-once after send or skip. */
@@ -71,14 +89,13 @@ export const socialDestinationFields: Field[] = [
       description: 'Pre-check this destination in the announce dialog.',
     },
   },
-  {
+  secretField({
     name: 'webhookUrl',
-    type: 'text',
     admin: {
       description: 'Encrypted at rest. Incoming webhook URL (Discord, Slack, or custom).',
       condition: whenType('discord', 'slack', 'custom_webhook'),
     },
-  },
+  }),
   {
     name: 'subreddit',
     type: 'text',
@@ -144,17 +161,15 @@ export const socialDestinationFields: Field[] = [
       condition: whenType('reddit', 'x', 'linkedin', 'tumblr', 'pinterest'),
     },
   },
-  {
+  secretField({
     name: 'clientSecret',
-    type: 'text',
     admin: {
       description: 'Encrypted at rest. OAuth client secret.',
       condition: whenType('reddit', 'x', 'linkedin', 'tumblr', 'pinterest'),
     },
-  },
-  {
+  }),
+  secretField({
     name: 'accessToken',
-    type: 'text',
     admin: {
       description:
         'Encrypted at rest. API access token / OAuth 2 bearer (or OAuth 1 access token for X/Tumblr).',
@@ -171,56 +186,50 @@ export const socialDestinationFields: Field[] = [
         'pinterest',
       ),
     },
-  },
-  {
+  }),
+  secretField({
     name: 'refreshToken',
-    type: 'text',
     admin: {
       description:
         'Encrypted at rest. OAuth refresh token (Reddit) or OAuth 1.0a token secret (X / Tumblr).',
       condition: whenType('reddit', 'x', 'linkedin', 'tumblr', 'pinterest'),
     },
-  },
-  {
+  }),
+  secretField({
     name: 'apiKey',
-    type: 'text',
     admin: {
       description: 'Encrypted at rest. Consumer / API key (X, Tumblr).',
       condition: whenType('x', 'tumblr', 'custom_webhook'),
     },
-  },
-  {
+  }),
+  secretField({
     name: 'apiSecret',
-    type: 'text',
     admin: {
       description: 'Encrypted at rest. Consumer / API secret (X, Tumblr).',
       condition: whenType('x', 'tumblr'),
     },
-  },
-  {
+  }),
+  secretField({
     name: 'appPassword',
-    type: 'text',
     admin: {
       description: 'Encrypted at rest. Bluesky app password.',
       condition: whenType('bluesky'),
     },
-  },
-  {
+  }),
+  secretField({
     name: 'botToken',
-    type: 'text',
     admin: {
       description: 'Encrypted at rest. Telegram bot token from BotFather.',
       condition: whenType('telegram'),
     },
-  },
-  {
+  }),
+  secretField({
     name: 'bearerToken',
-    type: 'text',
     admin: {
       description: 'Encrypted at rest. Optional auth for custom webhooks / Mastodon alternate.',
       condition: whenType('custom_webhook', 'mastodon', 'x'),
     },
-  },
+  }),
   {
     name: 'notes',
     type: 'textarea',
