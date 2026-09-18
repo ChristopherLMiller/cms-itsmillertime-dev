@@ -113,6 +113,7 @@ import {
   publishAnnounceDestinationsHandler,
   publishAnnounceSendHandler,
   publishAnnounceSkipHandler,
+  publishAnnounceTestHandler,
 } from './endpoints/publish-announce';
 import { trustedOriginsArray } from './lib/auth/trustedOrigins';
 import { sanitizeExifForStorage } from './utilities/sanitizeExif';
@@ -179,6 +180,11 @@ export default buildConfig({
       path: '/publish-announce/skip',
       method: 'post',
       handler: publishAnnounceSkipHandler,
+    },
+    {
+      path: '/publish-announce/test',
+      method: 'post',
+      handler: publishAnnounceTestHandler,
     },
     {
       path: '/account-link/medusa/lookup',
