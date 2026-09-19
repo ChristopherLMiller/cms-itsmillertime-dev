@@ -68,6 +68,7 @@ import { LogoutButton as LogoutButton_aa8e4427b70b37c7820895ace344eb78 } from '@
 import { SearchButton as SearchButton_3bf5d3e334c5eaf4f0d216451590d3c2 } from '@veiag/payload-cmdk/client'
 import { SecurityNavLinks as SecurityNavLinks_e3642e6c1e5dbb92bcf178f42e87e19e } from '@delmaredigital/payload-better-auth/components/management'
 import { default as default_e5727cf75af5a5f3715e1efb9b6b07eb } from '@/components/NavBadgeProvider'
+import { AdminErrorBoundary as AdminErrorBoundary_e5a9e14bdbe97e70ba60697217fe7688 } from '@payloadcms/plugin-sentry/client'
 import { CommandMenuProviderServer as CommandMenuProviderServer_ce0f74d90e08543ab3d3fb198105be4b } from '@veiag/payload-cmdk/rsc'
 import { S3ClientUploadHandler as S3ClientUploadHandler_f97aa6c64367fa259c5bc0567239ef24 } from '@payloadcms/storage-s3/client'
 import { default as default_41e34effe3f4ece2ddcb2839119d86bb } from '@/components/BGG'
@@ -150,6 +151,7 @@ export const importMap = {
   "@veiag/payload-cmdk/client#SearchButton": SearchButton_3bf5d3e334c5eaf4f0d216451590d3c2,
   "@delmaredigital/payload-better-auth/components/management#SecurityNavLinks": SecurityNavLinks_e3642e6c1e5dbb92bcf178f42e87e19e,
   "@/components/NavBadgeProvider#default": default_e5727cf75af5a5f3715e1efb9b6b07eb,
+  "@payloadcms/plugin-sentry/client#AdminErrorBoundary": AdminErrorBoundary_e5a9e14bdbe97e70ba60697217fe7688,
   "@veiag/payload-cmdk/rsc#CommandMenuProviderServer": CommandMenuProviderServer_ce0f74d90e08543ab3d3fb198105be4b,
   "@payloadcms/storage-s3/client#S3ClientUploadHandler": S3ClientUploadHandler_f97aa6c64367fa259c5bc0567239ef24,
   "@/components/BGG#default": default_41e34effe3f4ece2ddcb2839119d86bb,
