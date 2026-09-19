@@ -73,7 +73,7 @@ export const Media: CollectionConfig = {
           fields: [
             {
               type: 'join',
-              collection: ['posts'],
+              collection: 'posts',
               on: 'featuredImage',
               name: 'relatedPosts',
               label: 'Posts',

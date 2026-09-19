@@ -1,5 +1,19 @@
 # cms-itsmillertime-dev
 
+## 3.32.0
+
+### Minor Changes
+
+- Raise the multipart request cap to 5GB so large uploads still work under Payload 3.90
+- Queue EXIF generation through `jobs.queue()` instead of payload-jobs CRUD
+
+### Patch Changes
+
+- Upgrade Payload to 3.90.1 for the security release
+- Restore admin job reads after Payload 3.89 access defaults
+- Additive `_objectkey` migration for media, gallery-images, and gallery-masters
+- Bump `payload-plugin-google-photos` to 1.0.6
+
 ## 3.31.0
 
 ### Minor Changes

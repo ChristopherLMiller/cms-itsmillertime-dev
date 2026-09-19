@@ -97,6 +97,8 @@ export interface Config {
     passkeys: Passkey;
     apikeys: Apikey;
     search: Search;
+    'google-photos-oauth': GooglePhotosOauth;
+    'google-photos-imports': GooglePhotosImport;
     'payload-mcp-api-keys': PayloadMcpApiKey;
     'payload-jobs': PayloadJob;
     'payload-folders': FolderInterface;
@@ -156,6 +158,8 @@ export interface Config {
     passkeys: PasskeysSelect<false> | PasskeysSelect<true>;
     apikeys: ApikeysSelect<false> | ApikeysSelect<true>;
     search: SearchSelect<false> | SearchSelect<true>;
+    'google-photos-oauth': GooglePhotosOauthSelect<false> | GooglePhotosOauthSelect<true>;
+    'google-photos-imports': GooglePhotosImportsSelect<false> | GooglePhotosImportsSelect<true>;
     'payload-mcp-api-keys': PayloadMcpApiKeysSelect<false> | PayloadMcpApiKeysSelect<true>;
     'payload-jobs': PayloadJobsSelect<false> | PayloadJobsSelect<true>;
     'payload-folders': PayloadFoldersSelect<false> | PayloadFoldersSelect<true>;
@@ -665,13 +669,11 @@ export interface Media {
     [k: string]: unknown;
   } | null;
   relatedPosts?: {
-    docs?: {
-      relationTo?: 'posts';
-      value: number | Post;
-    }[];
+    docs?: (number | Post)[];
     hasNextPage?: boolean;
     totalDocs?: number;
   };
+  _objectKey?: string | null;
   folder?: (number | null) | FolderInterface;
   updatedAt: string;
   createdAt: string;
@@ -907,6 +909,7 @@ export interface GalleryImage {
     hasNextPage?: boolean;
     totalDocs?: number;
   };
+  _objectKey?: string | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -991,6 +994,7 @@ export interface GalleryMaster {
    * Local filename stem from ingest (piu).
    */
   sourceStem?: string | null;
+  _objectKey?: string | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -1393,6 +1397,34 @@ export interface Search {
   createdAt: string;
 }
 /**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "google-photos-oauth".
+ */
+export interface GooglePhotosOauth {
+  id: number;
+  user: number | User;
+  googleEmail?: string | null;
+  encryptedRefreshToken: string;
+  accessToken?: string | null;
+  accessTokenExpiresAt?: string | null;
+  scope?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "google-photos-imports".
+ */
+export interface GooglePhotosImport {
+  id: number;
+  googlePhotosId: string;
+  targetCollection: string;
+  documentId: string;
+  filename?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
  * API keys control which collections, resources, tools, and prompts MCP clients can access
  *
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1723,6 +1755,7 @@ export interface PayloadMcpApiKey {
   enableAPIKey?: boolean | null;
   apiKey?: string | null;
   apiKeyIndex?: string | null;
+  hasAPIKey?: boolean | null;
   collection: 'payload-mcp-api-keys';
 }
 /**
@@ -2136,6 +2169,7 @@ export interface MediaSelect<T extends boolean = true> {
   alt?: T;
   caption?: T;
   relatedPosts?: T;
+  _objectKey?: T;
   folder?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -2398,6 +2432,7 @@ export interface GalleryImagesSelect<T extends boolean = true> {
         image?: T;
       };
   productRequests?: T;
+  _objectKey?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -2492,6 +2527,7 @@ export interface GalleryMastersSelect<T extends boolean = true> {
   prefix?: T;
   alt?: T;
   sourceStem?: T;
+  _objectKey?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -2847,6 +2883,32 @@ export interface SearchSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "google-photos-oauth_select".
+ */
+export interface GooglePhotosOauthSelect<T extends boolean = true> {
+  user?: T;
+  googleEmail?: T;
+  encryptedRefreshToken?: T;
+  accessToken?: T;
+  accessTokenExpiresAt?: T;
+  scope?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "google-photos-imports_select".
+ */
+export interface GooglePhotosImportsSelect<T extends boolean = true> {
+  googlePhotosId?: T;
+  targetCollection?: T;
+  documentId?: T;
+  filename?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-mcp-api-keys_select".
  */
 export interface PayloadMcpApiKeysSelect<T extends boolean = true> {
@@ -2994,6 +3056,7 @@ export interface PayloadMcpApiKeysSelect<T extends boolean = true> {
   enableAPIKey?: T;
   apiKey?: T;
   apiKeyIndex?: T;
+  hasAPIKey?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -3159,7 +3222,7 @@ export interface SiteNavigation {
   createdAt?: string | null;
 }
 /**
- * Integration keys and prompts. API keys are encrypted at rest. Prefer the www /admin editors to view plaintext keys.
+ * Integration keys and prompts. API keys are encrypted at rest. Use the eye icon on each secret field to reveal plaintext.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "site-settings".
@@ -3173,7 +3236,7 @@ export interface SiteSetting {
      */
     model?: string | null;
     /**
-     * Encrypted at rest. After save this field shows ciphertext here. Use www /admin to view the plaintext key.
+     * Encrypted at rest. Reveal with the eye icon to view the plaintext key.
      */
     apiKey?: string | null;
     /**
@@ -3210,7 +3273,7 @@ export interface SiteSetting {
   createdAt?: string | null;
 }
 /**
- * Configure social platforms for first-publish announcements. Multiple rows of the same type are allowed (e.g. several Discords or Reddit subs). Secrets are encrypted at rest.
+ * Configure social platforms for first-publish announcements. Each row shows a setup guide with links; Reddit, Mastodon, X, LinkedIn, and Pinterest support Authorize when client credentials (or instance URL) are saved. Secrets are encrypted at rest.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "social-destinations".
@@ -3223,6 +3286,9 @@ export interface SocialDestination {
          * Shown in the announce dialog, e.g. “Discord – #blog”.
          */
         label: string;
+        /**
+         * Pick a platform to see setup steps below. Discord/Slack use webhooks; others use tokens or OAuth Authorize where available.
+         */
         type:
           | 'discord'
           | 'slack'
@@ -3244,7 +3310,7 @@ export interface SocialDestination {
          */
         defaultSelected?: boolean | null;
         /**
-         * Encrypted at rest. Incoming webhook URL.
+         * Encrypted at rest. Incoming webhook URL (Discord, Slack, or custom).
          */
         webhookUrl?: string | null;
         /**
@@ -3255,30 +3321,48 @@ export interface SocialDestination {
          * e.g. https://mastodon.social
          */
         instanceUrl?: string | null;
+        /**
+         * Bluesky handle (user.bsky.social). Optional for Threads if pageId is set.
+         */
         handle?: string | null;
+        /**
+         * Facebook Page ID, Instagram business account ID, Threads user ID, or LinkedIn author URN / org id.
+         */
         pageId?: string | null;
+        /**
+         * Pinterest board id
+         */
         boardId?: string | null;
+        /**
+         * Telegram chat / channel id (e.g. @channel or -100…)
+         */
         chatId?: string | null;
+        /**
+         * Tumblr blog name (without .tumblr.com)
+         */
         blogName?: string | null;
+        /**
+         * OAuth client / app id (Reddit, etc.)
+         */
         clientId?: string | null;
         /**
-         * Encrypted at rest.
+         * Encrypted at rest. OAuth client secret.
          */
         clientSecret?: string | null;
         /**
-         * Encrypted at rest.
+         * Encrypted at rest. API access token / OAuth 2 bearer (or OAuth 1 access token for X/Tumblr).
          */
         accessToken?: string | null;
         /**
-         * Encrypted at rest.
+         * Encrypted at rest. OAuth refresh token (Reddit) or OAuth 1.0a token secret (X / Tumblr).
          */
         refreshToken?: string | null;
         /**
-         * Encrypted at rest.
+         * Encrypted at rest. Consumer / API key (X, Tumblr).
          */
         apiKey?: string | null;
         /**
-         * Encrypted at rest.
+         * Encrypted at rest. Consumer / API secret (X, Tumblr).
          */
         apiSecret?: string | null;
         /**
@@ -3286,11 +3370,11 @@ export interface SocialDestination {
          */
         appPassword?: string | null;
         /**
-         * Encrypted at rest.
+         * Encrypted at rest. Telegram bot token from BotFather.
          */
         botToken?: string | null;
         /**
-         * Encrypted at rest. Optional auth for custom webhooks.
+         * Encrypted at rest. Optional auth for custom webhooks / Mastodon alternate.
          */
         bearerToken?: string | null;
         /**
@@ -3347,7 +3431,9 @@ export interface Webhook {
           | 'twoFactors'
           | 'passkeys'
           | 'apikeys'
-          | 'search';
+          | 'search'
+          | 'google-photos-oauth'
+          | 'google-photos-imports';
         enabled?: boolean | null;
         /**
          * Select which CRUD operations should emit webhook events.
@@ -3719,7 +3805,15 @@ export interface TaskSchedulePublish {
           value: number | Project;
         } | null);
     global?: string | null;
-    user?: (number | null) | User;
+    user?:
+      | ({
+          relationTo: 'users';
+          value: number | User;
+        } | null)
+      | ({
+          relationTo: 'payload-mcp-api-keys';
+          value: number | PayloadMcpApiKey;
+        } | null);
   };
   output?: unknown;
 }
