@@ -116,8 +116,8 @@ importers:
         specifier: ^1.0.3
         version: 1.0.3(@payloadcms/ui@3.90.1(@types/react@19.2.18)(monaco-editor@0.52.2)(next@16.3.4(@babel/core@7.29.7)(@opentelemetry/api@1.9.1)(@types/node@26.4.1)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(sass@1.77.4))(payload@3.90.1(graphql@16.11.0)(typescript@5.8.3))(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(typescript@5.8.3))(payload@3.90.1(graphql@16.11.0)(typescript@5.8.3))(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       payload-plugin-google-photos:
-        specifier: ^1.0.5
-        version: 1.0.5(payload@3.90.1(graphql@16.11.0)(typescript@5.8.3))
+        specifier: ^1.0.6
+        version: 1.0.6(payload@3.90.1(graphql@16.11.0)(typescript@5.8.3))
       payload-plugin-webhooks:
         specifier: ^1.2.0
         version: 1.2.0(payload@3.90.1(graphql@16.11.0)(typescript@5.8.3))
@@ -5993,8 +5993,8 @@ packages:
       react: ^18.0.0 || ^19.0.0
       react-dom: ^18.0.0 || ^19.0.0
 
-  payload-plugin-google-photos@1.0.5:
-    resolution: {integrity: sha512-7IXrv7X8h+0qAz7xatLqWAXgM8v9qJ79YzChqmeBqdoQWAeTbTdxTVlxzaUKNgzLdImZMLc0LaCmK1BIQ7NtJg==}
+  payload-plugin-google-photos@1.0.6:
+    resolution: {integrity: sha512-rrVd+Zmtt4x+w5qbIuKTPkKOwwh5Z2c+MGYwOjBjlpETJsPKrRvUfnJSt3CR7WhwSO1uklyNCzA0PKUVndPGUA==}
     engines: {node: '>=18.20.0', pnpm: ^9 || ^10 || ^11}
     peerDependencies:
       payload: ^3
@@ -13576,7 +13576,7 @@ snapshots:
       react: 19.2.8
       react-dom: 19.2.8(react@19.2.8)
 
-  payload-plugin-google-photos@1.0.5(payload@3.90.1(graphql@16.11.0)(typescript@5.8.3)):
+  payload-plugin-google-photos@1.0.6(payload@3.90.1(graphql@16.11.0)(typescript@5.8.3)):
     dependencies:
       google-auth-library: 10.9.1
       payload: 3.90.1(graphql@16.11.0)(typescript@5.8.3)
