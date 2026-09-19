@@ -60,6 +60,7 @@ import { galleryProductRequestHandler } from './endpoints/gallery-product-reques
 import { galleryImageTrackingHandler } from './endpoints/gallery-image-tracking';
 import { lastfmNowPlayingHandler } from './endpoints/lastfm-now-playing';
 import { emailPreviewHandler } from './endpoints/email-preview';
+import { queueExifHandler } from './endpoints/queue-exif';
 import {
   medusaCollectionCreateHandler,
   medusaCollectionsHandler,
@@ -85,6 +86,7 @@ import {
   openapiHealth,
   openapiLastfmNowPlaying,
   openapiEmailPreview,
+  openapiQueueExif,
   openapiMedusaCollectionsGet,
   openapiMedusaCollectionsPost,
   openapiMedusaOfferingSets,
@@ -121,6 +123,7 @@ import {
   socialOauthCallbackUrlHandler,
   socialOauthStartHandler,
 } from './endpoints/social-destination-oauth';
+import { allowedRoles } from './access/methods/allowedRoles';
 import { trustedOriginsArray } from './lib/auth/trustedOrigins';
 import { sanitizeExifForStorage } from './utilities/sanitizeExif';
 import { DEFAULT_FROM_ADDRESS, DEFAULT_FROM_NAME, emailFrom } from './utilities/emailFrom';
@@ -382,6 +385,12 @@ export default buildConfig({
       handler: emailPreviewHandler,
       custom: { openapi: openapiEmailPreview },
     },
+    {
+      path: '/queue-exif',
+      method: 'post',
+      handler: queueExifHandler,
+      custom: { openapi: openapiQueueExif },
+    },
   ],
   kv: redisKVAdapter({
     keyPrefix: 'payload:',
@@ -535,17 +544,30 @@ export default buildConfig({
   plugins: plugins,
   upload: {
     abortOnLimit: true,
+    // Payload 3.90 caps multipart requests at 50MB unless this is raised.
+    requestSizeLimit: 5 * 1024 * 1024 * 1024, // 5GB, match fileSize
     limits: {
       fileSize: 5 * 1024 * 1024 * 1024, // 5GB
     },
   },
   jobs: {
+    // 3.89+: dedicated queue/run/cancel APIs (not collection CRUD). Default is "any logged-in user".
+    access: {
+      queue: allowedRoles(['admin']),
+      run: allowedRoles(['admin']),
+      cancel: allowedRoles(['admin']),
+    },
     jobsCollectionOverrides: ({ defaultJobsCollection }) => {
       if (!defaultJobsCollection.admin) {
         defaultJobsCollection.admin = {};
       }
 
       defaultJobsCollection.admin.hidden = false;
+      // 3.89 denies payload-jobs CRUD by default. Admin list needs read; keep writes denied.
+      defaultJobsCollection.access = {
+        ...defaultJobsCollection.access,
+        read: allowedRoles(['admin']),
+      };
       return defaultJobsCollection;
     },
     tasks: [

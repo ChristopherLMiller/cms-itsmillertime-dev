@@ -562,6 +562,34 @@ export const openapiBggCollection = {
   },
 };
 
+export const openapiQueueExif = {
+  summary: 'Queue EXIF generation for an upload',
+  description:
+    'Admin only. Uses payload.jobs.queue() — do not POST to /api/payload-jobs after Payload 3.89.',
+  tags: ['Admin'],
+  security: adminSecurity,
+  requestBody: {
+    required: true,
+    content: {
+      'application/json': {
+        schema: {
+          type: 'object',
+          required: ['id', 'collection'],
+          properties: {
+            id: { type: 'integer' },
+            collection: { type: 'string', enum: ['media', 'gallery-images'] },
+          },
+        },
+      },
+    },
+  },
+  responses: {
+    '200': { description: 'Job queued' },
+    '400': { description: 'Validation error' },
+    '401': { description: 'Unauthorized' },
+  },
+};
+
 export const openapiEmailPreview = {
   summary: 'Render email templates with example data',
   description:

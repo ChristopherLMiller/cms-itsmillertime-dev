@@ -12,6 +12,8 @@ import * as migration_20260830_102053_site_settings from './20260830_102053_site
 import * as migration_20260901_account_link_user_fields from './20260901_account_link_user_fields';
 import * as migration_20260902_better_auth_1_7 from './20260902_better_auth_1_7';
 import * as migration_20260918_publish_announce_social from './20260918_publish_announce_social';
+import * as migration_20260919_google_photos_plugin from './20260919_google_photos_plugin';
+import * as migration_20260919_payload_3_90_upload_object_key from './20260919_payload_3_90_upload_object_key';
 
 export const migrations = [
   {
@@ -83,5 +85,15 @@ export const migrations = [
     up: migration_20260918_publish_announce_social.up,
     down: migration_20260918_publish_announce_social.down,
     name: '20260918_publish_announce_social',
+  },
+  {
+    up: migration_20260919_google_photos_plugin.up,
+    down: migration_20260919_google_photos_plugin.down,
+    name: '20260919_google_photos_plugin',
+  },
+  {
+    up: migration_20260919_payload_3_90_upload_object_key.up,
+    down: migration_20260919_payload_3_90_upload_object_key.down,
+    name: '20260919_payload_3_90_upload_object_key',
   },
 ];

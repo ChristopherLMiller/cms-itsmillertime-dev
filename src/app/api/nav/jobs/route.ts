@@ -1,6 +1,7 @@
+import { hasAnyRole } from '@delmaredigital/payload-better-auth';
 import config from '@payload-config';
-import { getPayload } from 'payload';
 import { headers } from 'next/headers';
+import { getPayload } from 'payload';
 
 export async function GET(): Promise<Response> {
   try {
@@ -22,8 +23,17 @@ export async function GET(): Promise<Response> {
       return Response.json({ count: 0 });
     }
 
+    const canReadJobs =
+      user.collection === 'payload-mcp-api-keys' || hasAnyRole(user, ['admin']);
+    if (!canReadJobs) {
+      return Response.json({ count: 0 });
+    }
+
+    // 3.89 denies payload-jobs CRUD by default; honor collection read access.
     const activeJobs = await payload.count({
       collection: 'payload-jobs',
+      user,
+      overrideAccess: false,
     });
 
     return Response.json({ count: activeJobs.totalDocs ?? 0 });

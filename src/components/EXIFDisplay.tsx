@@ -8,7 +8,6 @@ import {
   useDocumentInfo,
   useField,
   useDrawerSlug,
-  usePayloadAPI,
 } from '@payloadcms/ui';
 import type { JSONFieldClientProps } from 'payload';
 
@@ -52,7 +51,6 @@ export const EXIFDisplay: React.FC<JSONFieldClientProps> = () => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const drawerSlug = useDrawerSlug('exif-raw-data');
-  const payloadAPI = usePayloadAPI(process.env.NEXT_PUBLIC_SERVER_URL!);
 
   // Check if EXIF data is empty object
   const isEmptyObject = useMemo(() => {
@@ -148,18 +146,15 @@ export const EXIFDisplay: React.FC<JSONFieldClientProps> = () => {
 
       try {
         // Queue the job using Payload's jobs API
-        const response = await fetch('/api/payload-jobs', {
+        const response = await fetch('/api/queue-exif', {
           method: 'POST',
+          credentials: 'include',
           headers: {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            taskSlug: 'generateImageEXIF',
-            queue: 'exif',
-            input: {
-              id: typeof id === 'string' ? parseInt(id, 10) : id,
-              collection: collectionSlug,
-            },
+            id: typeof id === 'string' ? parseInt(id, 10) : id,
+            collection: collectionSlug,
           }),
         });
 
