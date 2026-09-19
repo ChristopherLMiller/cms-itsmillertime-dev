@@ -17,6 +17,7 @@ import { payloadCmdk } from '@veiag/payload-cmdk';
 import type { Plugin } from 'payload';
 import { betterAuthPlugin } from './better-auth';
 import { payloadPluginAndroidUpload } from 'payload-plugin-android-upload';
+import { googlePhotosPlugin } from 'payload-plugin-google-photos';
 
 export const plugins: Plugin[] = [
   ...betterAuthPlugin(),
@@ -61,6 +62,7 @@ export const plugins: Plugin[] = [
     disabled: false,
     basePath: '/mobile-upload',
   }),
+  googlePhotosPlugin({}),
   payloadCmdk({}),
   payloadPluginWebhooks({
     streamAuth: async (req) => {
