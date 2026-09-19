@@ -116,8 +116,8 @@ importers:
         specifier: ^1.0.3
         version: 1.0.3(@payloadcms/ui@3.88.0(@types/react@19.2.18)(monaco-editor@0.52.2)(next@16.3.4(@babel/core@7.29.7)(@opentelemetry/api@1.9.1)(@types/node@26.4.1)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(sass@1.77.4))(payload@3.88.0(graphql@16.11.0)(typescript@5.8.3))(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(typescript@5.8.3))(payload@3.88.0(graphql@16.11.0)(typescript@5.8.3))(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       payload-plugin-google-photos:
-        specifier: ^1.0.2
-        version: 1.0.2(payload@3.88.0(graphql@16.11.0)(typescript@5.8.3))
+        specifier: ^1.0.3
+        version: 1.0.3(payload@3.88.0(graphql@16.11.0)(typescript@5.8.3))
       payload-plugin-webhooks:
         specifier: ^1.2.0
         version: 1.2.0(payload@3.88.0(graphql@16.11.0)(typescript@5.8.3))
@@ -5862,8 +5862,8 @@ packages:
       react: ^18.0.0 || ^19.0.0
       react-dom: ^18.0.0 || ^19.0.0
 
-  payload-plugin-google-photos@1.0.2:
-    resolution: {integrity: sha512-O534gcBZjPKaOOQ3JbY/3nbIJUVOa4RJNfDHrvUlfQjNXTBQNTemv0HnKhRNYsn4j1SoOpwpAqk4WNciH0iaTA==}
+  payload-plugin-google-photos@1.0.3:
+    resolution: {integrity: sha512-JDRzVeT11hOOJh+D7/wnL3fKEAOTXT+a3X/8qv0/fv0RzUSX7QOdjFOeNorOl9Z/f/nM3irGuDFUsDHHsgHBHA==}
     engines: {node: '>=18.20.0', pnpm: ^9 || ^10 || ^11}
     peerDependencies:
       payload: ^3
@@ -9180,7 +9180,7 @@ snapshots:
       '@modelcontextprotocol/sdk': 1.30.0(zod@3.25.76)
       '@types/json-schema': 7.0.15
       json-schema-to-zod: 2.6.1
-      mcp-handler: 1.1.0(@modelcontextprotocol/sdk@1.30.0(zod@4.5.4))(next@16.3.4(@babel/core@7.29.7)(@opentelemetry/api@1.9.1)(@types/node@26.4.1)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(sass@1.77.4))
+      mcp-handler: 1.1.0(@modelcontextprotocol/sdk@1.30.0(zod@3.25.76))(next@16.3.4(@babel/core@7.29.7)(@opentelemetry/api@1.9.1)(@types/node@26.4.1)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(sass@1.77.4))
       payload: 3.88.0(graphql@16.11.0)(typescript@5.8.3)
       zod: 3.25.76
     transitivePeerDependencies:
@@ -12809,7 +12809,7 @@ snapshots:
 
   math-intrinsics@1.1.0: {}
 
-  mcp-handler@1.1.0(@modelcontextprotocol/sdk@1.30.0(zod@4.5.4))(next@16.3.4(@babel/core@7.29.7)(@opentelemetry/api@1.9.1)(@types/node@26.4.1)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(sass@1.77.4)):
+  mcp-handler@1.1.0(@modelcontextprotocol/sdk@1.30.0(zod@3.25.76))(next@16.3.4(@babel/core@7.29.7)(@opentelemetry/api@1.9.1)(@types/node@26.4.1)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(sass@1.77.4)):
     dependencies:
       '@modelcontextprotocol/sdk': 1.30.0(zod@3.25.76)
       chalk: 5.6.2
@@ -13368,7 +13368,7 @@ snapshots:
       react: 19.2.8
       react-dom: 19.2.8(react@19.2.8)
 
-  payload-plugin-google-photos@1.0.2(payload@3.88.0(graphql@16.11.0)(typescript@5.8.3)):
+  payload-plugin-google-photos@1.0.3(payload@3.88.0(graphql@16.11.0)(typescript@5.8.3)):
     dependencies:
       google-auth-library: 10.9.1
       payload: 3.88.0(graphql@16.11.0)(typescript@5.8.3)
