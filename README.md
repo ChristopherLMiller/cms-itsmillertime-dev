@@ -4,8 +4,8 @@ The headless CMS powering [itsmillertime.dev](https://www.itsmillertime.dev), bu
 
 ## Tech Stack
 
-- **CMS**: Payload CMS 3.86
-- **Framework**: Next.js 16 (App Router)
+- **CMS**: Payload CMS 3.88
+- **Framework**: Next.js 16.3 (App Router)
 - **Database**: PostgreSQL (via `@payloadcms/db-postgres`)
 - **KV**: Redis (via `@payloadcms/kv-redis`) for BGG / Last.fm API route caching
 - **Object Storage**: Cloudflare R2 (via `@payloadcms/storage-s3`)
@@ -43,10 +43,12 @@ The headless CMS powering [itsmillertime.dev](https://www.itsmillertime.dev), bu
 | `@payloadcms/plugin-mcp` | MCP server integration |
 | `@payloadcms/storage-s3` | Cloudflare R2 file storage |
 | `@seshuk/payload-plugin-openapi` | OpenAPI 3.1 spec + Scalar docs UI |
-| `payload-plugin-webhooks` | Webhook delivery on collection events |
+| `payload-plugin-webhooks` | SSE stream + webhook events on collection CRUD (configure in **Webhooks** global) |
+| `payload-plugin-google-photos` | Import from Google Photos into upload collections (admin picker) |
+| `payload-plugin-android-upload` | Mobile-friendly upload route for gallery/media |
 | `payload-sidebar-plugin` | Custom admin sidebar with grouped navigation and icons |
 | `@veiag/payload-cmdk` | Command palette (Cmd+K) in the admin panel |
-| `@delmaredigital/payload-better-auth` | Better Auth sessions; Authentik OIDC + local email/password |
+| `@delmaredigital/payload-better-auth` | Better Auth sessions; Authentik OIDC + local email/password + API keys |
 
 ## API Documentation
 
@@ -90,8 +92,15 @@ Collections, globals, and auth are documented automatically. Custom routes:
 | `POST` | `/api/nav/unpin` | Session | Unpin item |
 | `POST` | `/api/nav/reorder` | Session | Reorder pins |
 | `GET` | `/api/nav/jobs` | Session | Active jobs count (sidebar badge) |
+| `GET` | `/api/webhooks/stream` | API key / session | SSE stream of collection CRUD events (www cache invalidation) |
 
 Nav routes stay as Next.js App Router handlers (plugin contract). Everything else above is a Payload endpoint.
+
+### Webhook stream (www)
+
+The www frontend connects to `/api/webhooks/stream` with an `x-api-key` header to receive live content-change events. Auth uses Payload’s default stream handler (`req.payload.auth`), which accepts Better Auth API keys when `enableSessionForAPIKeys` is enabled.
+
+In admin, open **Webhooks** and enable the collections/operations you want emitted (typically create/update/delete on posts, pages, globals, etc.).
 
 ## Custom Features
 
@@ -99,6 +108,8 @@ Nav routes stay as Next.js App Router handlers (plugin contract). Everything els
 - **EXIF Extraction** -- background job queue that parses EXIF data from uploaded images using ExifReader
 - **BlurHash Generation** -- generates placeholder blurhash strings for images
 - **Word Count** -- automatic word count tracking on posts
+- **Google Photos import** -- pick photos in admin and copy originals into upload collections
+- **Webhook SSE stream** -- push collection change events to connected www clients
 - **Slug Field** -- auto-generated URL slugs from titles
 - **Custom Dashboard** -- analytics dashboard with Plausible integration
 - **BGG Integration** -- Board Game Geek collection viewer in the admin panel
@@ -163,6 +174,15 @@ BETTER_AUTH_URL=http://localhost:3000
 AUTHENTIK_CLIENT_ID=
 AUTHENTIK_CLIENT_SECRET=
 AUTHENTIK_DISCOVERY_URL=
+
+# Google Photos import (payload-plugin-google-photos)
+# OAuth client from Google Cloud — see plugin docs/setup.md
+GOOGLE_PHOTOS_CLIENT_ID=
+GOOGLE_PHOTOS_CLIENT_SECRET=
+# Optional — defaults to ${NEXT_PUBLIC_SERVER_URL}/api/google-photos/oauth/callback
+# GOOGLE_PHOTOS_REDIRECT_URI=
+# Optional — 32-byte key as 64 hex or base64; falls back to PAYLOAD_SECRET
+# GOOGLE_PHOTOS_ENCRYPTION_KEY=
 ```
 
 ### Installation
