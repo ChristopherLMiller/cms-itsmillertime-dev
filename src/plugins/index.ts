@@ -64,41 +64,8 @@ export const plugins: Plugin[] = [
   }),
   googlePhotosPlugin({}),
   payloadCmdk({}),
-  payloadPluginWebhooks({
-    streamAuth: async (req) => {
-      const apiKey = req.headers.get('x-api-key');
-
-      if (!apiKey) {
-        return false;
-      }
-
-      try {
-        const result = await req.payload.find({
-          collection: 'apikeys',
-          where: {
-            key: {
-              equals: apiKey,
-            },
-            enabled: { equals: true },
-          },
-          limit: 1,
-        });
-        if (result.docs.length > 0) {
-          await req.payload.update({
-            collection: 'apikeys',
-            id: result.docs[0].id,
-            data: { lastRequest: new Date().toISOString() },
-          });
-          return true;
-        }
-
-        return false;
-      } catch (error) {
-        console.error(`Error authorizing webhook stream: ${error}`);
-        return false;
-      }
-    },
-  }),
+  // Default stream auth uses req.payload.auth — x-api-key works via enableSessionForAPIKeys.
+  payloadPluginWebhooks({}),
   payloadSidebar({
     groupOrder: {
       [Groups.media]: 1,
@@ -132,7 +99,7 @@ export const plugins: Plugin[] = [
       'site-navigation': 'globe',
       'site-settings': 'settings',
       'map-markers': 'map',
-      gardenss: 'book',
+      gardens: 'book',
     },
     customLinks: [
       {

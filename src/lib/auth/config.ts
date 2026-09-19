@@ -144,9 +144,10 @@ export function createBetterAuthOptions(payload?: BasePayload): Partial<BetterAu
         // REST clients (piu, curl) send `x-api-key`. Without this, getSession()
         // ignores the header and Payload req.user stays null — uploads 403.
         enableSessionForAPIKeys: true,
-        // Default is 10 requests / 24h, which cannot upload a photo album.
+        // Disabled for now — rate-limit bookkeeping uses incrementOne on apikeys and
+        // contends under concurrent x-api-key traffic.
         rateLimit: {
-          enabled: true,
+          enabled: false,
           timeWindow: 1000 * 60 * 60,
           maxRequests: 10_000,
         },

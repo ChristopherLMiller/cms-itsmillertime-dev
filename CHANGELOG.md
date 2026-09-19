@@ -1,5 +1,18 @@
 # cms-itsmillertime-dev
 
+## 3.31.0
+
+### Minor Changes
+
+- Add Google Photos import via `payload-plugin-google-photos`
+- Document webhook SSE stream, API key auth, and Google Photos env vars in README
+
+### Patch Changes
+
+- Use default webhook stream auth (`req.payload.auth`) instead of a custom `apikeys` lookup
+- Disable Better Auth API key rate limiting to avoid `incrementOne` contention under concurrent `x-api-key` traffic
+- Fix gardens sidebar icon slug (`gardens`, not `gardenss`)
+
 ## 3.30.0
 
 ### Minor Changes
