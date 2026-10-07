@@ -9,11 +9,12 @@ import {
 type PayloadWithAuth = PayloadRequest['payload'] & {
   betterAuth?: {
     api: {
-      signInWithOAuth2: (args: {
+      signInSocial: (args: {
         body: {
-          providerId: string;
-          callbackURL: string;
+          provider: string;
+          callbackURL?: string;
           errorCallbackURL?: string;
+          disableRedirect?: boolean;
         };
         headers: Headers;
         asResponse: true;
@@ -49,7 +50,9 @@ export async function frontendOauthStartHandler(req: PayloadRequest): Promise<Re
   }
 
   const auth = (req.payload as PayloadWithAuth).betterAuth;
-  if (!auth?.api?.signInWithOAuth2) {
+  // genericOAuth registers Authentik as a social provider. Better Auth 1.7
+  // exposes that as signInSocial; the old signInWithOAuth2 method is gone.
+  if (!auth?.api?.signInSocial) {
     return Response.json({ error: 'Auth not initialized' }, { status: 500 });
   }
 
@@ -60,11 +63,12 @@ export async function frontendOauthStartHandler(req: PayloadRequest): Promise<Re
   );
 
   try {
-    const response = await auth.api.signInWithOAuth2({
+    const response = await auth.api.signInSocial({
       body: {
-        providerId: AUTHENTIK_PROVIDER_ID,
+        provider: AUTHENTIK_PROVIDER_ID,
         callbackURL: oauthCallbackURL,
         errorCallbackURL: errorCallbackURL || callbackURL,
+        disableRedirect: true,
       },
       headers: req.headers,
       asResponse: true,
