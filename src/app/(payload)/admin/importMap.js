@@ -70,7 +70,6 @@ import { SecurityNavLinks as SecurityNavLinks_e3642e6c1e5dbb92bcf178f42e87e19e }
 import { default as default_e5727cf75af5a5f3715e1efb9b6b07eb } from '@/components/NavBadgeProvider'
 import { AdminErrorBoundary as AdminErrorBoundary_e5a9e14bdbe97e70ba60697217fe7688 } from '@payloadcms/plugin-sentry/client'
 import { CommandMenuProviderServer as CommandMenuProviderServer_ce0f74d90e08543ab3d3fb198105be4b } from '@veiag/payload-cmdk/rsc'
-import { S3ClientUploadHandler as S3ClientUploadHandler_f97aa6c64367fa259c5bc0567239ef24 } from '@payloadcms/storage-s3/client'
 import { default as default_41e34effe3f4ece2ddcb2839119d86bb } from '@/components/BGG'
 import { AuthentikLoginViewWrapper as AuthentikLoginViewWrapper_ec378eedda62e1fa662ddd95e7b51280 } from '@/components/auth/AuthentikLoginViewWrapper'
 import { ApiKeysView as ApiKeysView_6234f869b6abd89bf631f5883bc67bd5 } from '@delmaredigital/payload-better-auth/rsc/api-key'
@@ -78,6 +77,7 @@ import { default as default_838fb0a30eb441ddfea0c8d82d1e35c3 } from '@/component
 import { default as default_f295ca6a3d97191f9cda7f6e79f83657 } from '@/components/Dashboard/widgets/RecentContentWidget'
 import { default as default_d818225534c63ffd29af315bedc786c0 } from '@/components/Dashboard/widgets/DeployVersionWidget'
 import { CollectionCards as CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1 } from '@payloadcms/next/rsc'
+import { S3ClientUploadHandler as S3ClientUploadHandler_f97aa6c64367fa259c5bc0567239ef24 } from '@payloadcms/storage-s3/client'
 
 /** @type import('payload').ImportMap */
 export const importMap = {
@@ -153,12 +153,12 @@ export const importMap = {
   "@/components/NavBadgeProvider#default": default_e5727cf75af5a5f3715e1efb9b6b07eb,
   "@payloadcms/plugin-sentry/client#AdminErrorBoundary": AdminErrorBoundary_e5a9e14bdbe97e70ba60697217fe7688,
   "@veiag/payload-cmdk/rsc#CommandMenuProviderServer": CommandMenuProviderServer_ce0f74d90e08543ab3d3fb198105be4b,
-  "@payloadcms/storage-s3/client#S3ClientUploadHandler": S3ClientUploadHandler_f97aa6c64367fa259c5bc0567239ef24,
   "@/components/BGG#default": default_41e34effe3f4ece2ddcb2839119d86bb,
   "@/components/auth/AuthentikLoginViewWrapper#AuthentikLoginViewWrapper": AuthentikLoginViewWrapper_ec378eedda62e1fa662ddd95e7b51280,
   "@delmaredigital/payload-better-auth/rsc/api-key#ApiKeysView": ApiKeysView_6234f869b6abd89bf631f5883bc67bd5,
   "@/components/Dashboard/widgets/AnalyticsWidget#default": default_838fb0a30eb441ddfea0c8d82d1e35c3,
   "@/components/Dashboard/widgets/RecentContentWidget#default": default_f295ca6a3d97191f9cda7f6e79f83657,
   "@/components/Dashboard/widgets/DeployVersionWidget#default": default_d818225534c63ffd29af315bedc786c0,
-  "@payloadcms/next/rsc#CollectionCards": CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1
+  "@payloadcms/next/rsc#CollectionCards": CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1,
+  "@payloadcms/storage-s3/client#S3ClientUploadHandler": S3ClientUploadHandler_f97aa6c64367fa259c5bc0567239ef24
 }

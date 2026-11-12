@@ -165,8 +165,9 @@ export async function uploadImageBuffer(
   contentType = 'application/octet-stream',
 ): Promise<string> {
   const form = new FormData();
-  const view = bytes instanceof Uint8Array ? bytes : new Uint8Array(bytes);
-  // Copy into a fresh ArrayBuffer-backed Blob to satisfy strict typings.
+  // Copy into a fresh ArrayBuffer-backed view: a Uint8Array may sit on a
+  // SharedArrayBuffer, which BlobPart (strict TS lib typings) does not accept.
+  const view = new Uint8Array(bytes instanceof Uint8Array ? bytes : new Uint8Array(bytes));
   form.append('files', new Blob([view], { type: contentType }), filename);
 
   const label = 'Medusa POST /admin/uploads';

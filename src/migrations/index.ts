@@ -14,6 +14,7 @@ import * as migration_20260902_better_auth_1_7 from './20260902_better_auth_1_7'
 import * as migration_20260918_publish_announce_social from './20260918_publish_announce_social';
 import * as migration_20260919_google_photos_plugin from './20260919_google_photos_plugin';
 import * as migration_20260919_payload_3_90_upload_object_key from './20260919_payload_3_90_upload_object_key';
+import * as migration_20261112_better_auth_1_7_3_issuer_cleanup from './20261112_better_auth_1_7_3_issuer_cleanup';
 
 export const migrations = [
   {
@@ -95,5 +96,10 @@ export const migrations = [
     up: migration_20260919_payload_3_90_upload_object_key.up,
     down: migration_20260919_payload_3_90_upload_object_key.down,
     name: '20260919_payload_3_90_upload_object_key',
+  },
+  {
+    up: migration_20261112_better_auth_1_7_3_issuer_cleanup.up,
+    down: migration_20261112_better_auth_1_7_3_issuer_cleanup.down,
+    name: '20261112_better_auth_1_7_3_issuer_cleanup',
   },
 ];
