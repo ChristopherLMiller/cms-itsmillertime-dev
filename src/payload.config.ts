@@ -20,6 +20,7 @@ import { Media } from './collections/Media/Media';
 import { Kits } from './collections/Models/Kits';
 import { Manufacturers } from './collections/Models/Manufacturers';
 import { Models } from './collections/Models/Models';
+import { ModelTimeEntries } from './collections/Models/TimeEntries';
 import { Scales } from './collections/Models/Scales';
 import { ModelsTags } from './collections/Models/Tags';
 import { Pages } from './collections/Pages';
@@ -55,6 +56,13 @@ import {
   clockifyTimerStatusHandler,
   clockifyTimerStopHandler,
 } from './endpoints/clockify-timer';
+import {
+  modelTimeClockifyImportHandler,
+  modelTimeClockifyUnlinkHandler,
+  modelTimeStartHandler,
+  modelTimeStatusHandler,
+  modelTimeStopHandler,
+} from './endpoints/model-time';
 import { contactFormHandler } from './endpoints/contact-form';
 import { galleryProductRequestHandler } from './endpoints/gallery-product-request';
 import { galleryImageTrackingHandler } from './endpoints/gallery-image-tracking';
@@ -80,6 +88,11 @@ import {
   openapiClockifyTimerGet,
   openapiClockifyTimerStart,
   openapiClockifyTimerStop,
+  openapiModelTimeClockifyImport,
+  openapiModelTimeClockifyUnlink,
+  openapiModelTimeStart,
+  openapiModelTimeStatus,
+  openapiModelTimeStop,
   openapiContactForm,
   openapiGalleryProductRequest,
   openapiGalleryImageTracking,
@@ -368,6 +381,36 @@ export default buildConfig({
       custom: { openapi: openapiClockifyTimerStop },
     },
     {
+      path: '/model-time/timer',
+      method: 'get',
+      handler: modelTimeStatusHandler,
+      custom: { openapi: openapiModelTimeStatus },
+    },
+    {
+      path: '/model-time/timer/start',
+      method: 'post',
+      handler: modelTimeStartHandler,
+      custom: { openapi: openapiModelTimeStart },
+    },
+    {
+      path: '/model-time/timer/stop',
+      method: 'post',
+      handler: modelTimeStopHandler,
+      custom: { openapi: openapiModelTimeStop },
+    },
+    {
+      path: '/model-time/clockify-import',
+      method: 'post',
+      handler: modelTimeClockifyImportHandler,
+      custom: { openapi: openapiModelTimeClockifyImport },
+    },
+    {
+      path: '/model-time/clockify-unlink',
+      method: 'post',
+      handler: modelTimeClockifyUnlinkHandler,
+      custom: { openapi: openapiModelTimeClockifyUnlink },
+    },
+    {
       path: '/bgg/collection',
       method: 'get',
       handler: bggCollectionHandler,
@@ -525,6 +568,7 @@ export default buildConfig({
     Manufacturers,
     ModelsTags,
     Models,
+    ModelTimeEntries,
     Projects,
     ProjectsCategories,
     ProjectsTechnologies,

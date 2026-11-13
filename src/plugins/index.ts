@@ -85,6 +85,7 @@ export const plugins: Plugin[] = [
       scales: 'scale',
       manufacturers: 'factory',
       models: 'airplane',
+      'model-time-entries': 'timer',
       'models-tags': 'tag',
       'gallery-albums': 'images',
       'gallery-images': 'image',

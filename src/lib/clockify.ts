@@ -9,6 +9,8 @@ export interface ClockifyProject {
     estimate: string;
     type: string;
   };
+  /** Total tracked time as an ISO-8601 duration, e.g. `PT49H23M12S`. */
+  duration?: string;
 }
 
 export interface ClockifyUser {
@@ -105,6 +107,13 @@ export class Clockify {
       console.error(`Error fetching Clockify projects: ${error}`);
       throw error;
     }
+  }
+
+  /** A single project, including its total tracked `duration`. */
+  public async getProject(projectId: string): Promise<ClockifyProject> {
+    return this.request<ClockifyProject>(
+      `/workspaces/${this.workspaceId}/projects/${encodeURIComponent(projectId)}`,
+    );
   }
 
   /** Resolve the Clockify user for the configured API key. */
