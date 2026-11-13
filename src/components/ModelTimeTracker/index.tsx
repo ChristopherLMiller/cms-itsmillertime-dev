@@ -1,6 +1,6 @@
 'use client';
 
-import { formatClock, formatHuman } from '@/lib/duration';
+import { formatClock } from '@/lib/duration';
 import { Button, toast, useDocumentInfo, useField } from '@payloadcms/ui';
 import { useCallback, useEffect, useState } from 'react';
 import styles from './ModelTimeTracker.module.css';
@@ -18,20 +18,13 @@ type Status = {
   model?: {
     id: number;
     totalSeconds: number;
-    clockifyProjectId: string | null;
-    clockifyImport: {
-      id: number;
-      durationSeconds: number;
-      clockifyProjectId: string | null;
-    } | null;
+    status: ModelStatus | null;
   };
 };
 
-type ImportResult = {
-  clockify: { name: string; seconds: number; duration: string | null };
-  entry: { id: number; durationSeconds: number };
-  replaced: boolean;
-};
+type ModelStatus = 'NOT_STARTED' | 'IN_PROGRESS' | 'COMPLETED';
+
+type StartResult = { modelStatus: ModelStatus | null };
 
 async function readError(response: Response): Promise<string> {
   try {
@@ -64,16 +57,17 @@ function useNow(active: boolean): number {
 }
 
 export function ModelTimeTracker() {
-  const { id } = useDocumentInfo();
+  const { id, lastUpdateTime } = useDocumentInfo();
   const modelId = typeof id === 'number' ? id : id ? Number(id) : null;
-  // Keep the form's copy of clockify_project in step after an unlink, so a
-  // later Save doesn't write the old project id back.
-  const clockifyField = useField<string | null>({ path: 'clockify_project' });
+  // The form's status drives the buttons (so switching to Completed hides
+  // Start immediately) and is kept in step when starting bumps the model to
+  // In Progress, so a later Save doesn't write NOT_STARTED back.
+  const statusField = useField<ModelStatus | null>({ path: 'model_meta.status' });
+  const isCompleted = statusField.value === 'COMPLETED';
 
   const [status, setStatus] = useState<Status | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
-  const [lastImport, setLastImport] = useState<ImportResult | null>(null);
 
   const refresh = useCallback(async () => {
     if (modelId == null) return;
@@ -89,9 +83,11 @@ export function ModelTimeTracker() {
     }
   }, [modelId]);
 
+  // Re-fetch after each save too: saving as Completed stops a running timer
+  // on the server, and the panel should show that.
   useEffect(() => {
     void refresh();
-  }, [refresh]);
+  }, [refresh, lastUpdateTime]);
 
   const running = status?.entry ?? null;
   const runningHere = running != null && running.modelId === modelId;
@@ -124,11 +120,6 @@ export function ModelTimeTracker() {
     );
   }
 
-  const clockifyProjectId = status?.model?.clockifyProjectId ?? null;
-  const importEntry = status?.model?.clockifyImport ?? null;
-  const importMatchesLink =
-    importEntry != null && clockifyProjectId != null && importEntry.clockifyProjectId === clockifyProjectId;
-
   return (
     <div className={styles.panel}>
       <p className={styles.label}>Time tracking</p>
@@ -154,15 +145,20 @@ export function ModelTimeTracker() {
           >
             Stop timer
           </Button>
-        ) : (
+        ) : isCompleted ? null : (
           <Button
             buttonStyle="primary"
             size="small"
             disabled={busy || status == null}
             onClick={() =>
               run(async () => {
-                await post('timer/start', { modelId });
-                toast.success('Timer started');
+                const result = (await post('timer/start', { modelId })) as StartResult;
+                if (result.modelStatus && result.modelStatus !== statusField.value) {
+                  statusField.setValue(result.modelStatus, true);
+                  toast.success('Timer started, model marked In Progress');
+                } else {
+                  toast.success('Timer started');
+                }
               })
             }
           >
@@ -178,65 +174,13 @@ export function ModelTimeTracker() {
           View all entries
         </Button>
       </div>
-      {running && !runningHere && (
+      {isCompleted && !runningHere && (
+        <p className={styles.muted}>This model is completed, so timers are off.</p>
+      )}
+      {running && !runningHere && !isCompleted && (
         <p className={styles.muted}>
           Starting will stop the timer on <strong>{running.modelTitle ?? `model #${running.modelId}`}</strong>.
         </p>
-      )}
-
-      {clockifyProjectId && (
-        <div className={styles.clockify}>
-          <p className={styles.label}>Clockify migration</p>
-          {lastImport ? (
-            <p className={styles.muted}>
-              Clockify “{lastImport.clockify.name}”: {formatHuman(lastImport.clockify.seconds)} → saved
-              entry #{lastImport.entry.id} ({formatHuman(lastImport.entry.durationSeconds)})
-              {lastImport.clockify.seconds === lastImport.entry.durationSeconds ? ' ✓' : ' ⚠ mismatch'}
-            </p>
-          ) : importMatchesLink && importEntry ? (
-            <p className={styles.muted}>
-              Imported: {formatHuman(importEntry.durationSeconds)} (entry #{importEntry.id})
-            </p>
-          ) : (
-            <p className={styles.muted}>This model&apos;s Clockify total hasn&apos;t been imported yet.</p>
-          )}
-          <div className={styles.actions}>
-            <Button
-              buttonStyle="secondary"
-              size="small"
-              disabled={busy}
-              onClick={() =>
-                run(async () => {
-                  const result = (await post('clockify-import', { modelId })) as ImportResult;
-                  setLastImport(result);
-                  toast.success(result.replaced ? 'Clockify total re-synced' : 'Clockify total imported');
-                })
-              }
-            >
-              {importEntry ? 'Re-sync from Clockify' : 'Import from Clockify'}
-            </Button>
-            {importMatchesLink && (
-              <Button
-                buttonStyle="error"
-                size="small"
-                disabled={busy}
-                onClick={() =>
-                  run(async () => {
-                    if (!window.confirm('Remove the Clockify link from this model? The imported time is kept.')) {
-                      return;
-                    }
-                    await post('clockify-unlink', { modelId });
-                    clockifyField.setValue(null, true);
-                    setLastImport(null);
-                    toast.success('Clockify link removed');
-                  })
-                }
-              >
-                Remove Clockify link
-              </Button>
-            )}
-          </div>
-        </div>
       )}
     </div>
   );

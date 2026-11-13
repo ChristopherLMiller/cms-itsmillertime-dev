@@ -1,5 +1,3 @@
-import { Clockify } from '@/lib/clockify';
-import { parseIsoDuration } from '@/lib/duration';
 import type { Model, ModelTimeEntry } from '@/payload-types';
 import {
   commitTransaction,
@@ -11,12 +9,13 @@ import { readJson, requireAdmin, unauthorized } from './lib/adminRequest';
 import { relationId } from '@/collections/Models/TimeEntries/hooks/recomputeModelTotal';
 
 /**
- * Admin-only model time tracking (replaces the Clockify timer):
+ * Admin-only model time tracking:
  *   GET  /api/model-time/timer[?modelId=]      running timer, plus model totals when modelId is given
  *   POST /api/model-time/timer/start {modelId} stop any running timer, start one on modelId
  *   POST /api/model-time/timer/stop            stop the running timer
- *   POST /api/model-time/clockify-import {modelId}  copy the linked Clockify project's total
- *   POST /api/model-time/clockify-unlink {modelId}  clear clockify_project once imported
+ *
+ * Starting a timer on a NOT_STARTED model moves it to IN_PROGRESS; COMPLETED
+ * models refuse new timers.
  */
 
 const COLLECTION = 'model-time-entries' as const;
@@ -46,19 +45,6 @@ async function findRunning(req: PayloadRequest): Promise<ModelTimeEntry | null> 
       and: [{ startedAt: { exists: true } }, { stoppedAt: { exists: false } }],
     },
     sort: '-startedAt',
-    limit: 1,
-    depth: 0,
-    req,
-  });
-  return result.docs[0] ?? null;
-}
-
-async function findImport(req: PayloadRequest, modelId: number): Promise<ModelTimeEntry | null> {
-  const result = await req.payload.find({
-    collection: COLLECTION,
-    where: {
-      and: [{ model: { equals: modelId } }, { source: { equals: 'clockify-import' } }],
-    },
     limit: 1,
     depth: 0,
     req,
@@ -96,18 +82,10 @@ export async function modelTimeStatusHandler(req: PayloadRequest): Promise<Respo
     if (modelId == null) return bad(400, 'modelId must be a positive integer');
     const model = await findModel(req, modelId);
     if (!model) return bad(404, 'Model not found');
-    const importEntry = await findImport(req, modelId);
     body.model = {
       id: model.id,
       totalSeconds: model.timeTracking?.totalSeconds ?? 0,
-      clockifyProjectId: model.clockify_project ?? null,
-      clockifyImport: importEntry
-        ? {
-            id: importEntry.id,
-            durationSeconds: importEntry.durationSeconds ?? 0,
-            clockifyProjectId: importEntry.clockifyProjectId ?? null,
-          }
-        : null,
+      status: model.model_meta?.status ?? null,
     };
   }
 
@@ -121,7 +99,11 @@ export async function modelTimeStartHandler(req: PayloadRequest): Promise<Respon
   const body = (await readJson(req)) ?? {};
   const modelId = parseModelId(body.modelId);
   if (modelId == null) return bad(400, 'modelId must be a positive integer');
-  if (!(await findModel(req, modelId))) return bad(404, 'Model not found');
+  const model = await findModel(req, modelId);
+  if (!model) return bad(404, 'Model not found');
+  if (model.model_meta?.status === 'COMPLETED') {
+    return bad(409, 'This model is completed. Change its status before tracking more time.');
+  }
 
   const shouldCommit = await initTransaction(req);
   try {
@@ -150,8 +132,30 @@ export async function modelTimeStartHandler(req: PayloadRequest): Promise<Respon
       req,
     });
 
+    let statusChanged = false;
+    if (model.model_meta?.status === 'NOT_STARTED') {
+      await req.payload.update({
+        collection: 'models',
+        id: modelId,
+        // Title is passed through so the title hook doesn't re-derive it from
+        // the kit; the rest of model_meta is kept so only status changes.
+        data: {
+          title: model.title,
+          model_meta: { ...model.model_meta, status: 'IN_PROGRESS' },
+        },
+        depth: 0,
+        req,
+      });
+      statusChanged = true;
+    }
+
     if (shouldCommit) await commitTransaction(req);
-    return Response.json({ entry, stopped, alreadyRunning: false });
+    return Response.json({
+      entry,
+      stopped,
+      alreadyRunning: false,
+      modelStatus: statusChanged ? 'IN_PROGRESS' : (model.model_meta?.status ?? null),
+    });
   } catch (err) {
     await killTransaction(req);
     if (isUniqueViolation(err)) return bad(409, 'Another timer was started at the same time. Try again.');
@@ -175,82 +179,4 @@ export async function modelTimeStopHandler(req: PayloadRequest): Promise<Respons
     req,
   });
   return Response.json({ entry });
-}
-
-/** POST /api/model-time/clockify-import */
-export async function modelTimeClockifyImportHandler(req: PayloadRequest): Promise<Response> {
-  if (!(await requireAdmin(req))) return unauthorized();
-
-  const body = (await readJson(req)) ?? {};
-  const modelId = parseModelId(body.modelId);
-  if (modelId == null) return bad(400, 'modelId must be a positive integer');
-  const model = await findModel(req, modelId);
-  if (!model) return bad(404, 'Model not found');
-  const projectId = model.clockify_project;
-  if (!projectId) return bad(400, 'This model has no Clockify project linked');
-
-  let client: Clockify;
-  try {
-    client = new Clockify();
-  } catch (err) {
-    return bad(503, err instanceof Error ? err.message : 'Clockify is not configured');
-  }
-
-  let project: Awaited<ReturnType<Clockify['getProject']>>;
-  try {
-    project = await client.getProject(projectId);
-  } catch (err) {
-    req.payload.logger.error({ err }, '[model-time] Clockify project fetch failed');
-    return bad(502, err instanceof Error ? err.message : 'Clockify request failed');
-  }
-
-  const seconds = parseIsoDuration(project.duration ?? 'PT0S');
-  if (seconds == null) {
-    return bad(502, `Could not read Clockify duration "${project.duration}"`);
-  }
-
-  const existing = await findImport(req, modelId);
-  const data = {
-    model: modelId,
-    source: 'clockify-import' as const,
-    durationSeconds: seconds,
-    clockifyProjectId: projectId,
-    note: `Imported from Clockify project "${project.name}"`,
-  };
-  const entry = existing
-    ? await req.payload.update({ collection: COLLECTION, id: existing.id, data, depth: 0, req })
-    : await req.payload.create({ collection: COLLECTION, data, depth: 0, req });
-
-  return Response.json({
-    clockify: { projectId, name: project.name, duration: project.duration ?? null, seconds },
-    entry: { id: entry.id, durationSeconds: entry.durationSeconds ?? 0 },
-    replaced: existing != null,
-  });
-}
-
-/** POST /api/model-time/clockify-unlink */
-export async function modelTimeClockifyUnlinkHandler(req: PayloadRequest): Promise<Response> {
-  if (!(await requireAdmin(req))) return unauthorized();
-
-  const body = (await readJson(req)) ?? {};
-  const modelId = parseModelId(body.modelId);
-  if (modelId == null) return bad(400, 'modelId must be a positive integer');
-  const model = await findModel(req, modelId);
-  if (!model) return bad(404, 'Model not found');
-  if (!model.clockify_project) return bad(409, 'This model has no Clockify project linked');
-
-  const importEntry = await findImport(req, modelId);
-  if (!importEntry || importEntry.clockifyProjectId !== model.clockify_project) {
-    return bad(409, 'Import this project from Clockify before removing the link');
-  }
-
-  await req.payload.update({
-    collection: 'models',
-    id: modelId,
-    // Title is passed through so the title hook doesn't try to derive it from the kit.
-    data: { title: model.title, clockify_project: null },
-    depth: 0,
-    req,
-  });
-  return Response.json({ ok: true });
 }

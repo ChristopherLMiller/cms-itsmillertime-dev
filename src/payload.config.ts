@@ -51,14 +51,6 @@ import { frontendOauthContinueHandler } from './endpoints/frontend-oauth-continu
 import { frontendOauthExchangeHandler } from './endpoints/frontend-oauth-exchange';
 import { frontendOauthStartHandler } from './endpoints/frontend-oauth-start';
 import {
-  clockifyProjectsHandler,
-  clockifyTimerStartHandler,
-  clockifyTimerStatusHandler,
-  clockifyTimerStopHandler,
-} from './endpoints/clockify-timer';
-import {
-  modelTimeClockifyImportHandler,
-  modelTimeClockifyUnlinkHandler,
   modelTimeStartHandler,
   modelTimeStatusHandler,
   modelTimeStopHandler,
@@ -84,12 +76,6 @@ import {
 } from './endpoints/medusa-commerce';
 import {
   openapiBggCollection,
-  openapiClockifyProjects,
-  openapiClockifyTimerGet,
-  openapiClockifyTimerStart,
-  openapiClockifyTimerStop,
-  openapiModelTimeClockifyImport,
-  openapiModelTimeClockifyUnlink,
   openapiModelTimeStart,
   openapiModelTimeStatus,
   openapiModelTimeStop,
@@ -357,30 +343,6 @@ export default buildConfig({
       custom: { openapi: openapiMedusaShippingProfiles },
     },
     {
-      path: '/clockify/projects',
-      method: 'get',
-      handler: clockifyProjectsHandler,
-      custom: { openapi: openapiClockifyProjects },
-    },
-    {
-      path: '/clockify/timer',
-      method: 'get',
-      handler: clockifyTimerStatusHandler,
-      custom: { openapi: openapiClockifyTimerGet },
-    },
-    {
-      path: '/clockify/timer/start',
-      method: 'post',
-      handler: clockifyTimerStartHandler,
-      custom: { openapi: openapiClockifyTimerStart },
-    },
-    {
-      path: '/clockify/timer/stop',
-      method: 'post',
-      handler: clockifyTimerStopHandler,
-      custom: { openapi: openapiClockifyTimerStop },
-    },
-    {
       path: '/model-time/timer',
       method: 'get',
       handler: modelTimeStatusHandler,
@@ -397,18 +359,6 @@ export default buildConfig({
       method: 'post',
       handler: modelTimeStopHandler,
       custom: { openapi: openapiModelTimeStop },
-    },
-    {
-      path: '/model-time/clockify-import',
-      method: 'post',
-      handler: modelTimeClockifyImportHandler,
-      custom: { openapi: openapiModelTimeClockifyImport },
-    },
-    {
-      path: '/model-time/clockify-unlink',
-      method: 'post',
-      handler: modelTimeClockifyUnlinkHandler,
-      custom: { openapi: openapiModelTimeClockifyUnlink },
     },
     {
       path: '/bgg/collection',

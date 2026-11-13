@@ -434,106 +434,6 @@ export const openapiMedusaShippingProfiles = {
   },
 };
 
-export const openapiClockifyProjects = {
-  summary: 'List Clockify projects',
-  description: 'Admin-only. Proxies Clockify workspace projects.',
-  tags: ['Clockify'],
-  security: adminSecurity,
-  responses: {
-    '200': { description: 'Projects list' },
-    '401': { description: 'Unauthorized' },
-    '502': { description: 'Upstream Clockify error' },
-    '503': { description: 'Clockify not configured' },
-  },
-};
-
-export const openapiClockifyTimerGet = {
-  summary: 'Get in-progress Clockify timer',
-  description: 'Admin-only. Returns the current running timer(s) for the API-key user.',
-  tags: ['Clockify'],
-  security: adminSecurity,
-  responses: {
-    '200': {
-      description: 'Timer status',
-      content: {
-        'application/json': {
-          schema: {
-            type: 'object',
-            properties: {
-              isRunning: { type: 'boolean' },
-              timer: { nullable: true },
-              timers: { type: 'array' },
-            },
-          },
-        },
-      },
-    },
-    '401': { description: 'Unauthorized' },
-    '502': { description: 'Upstream Clockify error' },
-    '503': { description: 'Clockify not configured' },
-  },
-};
-
-export const openapiClockifyTimerStart = {
-  summary: 'Start Clockify timer',
-  description: 'Admin-only. Starts a new time entry.',
-  tags: ['Clockify'],
-  security: adminSecurity,
-  requestBody: {
-    required: false,
-    content: {
-      'application/json': {
-        schema: {
-          type: 'object',
-          properties: {
-            projectId: { type: 'string' },
-            description: { type: 'string' },
-            billable: { type: 'boolean' },
-            start: { type: 'string', format: 'date-time' },
-          },
-        },
-      },
-    },
-  },
-  responses: {
-    '200': { description: 'Timer started' },
-    '400': { description: 'Validation error' },
-    '401': { description: 'Unauthorized' },
-    '502': { description: 'Upstream Clockify error' },
-    '503': { description: 'Clockify not configured' },
-  },
-};
-
-export const openapiClockifyTimerStop = {
-  summary: 'Stop Clockify timer',
-  description: 'Admin-only. Stops the running time entry.',
-  tags: ['Clockify'],
-  security: adminSecurity,
-  requestBody: {
-    required: false,
-    content: {
-      'application/json': {
-        schema: {
-          type: 'object',
-          properties: {
-            end: {
-              type: 'string',
-              format: 'date-time',
-              description: 'ISO-8601 end time; defaults to now',
-            },
-          },
-        },
-      },
-    },
-  },
-  responses: {
-    '200': { description: 'Timer stopped' },
-    '401': { description: 'Unauthorized' },
-    '502': { description: 'Upstream Clockify error' },
-    '503': { description: 'Clockify not configured' },
-  },
-};
-
 const modelIdBody = {
   required: true,
   content: {
@@ -550,7 +450,7 @@ const modelIdBody = {
 export const openapiModelTimeStatus = {
   summary: 'Get the running model timer',
   description:
-    'Admin-only. Returns the running time entry (if any). With `modelId`, also returns that model\'s total and Clockify import status.',
+    'Admin-only. Returns the running time entry (if any). With `modelId`, also returns that model\'s total and status.',
   tags: ['Time Tracking'],
   security: adminSecurity,
   parameters: [{ name: 'modelId', in: 'query', required: false, schema: { type: 'integer' } }],
@@ -564,7 +464,8 @@ export const openapiModelTimeStatus = {
 
 export const openapiModelTimeStart = {
   summary: 'Start a model timer',
-  description: 'Admin-only. Stops any running timer, then starts one on the model.',
+  description:
+    'Admin-only. Stops any running timer, then starts one on the model. A NOT_STARTED model is moved to IN_PROGRESS; COMPLETED models are rejected.',
   tags: ['Time Tracking'],
   security: adminSecurity,
   requestBody: modelIdBody,
@@ -573,7 +474,7 @@ export const openapiModelTimeStart = {
     '400': { description: 'Invalid modelId' },
     '401': { description: 'Unauthorized' },
     '404': { description: 'Model not found' },
-    '409': { description: 'Another timer was started concurrently' },
+    '409': { description: 'Model is completed, or another timer was started concurrently' },
   },
 };
 
@@ -586,39 +487,6 @@ export const openapiModelTimeStop = {
     '200': { description: 'Timer stopped' },
     '401': { description: 'Unauthorized' },
     '409': { description: 'No timer is running' },
-  },
-};
-
-export const openapiModelTimeClockifyImport = {
-  summary: 'Import a model\'s Clockify total',
-  description:
-    'Admin-only. Fetches the linked Clockify project\'s total and saves it as the model\'s single clockify-import time entry (updating it if it exists).',
-  tags: ['Time Tracking'],
-  security: adminSecurity,
-  requestBody: modelIdBody,
-  responses: {
-    '200': { description: 'Imported' },
-    '400': { description: 'Invalid modelId or no Clockify project linked' },
-    '401': { description: 'Unauthorized' },
-    '404': { description: 'Model not found' },
-    '502': { description: 'Upstream Clockify error' },
-    '503': { description: 'Clockify not configured' },
-  },
-};
-
-export const openapiModelTimeClockifyUnlink = {
-  summary: 'Remove a model\'s Clockify link',
-  description:
-    'Admin-only. Clears `clockify_project`, only once a matching clockify-import entry exists.',
-  tags: ['Time Tracking'],
-  security: adminSecurity,
-  requestBody: modelIdBody,
-  responses: {
-    '200': { description: 'Unlinked' },
-    '400': { description: 'Invalid modelId' },
-    '401': { description: 'Unauthorized' },
-    '404': { description: 'Model not found' },
-    '409': { description: 'Not linked, or not imported yet' },
   },
 };
 

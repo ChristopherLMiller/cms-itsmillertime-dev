@@ -2,7 +2,6 @@ import { RBAC } from '@/access/RBAC';
 import { allowAll } from '@/access/methods/allowAll';
 import { allowedRoles } from '@/access/methods/allowedRoles';
 import { Groups } from '@/collections/shared/groups';
-import { clockifyProjectField } from '@/fields/clockifyProject';
 import { slugField } from '@/fields/slug';
 import { announceFields } from '@/fields/announce';
 import {
@@ -18,6 +17,7 @@ import {
   removeModelFromRelatedPostsOnDelete,
   syncRelatedPostsOnModelChange,
 } from './hooks/syncRelatedPosts';
+import { stopTimerOnComplete } from './hooks/stopTimerOnComplete';
 
 export const Models: CollectionConfig<'models'> = {
   slug: 'models',
@@ -70,7 +70,7 @@ export const Models: CollectionConfig<'models'> = {
         }
       },
     ],
-    afterChange: [syncRelatedPostsOnModelChange],
+    afterChange: [syncRelatedPostsOnModelChange, stopTimerOnComplete],
     afterDelete: [removeModelFromRelatedPostsOnDelete],
   },
   fields: [
@@ -100,7 +100,6 @@ export const Models: CollectionConfig<'models'> = {
     },
     ...slugField('title'),
     announceFields,
-    clockifyProjectField,
     {
       name: 'timeTracker',
       type: 'ui',
@@ -137,19 +136,6 @@ export const Models: CollectionConfig<'models'> = {
           },
         },
       ],
-    },
-    {
-      name: 'timeEntries',
-      type: 'join',
-      collection: 'model-time-entries',
-      on: 'model',
-      label: 'Time Entries',
-      defaultSort: '-startedAt',
-      defaultLimit: 10,
-      admin: {
-        defaultColumns: ['startedAt', 'stoppedAt', 'durationSeconds', 'source'],
-        description: 'Start and stop timers from the sidebar.',
-      },
     },
     {
       type: 'group',
