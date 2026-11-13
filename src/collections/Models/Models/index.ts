@@ -244,36 +244,47 @@ export const Models: CollectionConfig<'models'> = {
       ],
     },
     {
-      name: 'relatedPosts',
-      type: 'relationship',
-      hasMany: true,
-      relationTo: 'posts',
-      label: 'Related Articles',
-      admin: {
-        position: 'sidebar',
-        description: 'Link articles from this model. Also editable from the article.',
-      },
-    },
-    {
+      // Display-only wrapper: both fields keep their data paths
+      // (`relatedPosts`, `relatedResources.relatedModels`).
       type: 'group',
-      name: 'relatedResources',
       label: 'Related Resources',
       admin: {
         position: 'sidebar',
       },
       fields: [
         {
-          name: 'relatedModels',
+          name: 'relatedPosts',
           type: 'relationship',
           hasMany: true,
-          relationTo: 'models',
-          filterOptions: ({ id }) => {
-            return {
-              id: {
-                not_in: [id],
-              },
-            };
+          relationTo: 'posts',
+          label: 'Related Articles',
+          admin: {
+            description: 'Link articles from this model. Also editable from the article.',
           },
+        },
+        {
+          type: 'group',
+          name: 'relatedResources',
+          label: false,
+          admin: {
+            hideGutter: true,
+          },
+          fields: [
+            {
+              name: 'relatedModels',
+              type: 'relationship',
+              hasMany: true,
+              relationTo: 'models',
+              label: 'Related Models',
+              filterOptions: ({ id }) => {
+                return {
+                  id: {
+                    not_in: [id],
+                  },
+                };
+              },
+            },
+          ],
         },
       ],
     },
