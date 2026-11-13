@@ -73,10 +73,6 @@ Collections, globals, and auth are documented automatically. Custom routes:
 | `POST` | `/api/gallery-image-tracking` | Public | Increments gallery tracking counters |
 | `GET` | `/api/bgg/collection` | Public | BGG collection proxy (Redis KV cache) |
 | `GET` | `/api/lastfm/now-playing` | Public | Last.fm now-playing (Redis KV cache) |
-| `GET` | `/api/clockify/projects` | Admin | Clockify projects |
-| `GET` | `/api/clockify/timer` | Admin | In-progress timer |
-| `POST` | `/api/clockify/timer/start` | Admin | Start timer |
-| `POST` | `/api/clockify/timer/stop` | Admin | Stop timer |
 | `GET` | `/api/medusa/product/status` | Admin | Linked Medusa product status |
 | `POST` | `/api/medusa/product/status` | Admin | Set draft/published |
 | `POST` | `/api/medusa/product/create` | Admin | Create Medusa product from gallery image |
@@ -87,6 +83,9 @@ Collections, globals, and auth are documented automatically. Custom routes:
 | `GET` | `/api/medusa/sales-channels` | Admin | List sales channels |
 | `GET` | `/api/medusa/offering-sets` | Admin | List offering sets |
 | `GET` | `/api/medusa/shipping-profiles` | Admin | List shipping profiles |
+| `GET` | `/api/model-time/timer` | Admin | Running timer (+ model total with `?modelId=`) |
+| `POST` | `/api/model-time/timer/start` | Admin | Start timer on a model (not on completed models) |
+| `POST` | `/api/model-time/timer/stop` | Admin | Stop the running timer |
 | `GET` | `/api/nav/pinned` | Session | Sidebar pins (`payload-sidebar-plugin`) |
 | `POST` | `/api/nav/pin` | Session | Pin item |
 | `POST` | `/api/nav/unpin` | Session | Unpin item |
@@ -113,7 +112,7 @@ In admin, open **Webhooks** and enable the collections/operations you want emitt
 - **Slug Field** -- auto-generated URL slugs from titles
 - **Custom Dashboard** -- analytics dashboard with Plausible integration
 - **BGG Integration** -- Board Game Geek collection viewer in the admin panel
-- **Clockify Integration** -- project time tracking via Clockify API
+- **Model Time Tracking** -- built-in start/stop timers and time entries per model
 
 ## Getting Started
 
@@ -257,7 +256,7 @@ src/
   fields/          # Reusable field configurations
   endpoints/       # Custom Payload API routes (e.g. contact form)
   globals/         # Payload global definitions
-  lib/             # Utility libraries (BGG, Clockify, Plausible)
+  lib/             # Utility libraries (BGG, Plausible)
   plugins/         # Payload plugin configuration
   types/           # TypeScript type definitions
   utilities/       # Helper functions (SEO generation, text processing)

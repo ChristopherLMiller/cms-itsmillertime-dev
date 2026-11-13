@@ -40,9 +40,3 @@
 .actions :global(.btn) {
   margin: 0;
 }
-
-.clockify {
-  margin-top: var(--base);
-  padding-top: calc(var(--base) * 0.75);
-  border-top: 1px solid var(--theme-elevation-150);
-}
