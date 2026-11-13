@@ -38,6 +38,7 @@ export const Models: CollectionConfig<'models'> = {
   trash: true,
   admin: {
     useAsTitle: 'title',
+    defaultColumns: ['title', 'slug', 'totalTime', 'model_meta.status'],
     group: Groups.models,
     description: 'A built model, not to be confused with a kit',
     components: {
@@ -79,6 +80,12 @@ export const Models: CollectionConfig<'models'> = {
       type: 'text',
       required: true,
       label: 'Model name',
+      admin: {
+        components: {
+          // List view: featured image thumbnail + name in one column.
+          Cell: '@/components/ModelListCells/ModelTitleCell#ModelTitleCell',
+        },
+      },
       hooks: {
         beforeChange: [
           async ({ data, req, value }) => {
@@ -105,8 +112,20 @@ export const Models: CollectionConfig<'models'> = {
       type: 'ui',
       admin: {
         position: 'sidebar',
+        disableListColumn: true,
         components: {
           Field: '@/components/ModelTimeTracker#ModelTimeTracker',
+        },
+      },
+    },
+    {
+      // List-view column only: renders nothing on the edit page.
+      name: 'totalTime',
+      type: 'ui',
+      label: 'Time Tracked',
+      admin: {
+        components: {
+          Cell: '@/components/ModelListCells/TotalTimeCell#TotalTimeCell',
         },
       },
     },

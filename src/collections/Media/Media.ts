@@ -34,6 +34,9 @@ export const Media: CollectionConfig = {
     group: Groups.media,
     description: 'Media Items, images and otherwise',
     defaultColumns: ['alt', 'caption'],
+    // List view and the upload picker drawer only select the visible columns,
+    // so large fields (exif, blurhash) aren't loaded for every row.
+    enableListViewSelectAPI: true,
   },
   defaultPopulate: {
     exif: false,
