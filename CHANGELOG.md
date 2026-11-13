@@ -1,5 +1,15 @@
 # cms-itsmillertime-dev
 
+## 3.35.0
+
+### Minor Changes
+
+- Remove the Clockify integration: `/api/clockify/*` endpoints, the Clockify API client, the `clockify_project` field and project picker, the `/api/model-time/clockify-import` and `/api/model-time/clockify-unlink` endpoints, and the sidebar Clockify migration panel
+- Migration `20261113_remove_clockify`: renames time entry source `clockify-import` to `imported` (carried-over totals are kept), drops `model_time_entries.clockify_project_id`, its one-import-per-model index, and `models.clockify_project`. Destructive; Clockify project ids are not recoverable on `down`
+- Model timer rules: starting a timer on a `NOT_STARTED` model moves it to `IN_PROGRESS`; `COMPLETED` models reject timer starts (409) and hide the Start button; saving a model as `COMPLETED` stops any timer running on it
+- Remove the Time Entries list from the model edit page ("View all entries" in the sidebar remains)
+- Hide the "Publish announce" group in the sidebar on Posts, Albums and Models (values are still kept and used by the Announce button)
+
 ## 3.34.0
 
 ### Minor Changes
