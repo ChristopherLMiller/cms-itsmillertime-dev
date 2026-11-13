@@ -100,6 +100,8 @@ export interface Config {
     search: Search;
     'google-photos-oauth': GooglePhotosOauth;
     'google-photos-imports': GooglePhotosImport;
+    'webhook-endpoints': WebhookEndpoint;
+    'webhook-deliveries': WebhookDelivery;
     'payload-mcp-api-keys': PayloadMcpApiKey;
     'payload-jobs': PayloadJob;
     'payload-folders': FolderInterface;
@@ -124,6 +126,9 @@ export interface Config {
     };
     kits: {
       models: 'models';
+    };
+    'webhook-endpoints': {
+      deliveries: 'webhook-deliveries';
     };
     'payload-folders': {
       documentsAndFolders: 'payload-folders' | 'media';
@@ -162,6 +167,8 @@ export interface Config {
     search: SearchSelect<false> | SearchSelect<true>;
     'google-photos-oauth': GooglePhotosOauthSelect<false> | GooglePhotosOauthSelect<true>;
     'google-photos-imports': GooglePhotosImportsSelect<false> | GooglePhotosImportsSelect<true>;
+    'webhook-endpoints': WebhookEndpointsSelect<false> | WebhookEndpointsSelect<true>;
+    'webhook-deliveries': WebhookDeliveriesSelect<false> | WebhookDeliveriesSelect<true>;
     'payload-mcp-api-keys': PayloadMcpApiKeysSelect<false> | PayloadMcpApiKeysSelect<true>;
     'payload-jobs': PayloadJobsSelect<false> | PayloadJobsSelect<true>;
     'payload-folders': PayloadFoldersSelect<false> | PayloadFoldersSelect<true>;
@@ -208,6 +215,7 @@ export interface Config {
       sendProductRequestAdminEmail: TaskSendProductRequestAdminEmail;
       sendProductRequestAvailableEmail: TaskSendProductRequestAvailableEmail;
       sendPublishAnnounce: TaskSendPublishAnnounce;
+      deliverWebhook: TaskDeliverWebhook;
       schedulePublish: TaskSchedulePublish;
       inline: {
         input: unknown;
@@ -1442,6 +1450,156 @@ export interface GooglePhotosImport {
   createdAt: string;
 }
 /**
+ * Call another website (Home Assistant, Zapier, n8n, your own API, …) when documents are created, updated or deleted. Open an endpoint for step-by-step setup help and a test button.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "webhook-endpoints".
+ */
+export interface WebhookEndpoint {
+  id: number;
+  /**
+   * Turn off to stop sending without deleting the endpoint.
+   */
+  enabled?: boolean | null;
+  /**
+   * Documents are read with this user’s access before sending, so the other site only gets what this user can read. For external sites, create a dedicated user with limited access.
+   */
+  runAs: number | User;
+  /**
+   * Send the document (and, for updates, the previous version). Turn off to send only the collection, action and id.
+   */
+  includeDocument?: boolean | null;
+  /**
+   * How long to wait for the other site to answer before retrying.
+   */
+  timeoutSeconds?: number | null;
+  /**
+   * A label for your own reference, e.g. "Home Assistant".
+   */
+  name: string;
+  /**
+   * Almost always POST.
+   */
+  method: 'POST' | 'PUT' | 'PATCH';
+  /**
+   * The incoming-webhook address from the other site. See "How to set up a webhook" above for where to find it.
+   */
+  url: string;
+  /**
+   * A request is sent for every change that matches both a collection and an operation.
+   */
+  events: {
+    collections: (
+      | 'map-markers'
+      | 'media'
+      | 'posts'
+      | 'posts-categories'
+      | 'posts-tags'
+      | 'pages'
+      | 'gallery-albums'
+      | 'gallery-images'
+      | 'gallery-masters'
+      | 'gallery-product-requests'
+      | 'gallery-tags'
+      | 'gallery-categories'
+      | 'gardens'
+      | 'kits'
+      | 'scales'
+      | 'manufacturers'
+      | 'models-tags'
+      | 'models'
+      | 'model-time-entries'
+      | 'projects'
+      | 'projects-categories'
+      | 'projects-technologies'
+      | 'sessions'
+      | 'accounts'
+      | 'verifications'
+      | 'twoFactors'
+      | 'passkeys'
+      | 'apikeys'
+      | 'search'
+      | 'google-photos-oauth'
+      | 'google-photos-imports'
+    )[];
+    operations: ('create' | 'update' | 'delete')[];
+  };
+  /**
+   * Only needed if the other site asks for a token, password or API key. Most incoming-webhook URLs (Home Assistant, Zapier, Make, IFTTT) need None.
+   */
+  authentication: {
+    type: 'none' | 'bearer' | 'basic' | 'header';
+    /**
+     * Sent as "Authorization: Bearer <token>". For Home Assistant’s REST API, create a long-lived access token on your HA profile page. Stored encrypted; shown masked after saving.
+     */
+    token?: string | null;
+    username?: string | null;
+    /**
+     * Stored encrypted; shown masked after saving.
+     */
+    password?: string | null;
+    /**
+     * The header the other site reads the key from.
+     */
+    headerName?: string | null;
+    /**
+     * Stored encrypted; shown masked after saving.
+     */
+    headerValue?: string | null;
+  };
+  /**
+   * Lets your own code prove a request came from this site. Each request gets a "X-Webhook-Signature: t=<unix time>,v1=<hex>" header, where v1 is the HMAC-SHA256 of "<t>.<raw body>" using this secret. No-code tools ignore it. Stored encrypted; shown masked after saving.
+   */
+  signingSecret?: string | null;
+  /**
+   * Extra headers sent with every request. Not encrypted, so put secrets under Authentication. "X-Webhook-Event" and "X-Webhook-Delivery" are always sent.
+   */
+  headers?:
+    | {
+        name: string;
+        value: string;
+        id?: string | null;
+      }[]
+    | null;
+  deliveries?: {
+    docs?: (number | WebhookDelivery)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * One entry per request sent by a Webhook Endpoint. Delivered: the other site answered with a 2xx status. Failed: the latest attempt failed; it is retried automatically with increasing delays, and Attempts counts the tries so far. Skipped: the endpoint was disabled or deleted before sending. Pending: queued. Open an entry for the error and the response. Request bodies are not stored.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "webhook-deliveries".
+ */
+export interface WebhookDelivery {
+  id: number;
+  endpoint?: (number | null) | WebhookEndpoint;
+  /**
+   * Collection and action, e.g. posts.update. "webhook.test" is a test request.
+   */
+  event?: string | null;
+  documentId?: string | null;
+  status?: ('pending' | 'success' | 'failed' | 'skipped') | null;
+  attempts?: number | null;
+  responseStatus?: number | null;
+  durationMs?: number | null;
+  lastAttemptAt?: string | null;
+  /**
+   * Why the latest attempt failed or was skipped, and what to check.
+   */
+  error?: string | null;
+  /**
+   * First 2 KB of the response.
+   */
+  responseBody?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
  * API keys control which collections, resources, tools, and prompts MCP clients can access
  *
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1837,6 +1995,7 @@ export interface PayloadJob {
           | 'sendProductRequestAdminEmail'
           | 'sendProductRequestAvailableEmail'
           | 'sendPublishAnnounce'
+          | 'deliverWebhook'
           | 'schedulePublish';
         taskID: string;
         input?:
@@ -1881,6 +2040,7 @@ export interface PayloadJob {
         | 'sendProductRequestAdminEmail'
         | 'sendProductRequestAvailableEmail'
         | 'sendPublishAnnounce'
+        | 'deliverWebhook'
         | 'schedulePublish'
       )
     | null;
@@ -2025,6 +2185,14 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'search';
         value: number | Search;
+      } | null)
+    | ({
+        relationTo: 'webhook-endpoints';
+        value: number | WebhookEndpoint;
+      } | null)
+    | ({
+        relationTo: 'webhook-deliveries';
+        value: number | WebhookDelivery;
       } | null)
     | ({
         relationTo: 'payload-mcp-api-keys';
@@ -2947,6 +3115,64 @@ export interface GooglePhotosImportsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "webhook-endpoints_select".
+ */
+export interface WebhookEndpointsSelect<T extends boolean = true> {
+  enabled?: T;
+  runAs?: T;
+  includeDocument?: T;
+  timeoutSeconds?: T;
+  name?: T;
+  method?: T;
+  url?: T;
+  events?:
+    | T
+    | {
+        collections?: T;
+        operations?: T;
+      };
+  authentication?:
+    | T
+    | {
+        type?: T;
+        token?: T;
+        username?: T;
+        password?: T;
+        headerName?: T;
+        headerValue?: T;
+      };
+  signingSecret?: T;
+  headers?:
+    | T
+    | {
+        name?: T;
+        value?: T;
+        id?: T;
+      };
+  deliveries?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "webhook-deliveries_select".
+ */
+export interface WebhookDeliveriesSelect<T extends boolean = true> {
+  endpoint?: T;
+  event?: T;
+  documentId?: T;
+  status?: T;
+  attempts?: T;
+  responseStatus?: T;
+  durationMs?: T;
+  lastAttemptAt?: T;
+  error?: T;
+  responseBody?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-mcp-api-keys_select".
  */
 export interface PayloadMcpApiKeysSelect<T extends boolean = true> {
@@ -3426,7 +3652,7 @@ export interface SocialDestination {
   createdAt?: string | null;
 }
 /**
- * Configure which collections and CRUD operations should emit webhook events.
+ * Live event stream for apps and dashboards that stay connected to this site (Server-Sent Events at /api/webhooks/stream; clients authenticate like any API request). Choose which changes are pushed to them below. To call another website when something changes, use Webhook Endpoints instead.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "webhooks".
@@ -3434,7 +3660,7 @@ export interface SocialDestination {
 export interface Webhook {
   id: number;
   /**
-   * Configure webhook events for each collection.
+   * Collections whose changes are pushed to connected stream clients. Clients only receive documents and fields their own user can read.
    */
   collections?:
     | {
@@ -3475,7 +3701,7 @@ export interface Webhook {
           | 'google-photos-imports';
         enabled?: boolean | null;
         /**
-         * Select which CRUD operations should emit webhook events.
+         * Which changes to push. Read sends an event every time a document is read, which can be very frequent.
          */
         operations?: {
           create?: boolean | null;
@@ -3819,6 +4045,42 @@ export interface TaskSendPublishAnnounce {
     title: string;
     collection: string;
     documentId: number;
+  };
+  output?: unknown;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TaskDeliverWebhook".
+ */
+export interface TaskDeliverWebhook {
+  input: {
+    endpointId:
+      | {
+          [k: string]: unknown;
+        }
+      | unknown[]
+      | string
+      | number
+      | boolean
+      | null;
+    deliveryId:
+      | {
+          [k: string]: unknown;
+        }
+      | unknown[]
+      | string
+      | number
+      | boolean
+      | null;
+    body:
+      | {
+          [k: string]: unknown;
+        }
+      | unknown[]
+      | string
+      | number
+      | boolean
+      | null;
   };
   output?: unknown;
 }

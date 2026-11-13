@@ -54,6 +54,9 @@ import { TotalTimeCell as TotalTimeCell_14687330a53efcef027237f2a1841664 } from 
 import { DurationCell as DurationCell_a6b0e1f5b1a30d264d956d14f356a29f } from '@/components/ModelTimeTracker/DurationCell'
 import { LinkToDoc as LinkToDoc_aead06e4cbf6b2620c5c51c9ab283634 } from '@payloadcms/plugin-search/client'
 import { ReindexButton as ReindexButton_aead06e4cbf6b2620c5c51c9ab283634 } from '@payloadcms/plugin-search/client'
+import { SendTestButton as SendTestButton_fcb2dafdf0f59a6c3a11842622e2d1b2 } from 'payload-plugin-webhooks/client'
+import { EndpointSetupGuide as EndpointSetupGuide_fcb2dafdf0f59a6c3a11842622e2d1b2 } from 'payload-plugin-webhooks/client'
+import { RequestPreview as RequestPreview_fcb2dafdf0f59a6c3a11842622e2d1b2 } from 'payload-plugin-webhooks/client'
 import { FolderTypeField as FolderTypeField_2b8867833a34864a02ddf429b0728a40 } from '@payloadcms/next/client'
 import { QueryPresetsAccessCell as QueryPresetsAccessCell_2b8867833a34864a02ddf429b0728a40 } from '@payloadcms/next/client'
 import { QueryPresetsWhereCell as QueryPresetsWhereCell_2b8867833a34864a02ddf429b0728a40 } from '@payloadcms/next/client'
@@ -140,6 +143,9 @@ export const importMap = {
   "@/components/ModelTimeTracker/DurationCell#DurationCell": DurationCell_a6b0e1f5b1a30d264d956d14f356a29f,
   "@payloadcms/plugin-search/client#LinkToDoc": LinkToDoc_aead06e4cbf6b2620c5c51c9ab283634,
   "@payloadcms/plugin-search/client#ReindexButton": ReindexButton_aead06e4cbf6b2620c5c51c9ab283634,
+  "payload-plugin-webhooks/client#SendTestButton": SendTestButton_fcb2dafdf0f59a6c3a11842622e2d1b2,
+  "payload-plugin-webhooks/client#EndpointSetupGuide": EndpointSetupGuide_fcb2dafdf0f59a6c3a11842622e2d1b2,
+  "payload-plugin-webhooks/client#RequestPreview": RequestPreview_fcb2dafdf0f59a6c3a11842622e2d1b2,
   "@payloadcms/next/client#FolderTypeField": FolderTypeField_2b8867833a34864a02ddf429b0728a40,
   "@payloadcms/next/client#QueryPresetsAccessCell": QueryPresetsAccessCell_2b8867833a34864a02ddf429b0728a40,
   "@payloadcms/next/client#QueryPresetsWhereCell": QueryPresetsWhereCell_2b8867833a34864a02ddf429b0728a40,

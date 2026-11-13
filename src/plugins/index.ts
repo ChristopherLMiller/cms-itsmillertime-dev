@@ -12,6 +12,7 @@ import * as Sentry from '@sentry/nextjs';
 import { mcpPlugin } from './mcp';
 import { payloadSidebar } from 'payload-sidebar-plugin';
 import { payloadPluginWebhooks } from 'payload-plugin-webhooks';
+import { allowedRoles } from '@/access/methods/allowedRoles';
 import { Groups } from '@/collections/shared/groups';
 import { payloadCmdk } from '@veiag/payload-cmdk';
 import type { Plugin } from 'payload';
@@ -65,7 +66,20 @@ export const plugins: Plugin[] = [
   googlePhotosPlugin({}),
   payloadCmdk({}),
   // Default stream auth uses req.payload.auth — x-api-key works via enableSessionForAPIKeys.
-  payloadPluginWebhooks({}),
+  payloadPluginWebhooks({
+    // Event Stream global (SSE config) — admins only (default is any logged-in user).
+    access: {
+      read: allowedRoles(['admin']),
+      update: allowedRoles(['admin']),
+    },
+    // 1.3.0 outbound webhooks: webhook-endpoints + webhook-deliveries collections and a
+    // `deliverWebhook` task on the `webhooks` queue (autoRun every minute in-process).
+    outbound: {
+      access: allowedRoles(['admin']),
+      // Let admins pick a dedicated low-privilege "Run as" user for external services.
+      assignRunAs: allowedRoles(['admin']),
+    },
+  }),
   payloadSidebar({
     groupOrder: {
       [Groups.media]: 1,
