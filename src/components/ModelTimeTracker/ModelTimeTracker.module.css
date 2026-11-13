@@ -1,0 +1,48 @@
+.panel {
+  margin-bottom: var(--base);
+  padding: calc(var(--base) * 0.75);
+  border: 1px solid var(--theme-elevation-150);
+  border-radius: var(--style-radius-m);
+  background: var(--theme-elevation-50);
+}
+
+.label {
+  margin: 0 0 calc(var(--base) * 0.25);
+  font-weight: 600;
+}
+
+.total {
+  margin: 0;
+  font-size: 1.75rem;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.2;
+}
+
+.muted {
+  margin: calc(var(--base) * 0.25) 0;
+  color: var(--theme-elevation-600);
+  font-size: 0.85rem;
+}
+
+.error {
+  margin: 0 0 calc(var(--base) * 0.25);
+  color: var(--theme-error-500);
+  font-size: 0.85rem;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: calc(var(--base) * 0.5);
+  margin-top: calc(var(--base) * 0.5);
+}
+
+.actions :global(.btn) {
+  margin: 0;
+}
+
+.clockify {
+  margin-top: var(--base);
+  padding-top: calc(var(--base) * 0.75);
+  border-top: 1px solid var(--theme-elevation-150);
+}

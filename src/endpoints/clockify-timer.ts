@@ -1,6 +1,6 @@
-import { allowedRoles } from '@/access/methods/allowedRoles';
 import { Clockify } from '@/lib/clockify';
 import type { PayloadRequest } from 'payload';
+import { readJson, requireAdmin } from './lib/adminRequest';
 
 /**
  * Admin-only Clockify endpoints for the www frontend and admin UI.
@@ -10,22 +10,6 @@ import type { PayloadRequest } from 'payload';
  *   POST /api/clockify/timer/start
  *   POST /api/clockify/timer/stop
  */
-
-async function requireAdmin(req: PayloadRequest): Promise<boolean> {
-  return allowedRoles(['admin'])({ req });
-}
-
-async function readJson(req: PayloadRequest): Promise<Record<string, unknown> | null> {
-  const parseJson = req.json;
-  if (!parseJson) return null;
-  try {
-    const body = await parseJson.call(req);
-    if (!body || typeof body !== 'object' || Array.isArray(body)) return null;
-    return body as Record<string, unknown>;
-  } catch {
-    return null;
-  }
-}
 
 function clockifyOr503(): Clockify | Response {
   try {

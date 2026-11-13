@@ -87,6 +87,7 @@ export interface Config {
     manufacturers: Manufacturer;
     'models-tags': ModelsTag;
     models: Model;
+    'model-time-entries': ModelTimeEntry;
     projects: Project;
     'projects-categories': ProjectsCategory;
     'projects-technologies': ProjectsTechnology;
@@ -124,6 +125,9 @@ export interface Config {
     kits: {
       models: 'models';
     };
+    models: {
+      timeEntries: 'model-time-entries';
+    };
     'payload-folders': {
       documentsAndFolders: 'payload-folders' | 'media';
     };
@@ -148,6 +152,7 @@ export interface Config {
     manufacturers: ManufacturersSelect<false> | ManufacturersSelect<true>;
     'models-tags': ModelsTagsSelect<false> | ModelsTagsSelect<true>;
     models: ModelsSelect<false> | ModelsSelect<true>;
+    'model-time-entries': ModelTimeEntriesSelect<false> | ModelTimeEntriesSelect<true>;
     projects: ProjectsSelect<false> | ProjectsSelect<true>;
     'projects-categories': ProjectsCategoriesSelect<false> | ProjectsCategoriesSelect<true>;
     'projects-technologies': ProjectsTechnologiesSelect<false> | ProjectsTechnologiesSelect<true>;
@@ -581,6 +586,20 @@ export interface Model {
    * Select a Clockify Project from your workspace
    */
   clockify_project?: string | null;
+  timeTracking?: {
+    /**
+     * Sum of all finished time entries. Maintained automatically.
+     */
+    totalSeconds?: number | null;
+  };
+  /**
+   * Start and stop timers from the sidebar.
+   */
+  timeEntries?: {
+    docs?: (number | ModelTimeEntry)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
   model_meta: {
     featuredImage: number | Media;
     status: 'NOT_STARTED' | 'IN_PROGRESS' | 'COMPLETED';
@@ -632,6 +651,30 @@ export interface Model {
   updatedAt: string;
   createdAt: string;
   deletedAt?: string | null;
+}
+/**
+ * Time tracked against a model. Start and stop timers from the model page.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "model-time-entries".
+ */
+export interface ModelTimeEntry {
+  id: number;
+  model: number | Model;
+  startedAt?: string | null;
+  /**
+   * Empty while the timer is running.
+   */
+  stoppedAt?: string | null;
+  /**
+   * Worked out from the start and stop times.
+   */
+  durationSeconds?: number | null;
+  source?: ('timer' | 'manual' | 'clockify-import') | null;
+  clockifyProjectId?: string | null;
+  note?: string | null;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * Media Items, images and otherwise
@@ -1965,6 +2008,10 @@ export interface PayloadLockedDocument {
         value: number | Model;
       } | null)
     | ({
+        relationTo: 'model-time-entries';
+        value: number | ModelTimeEntry;
+      } | null)
+    | ({
         relationTo: 'projects';
         value: number | Project;
       } | null)
@@ -2662,6 +2709,12 @@ export interface ModelsSelect<T extends boolean = true> {
         skippedAt?: T;
       };
   clockify_project?: T;
+  timeTracking?:
+    | T
+    | {
+        totalSeconds?: T;
+      };
+  timeEntries?: T;
   model_meta?:
     | T
     | {
@@ -2702,6 +2755,21 @@ export interface ModelsSelect<T extends boolean = true> {
   updatedAt?: T;
   createdAt?: T;
   deletedAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "model-time-entries_select".
+ */
+export interface ModelTimeEntriesSelect<T extends boolean = true> {
+  model?: T;
+  startedAt?: T;
+  stoppedAt?: T;
+  durationSeconds?: T;
+  source?: T;
+  clockifyProjectId?: T;
+  note?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -3420,6 +3488,7 @@ export interface Webhook {
           | 'manufacturers'
           | 'models-tags'
           | 'models'
+          | 'model-time-entries'
           | 'projects'
           | 'projects-categories'
           | 'projects-technologies'

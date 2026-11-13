@@ -1,5 +1,14 @@
 # cms-itsmillertime-dev
 
+## 3.34.0
+
+### Minor Changes
+
+- Built-in model time tracking to replace Clockify: new `model-time-entries` collection (model, start/stop, server-computed duration, source, note) with a per-model total stored on `models.timeTracking.totalSeconds`, re-summed by hooks on every entry change
+- Models sidebar time tracker (live total, start/stop, link to entries), a join list of recent entries, and a Clockify migration panel that imports a project's total as a single `clockify-import` entry and only allows unlinking Clockify once that import exists
+- New admin-only endpoints under `/api/model-time` (timer status, start, stop, clockify-import, clockify-unlink), documented in the OpenAPI spec. The existing `/api/clockify` endpoints stay until www is switched over
+- Migration `20261112_model_time_entries`: additive; enforces one running timer and one Clockify import per model with partial unique indexes
+
 ## 3.33.0
 
 ### Minor Changes
