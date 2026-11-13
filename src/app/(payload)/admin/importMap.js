@@ -48,7 +48,9 @@ import { ProductRequestImageLinkCell as ProductRequestImageLinkCell_341a80da575f
 import { ProductRequestImageCell as ProductRequestImageCell_341a80da575fa264987d5f4900cfe0d2 } from '@/components/Commerce/ProductRequestCells'
 import { HiddenOnEdit as HiddenOnEdit_341a80da575fa264987d5f4900cfe0d2 } from '@/components/Commerce/ProductRequestCells'
 import { ProductRequestsListIntro as ProductRequestsListIntro_bd07b75754a46fd2b465076f8a271152 } from '@/components/Commerce/ProductRequestsListIntro'
+import { ModelTitleCell as ModelTitleCell_c3f92963f458be2b28c1cc47d9a32314 } from '@/components/ModelListCells/ModelTitleCell'
 import { ModelTimeTracker as ModelTimeTracker_c8487ca481dcce2be0fb53ea6063e40e } from '@/components/ModelTimeTracker'
+import { TotalTimeCell as TotalTimeCell_14687330a53efcef027237f2a1841664 } from '@/components/ModelListCells/TotalTimeCell'
 import { DurationCell as DurationCell_a6b0e1f5b1a30d264d956d14f356a29f } from '@/components/ModelTimeTracker/DurationCell'
 import { LinkToDoc as LinkToDoc_aead06e4cbf6b2620c5c51c9ab283634 } from '@payloadcms/plugin-search/client'
 import { ReindexButton as ReindexButton_aead06e4cbf6b2620c5c51c9ab283634 } from '@payloadcms/plugin-search/client'
@@ -132,7 +134,9 @@ export const importMap = {
   "@/components/Commerce/ProductRequestCells#ProductRequestImageCell": ProductRequestImageCell_341a80da575fa264987d5f4900cfe0d2,
   "@/components/Commerce/ProductRequestCells#HiddenOnEdit": HiddenOnEdit_341a80da575fa264987d5f4900cfe0d2,
   "@/components/Commerce/ProductRequestsListIntro#ProductRequestsListIntro": ProductRequestsListIntro_bd07b75754a46fd2b465076f8a271152,
+  "@/components/ModelListCells/ModelTitleCell#ModelTitleCell": ModelTitleCell_c3f92963f458be2b28c1cc47d9a32314,
   "@/components/ModelTimeTracker#ModelTimeTracker": ModelTimeTracker_c8487ca481dcce2be0fb53ea6063e40e,
+  "@/components/ModelListCells/TotalTimeCell#TotalTimeCell": TotalTimeCell_14687330a53efcef027237f2a1841664,
   "@/components/ModelTimeTracker/DurationCell#DurationCell": DurationCell_a6b0e1f5b1a30d264d956d14f356a29f,
   "@payloadcms/plugin-search/client#LinkToDoc": LinkToDoc_aead06e4cbf6b2620c5c51c9ab283634,
   "@payloadcms/plugin-search/client#ReindexButton": ReindexButton_aead06e4cbf6b2620c5c51c9ab283634,

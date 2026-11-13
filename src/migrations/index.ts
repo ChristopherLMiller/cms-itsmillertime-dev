@@ -17,6 +17,7 @@ import * as migration_20260919_payload_3_90_upload_object_key from './20260919_p
 import * as migration_20261112_better_auth_1_7_3_issuer_cleanup from './20261112_better_auth_1_7_3_issuer_cleanup';
 import * as migration_20261112_model_time_entries from './20261112_model_time_entries';
 import * as migration_20261113_remove_clockify from './20261113_remove_clockify';
+import * as migration_20261113_strip_exif_blobs from './20261113_strip_exif_blobs';
 
 export const migrations = [
   {
@@ -113,5 +114,10 @@ export const migrations = [
     up: migration_20261113_remove_clockify.up,
     down: migration_20261113_remove_clockify.down,
     name: '20261113_remove_clockify',
+  },
+  {
+    up: migration_20261113_strip_exif_blobs.up,
+    down: migration_20261113_strip_exif_blobs.down,
+    name: '20261113_strip_exif_blobs',
   },
 ];

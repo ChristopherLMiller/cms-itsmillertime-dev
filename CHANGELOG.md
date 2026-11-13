@@ -1,5 +1,13 @@
 # cms-itsmillertime-dev
 
+## 3.36.0
+
+### Minor Changes
+
+- Models list: the name column shows the featured image thumbnail beside the model name, and a new "Time Tracked" column shows the stored total as `49h 23m 12s`. Default columns are now name, slug, time tracked, status
+- Media picker performance: Pixel Ultra HDR / Motion Photo uploads stored their embedded images in `exif.mpf.Images[].base64` (5–10 MB per record), so 50 Media rows were ~126 MB. The EXIF sanitizer now drops `base64` keys and any string over 16 KB, and the Media list and upload picker only load visible columns
+- Migration `20261113_strip_exif_blobs`: strips existing EXIF blobs (`mpf.Images[].base64`, `Thumbnail`, `exif.MakerNote`) from `media` and `gallery_images`; tag values are kept. Not reversible (the stripped data isn't used)
+
 ## 3.35.1
 
 ### Patch Changes
