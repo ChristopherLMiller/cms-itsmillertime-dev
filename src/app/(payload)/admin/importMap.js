@@ -48,7 +48,6 @@ import { ProductRequestImageLinkCell as ProductRequestImageLinkCell_341a80da575f
 import { ProductRequestImageCell as ProductRequestImageCell_341a80da575fa264987d5f4900cfe0d2 } from '@/components/Commerce/ProductRequestCells'
 import { HiddenOnEdit as HiddenOnEdit_341a80da575fa264987d5f4900cfe0d2 } from '@/components/Commerce/ProductRequestCells'
 import { ProductRequestsListIntro as ProductRequestsListIntro_bd07b75754a46fd2b465076f8a271152 } from '@/components/Commerce/ProductRequestsListIntro'
-import { ClockifyProjectSelect as ClockifyProjectSelect_b8bb1889944a5b33eae5b7c527a1ff0a } from '@/components/ClockifyProjectSelect'
 import { ModelTimeTracker as ModelTimeTracker_c8487ca481dcce2be0fb53ea6063e40e } from '@/components/ModelTimeTracker'
 import { DurationCell as DurationCell_a6b0e1f5b1a30d264d956d14f356a29f } from '@/components/ModelTimeTracker/DurationCell'
 import { LinkToDoc as LinkToDoc_aead06e4cbf6b2620c5c51c9ab283634 } from '@payloadcms/plugin-search/client'
@@ -133,7 +132,6 @@ export const importMap = {
   "@/components/Commerce/ProductRequestCells#ProductRequestImageCell": ProductRequestImageCell_341a80da575fa264987d5f4900cfe0d2,
   "@/components/Commerce/ProductRequestCells#HiddenOnEdit": HiddenOnEdit_341a80da575fa264987d5f4900cfe0d2,
   "@/components/Commerce/ProductRequestsListIntro#ProductRequestsListIntro": ProductRequestsListIntro_bd07b75754a46fd2b465076f8a271152,
-  "@/components/ClockifyProjectSelect#ClockifyProjectSelect": ClockifyProjectSelect_b8bb1889944a5b33eae5b7c527a1ff0a,
   "@/components/ModelTimeTracker#ModelTimeTracker": ModelTimeTracker_c8487ca481dcce2be0fb53ea6063e40e,
   "@/components/ModelTimeTracker/DurationCell#DurationCell": DurationCell_a6b0e1f5b1a30d264d956d14f356a29f,
   "@payloadcms/plugin-search/client#LinkToDoc": LinkToDoc_aead06e4cbf6b2620c5c51c9ab283634,

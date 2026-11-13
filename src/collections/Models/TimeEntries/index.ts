@@ -4,23 +4,21 @@ import { Groups } from '@/collections/shared/groups';
 import { APIError, CollectionBeforeChangeHook, CollectionConfig } from 'payload';
 import { recomputeTotalAfterChange, recomputeTotalAfterDelete } from './hooks/recomputeModelTotal';
 
-export const TIME_ENTRY_SOURCES = ['timer', 'manual', 'clockify-import'] as const;
+export const TIME_ENTRY_SOURCES = ['timer', 'manual', 'imported'] as const;
 
 /**
  * Derive `durationSeconds` from the timestamps so it is never trusted from the
- * client. Clockify imports have no timestamps and keep their stored duration.
+ * client. Imported totals (e.g. carried over from Clockify) have no timestamps
+ * and keep their stored duration.
  */
 const computeDuration: CollectionBeforeChangeHook = ({ data, originalDoc }) => {
   const merged = { ...originalDoc, ...data };
   const source = merged.source ?? 'timer';
 
-  if (source === 'clockify-import') {
-    if (!merged.clockifyProjectId) {
-      throw new APIError('Clockify import entries need a clockifyProjectId.', 400);
-    }
+  if (source === 'imported') {
     const seconds = Number(merged.durationSeconds);
     if (!Number.isFinite(seconds) || seconds < 0) {
-      throw new APIError('Clockify import entries need a non-negative durationSeconds.', 400);
+      throw new APIError('Imported entries need a non-negative durationSeconds.', 400);
     }
     data.durationSeconds = Math.floor(seconds);
     return data;
@@ -88,7 +86,7 @@ export const ModelTimeEntries: CollectionConfig<'model-time-entries'> = {
           index: true,
           admin: {
             date: { pickerAppearance: 'dayAndTime' },
-            condition: (data) => data?.source !== 'clockify-import',
+            condition: (data) => data?.source !== 'imported',
           },
         },
         {
@@ -98,7 +96,7 @@ export const ModelTimeEntries: CollectionConfig<'model-time-entries'> = {
           admin: {
             date: { pickerAppearance: 'dayAndTime' },
             description: 'Empty while the timer is running.',
-            condition: (data) => data?.source !== 'clockify-import',
+            condition: (data) => data?.source !== 'imported',
           },
         },
       ],
@@ -123,19 +121,9 @@ export const ModelTimeEntries: CollectionConfig<'model-time-entries'> = {
       options: [
         { label: 'Timer', value: 'timer' },
         { label: 'Manual', value: 'manual' },
-        { label: 'Clockify import', value: 'clockify-import' },
+        { label: 'Imported total', value: 'imported' },
       ],
       admin: { position: 'sidebar' },
-    },
-    {
-      name: 'clockifyProjectId',
-      type: 'text',
-      label: 'Clockify project',
-      admin: {
-        position: 'sidebar',
-        readOnly: true,
-        condition: (data) => data?.source === 'clockify-import',
-      },
     },
     {
       name: 'note',

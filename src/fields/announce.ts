@@ -31,8 +31,9 @@ export const announceFields: Field = {
   label: 'Publish announce',
   admin: {
     position: 'sidebar',
-    description:
-      'Tracks whether this document was announced to social destinations. Use the Announce button to post.',
+    // Bookkeeping only: the Announce button reads these from the saved doc.
+    // Hidden fields stay in form state, so saving doesn't clear them.
+    hidden: true,
   },
   fields: [
     {

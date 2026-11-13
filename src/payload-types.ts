@@ -125,9 +125,6 @@ export interface Config {
     kits: {
       models: 'models';
     };
-    models: {
-      timeEntries: 'model-time-entries';
-    };
     'payload-folders': {
       documentsAndFolders: 'payload-folders' | 'media';
     };
@@ -296,9 +293,6 @@ export interface GalleryAlbum {
   id: number;
   slug?: string | null;
   slugLock?: boolean | null;
-  /**
-   * Tracks whether this document was announced to social destinations. Use the Announce button to post.
-   */
   announce?: {
     /**
      * Set automatically after a successful announce.
@@ -475,9 +469,6 @@ export interface Post {
    * Set once on first publish. Later publishes do not change this.
    */
   originalPublicationDate?: string | null;
-  /**
-   * Tracks whether this document was announced to social destinations. Use the Announce button to post.
-   */
   announce?: {
     /**
      * Set automatically after a successful announce.
@@ -569,9 +560,6 @@ export interface Model {
   title: string;
   slug?: string | null;
   slugLock?: boolean | null;
-  /**
-   * Tracks whether this document was announced to social destinations. Use the Announce button to post.
-   */
   announce?: {
     /**
      * Set automatically after a successful announce.
@@ -582,23 +570,11 @@ export interface Model {
      */
     skippedAt?: string | null;
   };
-  /**
-   * Select a Clockify Project from your workspace
-   */
-  clockify_project?: string | null;
   timeTracking?: {
     /**
      * Sum of all finished time entries. Maintained automatically.
      */
     totalSeconds?: number | null;
-  };
-  /**
-   * Start and stop timers from the sidebar.
-   */
-  timeEntries?: {
-    docs?: (number | ModelTimeEntry)[];
-    hasNextPage?: boolean;
-    totalDocs?: number;
   };
   model_meta: {
     featuredImage: number | Media;
@@ -651,30 +627,6 @@ export interface Model {
   updatedAt: string;
   createdAt: string;
   deletedAt?: string | null;
-}
-/**
- * Time tracked against a model. Start and stop timers from the model page.
- *
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "model-time-entries".
- */
-export interface ModelTimeEntry {
-  id: number;
-  model: number | Model;
-  startedAt?: string | null;
-  /**
-   * Empty while the timer is running.
-   */
-  stoppedAt?: string | null;
-  /**
-   * Worked out from the start and stop times.
-   */
-  durationSeconds?: number | null;
-  source?: ('timer' | 'manual' | 'clockify-import') | null;
-  clockifyProjectId?: string | null;
-  note?: string | null;
-  updatedAt: string;
-  createdAt: string;
 }
 /**
  * Media Items, images and otherwise
@@ -1167,6 +1119,29 @@ export interface Garden {
   updatedAt: string;
   createdAt: string;
   deletedAt?: string | null;
+}
+/**
+ * Time tracked against a model. Start and stop timers from the model page.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "model-time-entries".
+ */
+export interface ModelTimeEntry {
+  id: number;
+  model: number | Model;
+  startedAt?: string | null;
+  /**
+   * Empty while the timer is running.
+   */
+  stoppedAt?: string | null;
+  /**
+   * Worked out from the start and stop times.
+   */
+  durationSeconds?: number | null;
+  source?: ('timer' | 'manual' | 'imported') | null;
+  note?: string | null;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * Coding projects and portfolio items
@@ -2708,13 +2683,11 @@ export interface ModelsSelect<T extends boolean = true> {
         notifiedAt?: T;
         skippedAt?: T;
       };
-  clockify_project?: T;
   timeTracking?:
     | T
     | {
         totalSeconds?: T;
       };
-  timeEntries?: T;
   model_meta?:
     | T
     | {
@@ -2766,7 +2739,6 @@ export interface ModelTimeEntriesSelect<T extends boolean = true> {
   stoppedAt?: T;
   durationSeconds?: T;
   source?: T;
-  clockifyProjectId?: T;
   note?: T;
   updatedAt?: T;
   createdAt?: T;
