@@ -102,6 +102,56 @@ export const Models: CollectionConfig<'models'> = {
     announceFields,
     clockifyProjectField,
     {
+      name: 'timeTracker',
+      type: 'ui',
+      admin: {
+        position: 'sidebar',
+        components: {
+          Field: '@/components/ModelTimeTracker#ModelTimeTracker',
+        },
+      },
+    },
+    {
+      type: 'group',
+      name: 'timeTracking',
+      label: 'Time Tracking',
+      admin: {
+        position: 'sidebar',
+        hidden: true,
+      },
+      fields: [
+        {
+          name: 'totalSeconds',
+          type: 'number',
+          defaultValue: 0,
+          admin: {
+            readOnly: true,
+            description: 'Sum of all finished time entries. Maintained automatically.',
+          },
+          // Only the time-entry hooks write this (via payload.db, bypassing
+          // access). Blocking writes here stops a stale admin form from
+          // overwriting the total when the model is saved.
+          access: {
+            create: () => false,
+            update: () => false,
+          },
+        },
+      ],
+    },
+    {
+      name: 'timeEntries',
+      type: 'join',
+      collection: 'model-time-entries',
+      on: 'model',
+      label: 'Time Entries',
+      defaultSort: '-startedAt',
+      defaultLimit: 10,
+      admin: {
+        defaultColumns: ['startedAt', 'stoppedAt', 'durationSeconds', 'source'],
+        description: 'Start and stop timers from the sidebar.',
+      },
+    },
+    {
       type: 'group',
       name: 'model_meta',
       label: 'Model Meta',

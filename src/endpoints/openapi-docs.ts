@@ -534,6 +534,94 @@ export const openapiClockifyTimerStop = {
   },
 };
 
+const modelIdBody = {
+  required: true,
+  content: {
+    'application/json': {
+      schema: {
+        type: 'object',
+        required: ['modelId'],
+        properties: { modelId: { type: 'integer' } },
+      },
+    },
+  },
+};
+
+export const openapiModelTimeStatus = {
+  summary: 'Get the running model timer',
+  description:
+    'Admin-only. Returns the running time entry (if any). With `modelId`, also returns that model\'s total and Clockify import status.',
+  tags: ['Time Tracking'],
+  security: adminSecurity,
+  parameters: [{ name: 'modelId', in: 'query', required: false, schema: { type: 'integer' } }],
+  responses: {
+    '200': { description: 'Timer status' },
+    '400': { description: 'Invalid modelId' },
+    '401': { description: 'Unauthorized' },
+    '404': { description: 'Model not found' },
+  },
+};
+
+export const openapiModelTimeStart = {
+  summary: 'Start a model timer',
+  description: 'Admin-only. Stops any running timer, then starts one on the model.',
+  tags: ['Time Tracking'],
+  security: adminSecurity,
+  requestBody: modelIdBody,
+  responses: {
+    '200': { description: 'Timer started (or already running on this model)' },
+    '400': { description: 'Invalid modelId' },
+    '401': { description: 'Unauthorized' },
+    '404': { description: 'Model not found' },
+    '409': { description: 'Another timer was started concurrently' },
+  },
+};
+
+export const openapiModelTimeStop = {
+  summary: 'Stop the running model timer',
+  description: 'Admin-only. Stops the running time entry.',
+  tags: ['Time Tracking'],
+  security: adminSecurity,
+  responses: {
+    '200': { description: 'Timer stopped' },
+    '401': { description: 'Unauthorized' },
+    '409': { description: 'No timer is running' },
+  },
+};
+
+export const openapiModelTimeClockifyImport = {
+  summary: 'Import a model\'s Clockify total',
+  description:
+    'Admin-only. Fetches the linked Clockify project\'s total and saves it as the model\'s single clockify-import time entry (updating it if it exists).',
+  tags: ['Time Tracking'],
+  security: adminSecurity,
+  requestBody: modelIdBody,
+  responses: {
+    '200': { description: 'Imported' },
+    '400': { description: 'Invalid modelId or no Clockify project linked' },
+    '401': { description: 'Unauthorized' },
+    '404': { description: 'Model not found' },
+    '502': { description: 'Upstream Clockify error' },
+    '503': { description: 'Clockify not configured' },
+  },
+};
+
+export const openapiModelTimeClockifyUnlink = {
+  summary: 'Remove a model\'s Clockify link',
+  description:
+    'Admin-only. Clears `clockify_project`, only once a matching clockify-import entry exists.',
+  tags: ['Time Tracking'],
+  security: adminSecurity,
+  requestBody: modelIdBody,
+  responses: {
+    '200': { description: 'Unlinked' },
+    '400': { description: 'Invalid modelId' },
+    '401': { description: 'Unauthorized' },
+    '404': { description: 'Model not found' },
+    '409': { description: 'Not linked, or not imported yet' },
+  },
+};
+
 export const openapiBggCollection = {
   summary: 'BoardGameGeek collection proxy',
   description:
