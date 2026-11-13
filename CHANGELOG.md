@@ -1,5 +1,13 @@
 # cms-itsmillertime-dev
 
+## 3.37.0
+
+### Minor Changes
+
+- Update `payload-plugin-webhooks` to 1.3.1. Outbound webhook endpoints, deliveries and the Event Stream global are now admin-only, and admins can set a different "Run as" user on an endpoint
+- Migration `20261113_webhooks_outbound`: creates the `webhook_endpoints` / `webhook_deliveries` tables, their lock rels columns and the `deliverWebhook` job task slug. Idempotent
+- Fix "Send test" on a webhook endpoint returning 400 ("The following field is invalid: Endpoint") on Postgres (plugin 1.3.1)
+
 ## 3.36.0
 
 ### Minor Changes
