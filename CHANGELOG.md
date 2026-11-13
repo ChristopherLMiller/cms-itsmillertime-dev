@@ -1,5 +1,11 @@
 # cms-itsmillertime-dev
 
+## 3.35.1
+
+### Patch Changes
+
+- Models sidebar: Related Articles and Related Models now sit together under one "Related Resources" section. Display-only; stored data paths are unchanged, so no migration
+
 ## 3.35.0
 
 ### Minor Changes
