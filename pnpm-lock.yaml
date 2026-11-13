@@ -122,8 +122,8 @@ importers:
         specifier: ^1.0.7
         version: 1.0.7(payload@3.93.0(graphql@16.15.0)(typescript@5.9.3))
       payload-plugin-webhooks:
-        specifier: ^1.3.0
-        version: 1.3.0(payload@3.93.0(graphql@16.15.0)(typescript@5.9.3))
+        specifier: ^1.3.1
+        version: 1.3.1(payload@3.93.0(graphql@16.15.0)(typescript@5.9.3))
       payload-sidebar-plugin:
         specifier: ^1.3.5
         version: 1.3.5(@payloadcms/translations@3.93.0)(@payloadcms/ui@3.93.0(@types/react@19.3.0)(monaco-editor@0.57.0)(next@16.4.6(@babel/core@7.29.13)(@opentelemetry/api@1.9.1)(@types/node@26.6.6)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(sass@1.77.4))(payload@3.93.0(graphql@16.15.0)(typescript@5.9.3))(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(typescript@5.9.3))(lucide-react@0.556.0(react@19.3.1))(next@16.4.6(@babel/core@7.29.13)(@opentelemetry/api@1.9.1)(@types/node@26.6.6)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(sass@1.77.4))(payload@3.93.0(graphql@16.15.0)(typescript@5.9.3))(react@19.3.1)
@@ -5838,8 +5838,8 @@ packages:
     peerDependencies:
       payload: ^3
 
-  payload-plugin-webhooks@1.3.0:
-    resolution: {integrity: sha512-XiNUx5HuSA9SjXHA2B78ZEewcNhqtZHoa/84VqHfgthV2YWCSVmYd4g7DP0HuXytvuoRUMC7xUfjC1qTpCDfgw==}
+  payload-plugin-webhooks@1.3.1:
+    resolution: {integrity: sha512-zRlTpKX5EvoI42ilp/e81nexhgX6MbF5y60Sc0EG/neId6Eb3vPQ6iCtRyILZOwNyWDLqPrMWd7ij1o4pDxJDw==}
     engines: {node: ^18.20.2 || >=20.9.0, pnpm: ^9 || ^10}
     peerDependencies:
       payload: ^3.37.0
@@ -13281,7 +13281,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  payload-plugin-webhooks@1.3.0(payload@3.93.0(graphql@16.15.0)(typescript@5.9.3)):
+  payload-plugin-webhooks@1.3.1(payload@3.93.0(graphql@16.15.0)(typescript@5.9.3)):
     dependencies:
       payload: 3.93.0(graphql@16.15.0)(typescript@5.9.3)
 
